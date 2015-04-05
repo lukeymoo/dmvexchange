@@ -12,8 +12,8 @@ html
 	body
 		div(id='wrapper')
 			div(id='pageHeader')
-				div(id='headerMenuButtonContainer')
-					span(id='headerMenuButton') &#9776;
+				div(id='menuButtonContainer')
+					span(id='menuButton') &#9776;
 				a(href='/')
 					div(id='headerLogo')  DMV EXCHANGE 
 				div(id='headerControls')
@@ -43,10 +43,9 @@ html
 			if title == 'Error'
 				block content
 
-		script(data-main='/js/common.js' src='/js/lib/vendor/require.js')
-		if title == 'Sign in'
-			script(type='text/javascript', src='/js/lib/vendor/rollups/md5.js')
-		if title == 'Sign up'
-			script(type='text/javascript', src='/js/lib/vendor/rollups/md5.js')
+		script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+		script(src='/js/common.js')
 		if title == 'Account'
-			script(type='text/javascript', src='/js/lib/vendor/rollups/md5.js')
+			script(src='/js/account.js')
+		if title == 'Sign in'
+			script(src='/js/login.js')

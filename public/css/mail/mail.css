@@ -22,6 +22,29 @@
 	position: relative;
 }
 
+#mailControls #compose {
+	width: 80%;
+	padding: 2px;
+	margin-left: 10%;
+	margin-bottom: 10px;
+	background-color: rgb(25, 175, 200);
+
+	font-family: DX-COND;
+	font-weight: bold;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	-webkit-transition: background-color .1s linear 0s;
+	-moz-transition: background-color .1s linear 0s;
+	transition: background-color .1s linear 0s;
+}
+
+#mailControls #compose:hover {
+	background-color: rgb(0, 225, 200);
+}
+
 #mailControls div {
 	display: inline-block;
 	width: 100%;
@@ -111,6 +134,10 @@
 	text-align: center;
 }
 
+.message #id {
+	display: none;
+}
+
 .message #select {
 	width: 50px;
 }
@@ -134,4 +161,134 @@
 
 #messageContainer .message:hover {
 	background-color: #ddf;
+}
+
+#mailWrapper #backgroundBlur {
+	display: none;
+	position: absolute;
+	z-index: 1000;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.8);
+}
+
+#mailWrapper #composeForm {
+	position: absolute;
+	z-index: 1001;
+	top: 75px;
+	left: 25px;
+	width: 80%;
+	height: 75vh;
+	background-color: #eee;
+	padding: 25px 75px;
+	display: none;
+}
+
+#composeForm label {
+	font-size: .95em;
+	display: block;
+}
+
+#composeForm input {
+	padding-left: 5px;
+}
+
+#composeForm input:focus, #composeForm textarea:focus {
+	outline: none;
+}
+
+#composeForm #titleLabel {
+	margin-left: 313px;
+}
+
+#composeForm #targetLabel {
+	margin-top: 20px;
+	margin-bottom: -20px;
+}
+
+#composeForm #messageLabel {
+	margin-left: 313px;
+}
+
+#composeForm #title {
+	width: 200px;
+	margin-left: 312px;
+}
+
+#composeForm #target {
+	position: absolute;
+	margin-top: 21px;
+	padding-left: 5px;
+	width: 275px;
+	height: 24px;
+	font-size: 1.1em;
+	border: 1px solid #aaa;
+	border-left: none;
+	background-color: #fff;
+}
+
+#currentTargets {
+	position: absolute;
+	margin-left: -42px;
+	margin-top: 60px;
+	width: 301px;
+	height: 315px;
+	border: 1px solid #aaa;
+	background-color: rgb(150, 225, 200);
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#currentTargets div {
+	background-color: 
+}
+
+#composeForm #addTargetButton {
+	position: absolute;
+	margin-left: -42px;
+	margin-top: 21px;
+	height: 28px;
+	border: 1px solid rgb(175, 175, 175);
+}
+
+#composeForm #message {
+	display: block;
+	width: 500px;
+	height: 350px;
+	margin-bottom: 10px;
+	float: right;
+	resize: none;
+}
+
+#composeForm #characterCount {
+	position: absolute;
+	color: black;
+	margin-top: -20px;
+	margin-left: 785px;
+}
+
+#composeForm #buttons {
+	margin-top: 370px;
+}
+
+#composeForm #cancelButton {
+	display: inline-block;
+	width: 125px;
+	height: 32px;
+	color: #fff;
+	background-color: rgb(175, 0, 0);
+	border: 1px solid rgb(150, 150, 150);
+	margin-left: 313px;
+}
+
+#composeForm #sendButton {
+	display: inline-block;
+	width: 125px;
+	height: 32px;
+	color: black;
+	background-color: rgb(0, 225, 200);
+	border: 1px solid rgb(150, 150, 150);
+	float: right;
 }

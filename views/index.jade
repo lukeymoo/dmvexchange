@@ -15,6 +15,7 @@ block headerMenu
 				li Log in
 			a(href='/signup')
 				li Sign up
+	div(id='pageMessage')
 
 block accountBlock
 	div(id='accountControlsContainer')
@@ -25,7 +26,7 @@ block accountBlock
 		div(id='accountHeader') Change Password
 		div(id='accountSettings')
 
-		div(id='accountPassword')
+		div(id='passwordPanel')
 			label Enter current password
 			br
 			input(id='currentPassword', type='password')
@@ -39,7 +40,6 @@ block accountBlock
 			input(id='newPasswordAgain', type='password')
 			br
 			button Change password
-	div(id='accountMessage') This is the server response to changing password
 
 block loginForm
 	div(id='loginFormErrorContainer') 
@@ -105,10 +105,30 @@ block registerForm
 
 block mailBlock
 	div(id='mailWrapper')
+		div(id='backgroundBlur')
+
+		div(id='composeForm')
+			label(id='titleLabel') Title
+			input(type='text', id='title', autocomplete='off')
+			label(id='targetLabel') Recipients
+			input(id='target', contentEditable='true')
+			button(id='addTargetButton') Add
+			div(id='currentTargets')
+				div(class='target') Sample_user
+					span(id='close') x
+			label(id='messageLabel') Message
+			span(id='characterCount') 240
+			textarea(id='message')
+			div(id='buttons')
+				button(id='cancelButton') Cancel 
+				button(id='sendButton') Send
+
 		div(id='mailControlsContainer')
 			div(id='mailControls')
+				div(id='compose') Compose
 				div(id='inbox', data-selected='true') Inbox
 				div(id='trash', data-selected='false') Trash
+
 		div(id='mailContent')
 			div(id='mailActions')
 				div(id='selectAll') 
@@ -117,11 +137,15 @@ block mailBlock
 				div(id='title') Title
 				div(id='from') From
 				div(id='date') Date
+
 			div(id='messageContainer')
-				div(class='message')
-					div(id='select')
-						input(type='checkbox')
-					div(id='title') This is a title
-					div(id='from') @lukeymoo
-					div(id='date') Apr. 1
+				//
+					div(class='message')
+						div(id='select')
+							input(type='checkbox')
+						div(id='id') ijfnJsK213m4kakms-oikjk-mdsk
+						div(id='title') This is a title
+						div(id='from') @lukeymoo
+						div(id='date') Apr. 1
+
 

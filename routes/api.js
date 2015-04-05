@@ -37,7 +37,7 @@ router.get('/session', function(req, res, next) {
 });
 
 // Change password
-router.get('/changePassword', function(req, res, next) {
+router.get('/chgpwd', function(req, res, next) {
 
 	// Ensure the user is logged in
 	if(!req.session.LOGGED_IN) {
@@ -124,6 +124,120 @@ router.get('/changePassword', function(req, res, next) {
 });
 
 /** Mail API calls **/
+router.get('/mail', function(req, res, next) {
+	// Ensure they're logged in
+	if(!req.session.LOGGED_IN) {
+		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
+		return;
+	}
 
+	// Ensure they have an identity
+	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'Could not resolve identity please try re-logging in'});
+		return;
+	}
+	if(!('EMAIL') in req.session || req.session.EMAIL.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'Could not resolve identity please try re-logging in'});
+		return;
+	}
+
+	// Ensure they've sent a valid request type
+	if(!('request' in req.query) || req.query.request.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'Must have a valid request type'});
+		return;
+	}
+
+	switch(req.query.request) {
+		case 'GET':
+			// Ensure they've sent a view
+			if(!('view' in req.query) || req.query.view.length == 0) {
+				res.send({status: 'DX-REJECTED', message: 'No view specified'});
+				return;
+			}
+			// Parse JSON for messages in database and send it as array of objects(messages)
+			switch(req.query.view) {
+				case '[INBOX]':
+					break;
+				case '[TRASH]':
+					break;
+				default:
+					res.send({status: 'DX-REJECTED', message: 'Could not resolve view requested'});
+					return;
+					break;
+			}
+			res.send({status: 'DX-OK', message: 'Unprogrammed response'});
+			return;
+			break;
+
+		case 'SEND':
+			// Ensure they've sent a proper message
+			if(!('message' in req.query)
+				|| 'object' != typeof req.query.message
+				|| req.query.message.length == 0) {
+				res.send({status: 'DX-REJECTED', message: 'Must specify message and in object format'});
+				return;
+			}
+			// Ensure they've sent valid targets
+			if(!('target' in req.query)
+				|| 'object' != req.query.target
+				|| req.query.target.length == 0) {
+				res.send({status: 'DX-REJECTED', message: 'Must specify target(s) and in array format'});
+				return;
+			}
+
+			// create and parse message object
+			var validTarget = [];
+			for(var user in req.query.target) {
+
+				// Ensure its not an empty target
+				if(req.query.target[user].length == 0) {
+					continue;
+				}
+
+				// ensure we don't send to the same user twice
+				var added = false;
+
+				for(var target in validTarget) {
+					if(req.query.target[user] == validTarget[target]) {
+						added = true;
+					}
+				}
+
+				// if not added, push to targets array
+				if(!added) {
+					validTarget.push({
+						username: req.query.target[user],
+						label: '[INBOX]',
+						read: false
+					});
+				}
+
+			}
+
+			// Ensure we still have targets after validation
+			if(validTarget.length == 0) {
+				res.send({status: 'DX-REJECTED', message: 'No valid targets specified'});
+				return;
+			}
+
+			var mail = {
+				title: req.query.message.title,
+				message: req.query.message.message,
+				origin: req.session.USERNAME,
+				target: validTarget
+			};
+
+			// Insert message
+			var database = databaseManger.getDB();
+			var msgCol = database.collection('MAIL');
+
+			msgCol.insert(mail);
+			res.send({status: 'DX-OK', message: 'Sent!'});
+			return;
+			break;
+	}
+
+	res.send({status: 'DX-FAILED', message: 'Could not meet request'});
+});
 
 module.exports = router;

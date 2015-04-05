@@ -26,7 +26,7 @@ body {
 	box-sizing: border-box;
 }
 
-#headerMenuButtonContainer {
+#menuButtonContainer {
 	display: inline-block;
 	width: 60px;
 	height: 46px;
@@ -35,7 +35,7 @@ body {
 	padding-top: 4px;
 }
 
-#headerMenuButton {
+#menuButton {
 	display: inline-block;
 	vertical-align: middle;
 	color: rgb(0, 100, 200);
@@ -53,7 +53,7 @@ body {
 	transition: background-color .075s linear 0s;
 }
 
-#headerMenuButton:hover {
+#menuButton:hover {
 	background-color: #C5E4FF;
 }
 
@@ -692,5 +692,96 @@ body {
 	}
 	to {
 		max-height: 50vh;
+	}
+}
+
+#pageMessage {
+	position: absolute;
+	display: inline-block;
+	top: 50px;
+	left: 0px;
+	width: 100vw;
+	max-height: 0px;
+	line-height: 50px;
+	background-color: rgb(0, 200, 200);
+	font-family: DX-REG;
+	text-align: center;
+	overflow: hidden;
+	z-index: 998;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+
+.showPageMessage {
+	-webkit-animation: showPageMessage 3.5s forwards 0s 1 normal;
+	-moz-animation: showPageMessage 3.5s forwards 0s 1 normal;
+	animation: showPageMessage 3.5s forwards 0s 1 normal;
+}
+
+@-webkit-keyframes showPageMessage {
+	0% {
+		max-height: 0px;
+	}
+	30% {
+		max-height: 50px;
+	}
+	35% {
+		max-height: 50px;
+	}
+	40% {
+		max-height: 50px;
+	}
+	45% {
+		max-height: 50px;
+	}
+	50% {
+		max-height: 50px;
+	}
+	55% {
+		max-height: 50px;
+	}
+	60% {
+		max-height: 50px;
+	}
+	65% {
+		max-height: 50px;
+	}
+	70% {
+		max-height: 50px;
+	}
+	75% {
+		max-height: 50px;
+	}
+	80% {
+		max-height: 50px;
+	}
+	100% {
+		max-height: 0px;
+	}
+}
+
+@-moz-keyframes showPageMessage {
+	0% {
+		max-height: 0px;
+	}
+	50% {
+		max-height: 50px;
+	}
+	100% {
+		max-height: 0px;
+	}
+}
+
+@keyframes showPageMessage {
+	0% {
+		max-height: 0px;
+	}
+	50% {
+		max-height: 50px;
+	}
+	100% {
+		max-height: 0px;
 	}
 }
