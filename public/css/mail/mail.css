@@ -1,0 +1,137 @@
+#mailWrapper {
+	display: inline-block;
+	width: 100%;
+	height: calc(100vh - 50px);
+	font-family: DX-REG;
+}
+
+#mailControlsContainer {
+	background-color: #fff;
+	float: left;
+	width: 100px;
+	height: calc(100vh - 50px);
+
+	-webkit-box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.2);
+	box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+#mailControls {
+	width: 100%;
+	margin-top: 75px;
+	position: relative;
+}
+
+#mailControls div {
+	display: inline-block;
+	width: 100%;
+	height: 25px;
+	line-height: 25px;
+	cursor: pointer;
+	pointer: hand;
+	text-align: center;
+}
+
+#mailControls div:hover {
+	background-color: rgb(225, 225, 225);
+}
+
+#mailControls div[data-selected='true'] {
+	background-color: rgb(230, 230, 230);
+}
+
+#mailActions {
+	display: table;
+	width: calc(100% - 100px);
+	background-color: #fff;
+	border-bottom: 1px solid rgb(220, 220, 220);
+}
+
+#mailActions div {
+	display: table-cell;
+	border-left: 1px solid rgb(200, 200, 200);
+	text-align: center;
+}
+
+#mailActions #selectAll {
+	width: 50px;
+	height: 30px;
+	text-align: center;
+	padding-top: 10px;
+	cursor: pointer;
+	pointer: hand;
+}
+
+#mailActions #selectAll span {
+	font-size: .8em;
+}
+
+#mailActions #selectAll input {
+	display: block;
+	margin-left: 20px;
+	cursor: pointer;
+	pointer: hand;
+}
+
+#mailActions #select {
+	width: 50px;
+}
+
+#mailActions #title {
+	width: 425px;
+}
+
+#mailActions #from {
+	width: 250px;
+}
+
+#mailActions #date {
+	width: 195px;
+}
+
+#messageContainer {
+	display: inline-table;
+	width: calc(100% - 100px);
+}
+
+#messageContainer .message {
+	display: block;
+	height: 30px;
+	line-height: 30px;
+	background-color: #eee;
+	border-bottom: 1px solid rgb(200, 200, 200);
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+.message div {
+	display: table-cell;
+	border-left: 1px solid rgb(200, 200, 200);
+	text-align: center;
+}
+
+.message #select {
+	width: 50px;
+}
+
+.message #select input {
+	cursor: pointer;
+	pointer: hand;
+}
+
+.message #title {
+	width: 425px;
+}
+
+.message #from {
+	width: 250px;
+}
+
+.message #date {
+	width: 195px;
+}
+
+#messageContainer .message:hover {
+	background-color: #ddf;
+}

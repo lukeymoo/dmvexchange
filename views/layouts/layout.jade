@@ -1,0 +1,52 @@
+doctype html
+html
+	head
+		title DX &#8212; #{title}
+		link(rel='stylesheet', href='/css/normalize.css')
+		link(rel='stylesheet', href='/css/main.css')
+		link(rel='stylesheet', href='/css/common/common.css')
+		if title == 'Account'
+			link(rel='stylesheet', href='/css/account/account.css')
+		if title == 'Mail'
+			link(rel='stylesheet', href='/css/mail/mail.css')
+	body
+		div(id='wrapper')
+			div(id='pageHeader')
+				div(id='headerMenuButtonContainer')
+					span(id='headerMenuButton') &#9776;
+				a(href='/')
+					div(id='headerLogo')  DMV EXCHANGE 
+				div(id='headerControls')
+					if USER.LOGGED_IN
+						a(href='/account/mail')
+							div(id='left') Mail
+						a(href='/user/#{USER.USERNAME}')
+							div(id='right') #{USER.USERNAME}
+					else
+						a(href='/signin')
+							div(data-selected='false', id='left') Log in
+						a(href='/signup')
+							div(id='signup') Sign up
+
+			block headerMenu
+
+			if title == 'Sign in'
+				block loginForm
+			if title == 'Sign up'
+				block registerForm
+			if title == 'Account'
+				if USER.LOGGED_IN
+					block accountBlock
+			if title == 'Mail'
+				block mailBlock
+
+			if title == 'Error'
+				block content
+
+		script(data-main='/js/common.js' src='/js/lib/vendor/require.js')
+		if title == 'Sign in'
+			script(type='text/javascript', src='/js/lib/vendor/rollups/md5.js')
+		if title == 'Sign up'
+			script(type='text/javascript', src='/js/lib/vendor/rollups/md5.js')
+		if title == 'Account'
+			script(type='text/javascript', src='/js/lib/vendor/rollups/md5.js')

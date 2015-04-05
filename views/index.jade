@@ -1,0 +1,127 @@
+extends layouts/layout
+
+block headerMenu
+	ul(id='headerMenu', data-selected='false')
+		a(href='/')
+			li Home
+		li Report Bug
+		if USER.LOGGED_IN
+			a(href='/account')
+				li Account
+			a(href='/logout')
+				li Logout
+		else
+			a(href='/signin')
+				li Log in
+			a(href='/signup')
+				li Sign up
+
+block accountBlock
+	div(id='accountControlsContainer')
+		span Settings
+		<!--div(data-active='false') Account-->
+		div(data-active='true') Password
+	div(id='accountPanel')
+		div(id='accountHeader') Change Password
+		div(id='accountSettings')
+
+		div(id='accountPassword')
+			label Enter current password
+			br
+			input(id='currentPassword', type='password')
+			br
+			label Enter new password
+			br
+			input(id='newPassword', type='password')
+			br
+			label Confirm new password
+			br
+			input(id='newPasswordAgain', type='password')
+			br
+			button Change password
+	div(id='accountMessage') This is the server response to changing password
+
+block loginForm
+	div(id='loginFormErrorContainer') 
+	div(id='loginFormContainer')
+		div(id='loginFormHeader') Sign in
+		form(id='loginForm', action='/auth', method='post')
+			label Username or email
+			input(id='username', name='u', type='text', tabindex=1)
+			input(id='password', name='p', type='password', tabindex=2)
+			a(href='/forgot')
+				span(tabindex=4) forgot password?
+		button(tabindex=3) Sign in
+		a(href='/signup')
+			div(id='signupNow') Don't have an account?
+
+block registerForm
+	div(id='registerFormContainer')
+		div(id='registerFormHeader') Sign up
+		form(id='registerForm', action='/process', method='post')
+			label(id='firstnameLabel') First name
+			label(id='lastnameLabel') Last name
+			br
+			input(id='firstname', name='f', type='text', tabindex=1)
+			input(id='lastname', name='l', type='text', tabindex=2)
+			br
+			div(id='nameError') 
+			br
+			label Email address
+			br
+			input(id='email', name='e', type='text', tabindex=3)
+			br
+			div(id='emailError') 
+			br
+			label Confirm email
+			br
+			input(id='emailAgain', name='ea', type='text', tabindex=4)
+			br
+			div(id='emailAgainError') 
+			br
+			label Desired username
+			br
+			input(id='username', name='u', type='text', tabindex=5)
+			br
+			div(id='usernameError') 
+			br
+			label(id='passwordLabel') Desired password
+			label(id='passwordAgainLabel') Confirm password
+			br
+			input(id='password', name='p', type='password', tabindex=6)
+			input(id='passwordAgain', name='pa', type='password', tabindex=7)
+			br
+			div(id='passwordError') 
+			br
+			div(id='tosContainer')
+				input(type='checkbox', name='tos', value='I_AGREE', tabindex=8)
+				span(id='tosLetter')
+					| By clicking here you agree to our 
+					a(target='_blank', href='/policy.html', style='color: rgb(0, 100, 225);') terms of service
+			div(id='tosError') 
+		button(tabindex=9) Sign up
+		a(href='/signin')
+				div(id='signinNow') Already have an account ?
+
+block mailBlock
+	div(id='mailWrapper')
+		div(id='mailControlsContainer')
+			div(id='mailControls')
+				div(id='inbox', data-selected='true') Inbox
+				div(id='trash', data-selected='false') Trash
+		div(id='mailContent')
+			div(id='mailActions')
+				div(id='selectAll') 
+					input(type='checkbox')
+					span Select all
+				div(id='title') Title
+				div(id='from') From
+				div(id='date') Date
+			div(id='messageContainer')
+				div(class='message')
+					div(id='select')
+						input(type='checkbox')
+					div(id='title') This is a title
+					div(id='from') @lukeymoo
+					div(id='date') Apr. 1
+

@@ -1,0 +1,23 @@
+extends layouts/layout
+
+block content
+	h1= message
+	h2= error.status
+	pre #{error.stack}
+
+
+block headerMenu
+	ul(id='headerMenu', data-selected='false')
+		a(href='/')
+			li Home
+		li Report Bug
+		if USER.LOGGED_IN
+			a(href='/account')
+				li Account
+			a(href='/logout')
+				li Logout
+		else
+			a(href='/signin')
+				li Log in
+			a(href='/signup')
+				li Sign up
