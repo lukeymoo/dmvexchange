@@ -94,6 +94,15 @@ body {
 	white-space: nowrap;
 }
 
+#headerControls #unreadCount {
+	margin-left: 5px;
+	background-color: orange;
+	border-radius: 2px;
+	color: black;
+	padding: 1px 5px;
+	vertical-align: middle;
+}
+
 #headerControls #right {
 	text-transform: capitalize;
 }

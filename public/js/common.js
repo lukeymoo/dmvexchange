@@ -1,6 +1,63 @@
 'use strict';
 
+// Contains session values
+var state = {};
+var page = '';
+
 $(function() {
+
+	// Get page
+	page = getPage();
+
+	// Check if logged in
+	$.ajax({
+		url: '/api/session'
+	}).done(function(res) {
+
+		// store response in global object
+		state = res.state;
+
+		// Check session every 5 minute
+		// if logged in add interval to ensure session has not timed out
+		if(state.LOGGED_IN) {
+
+
+			if(page != 'Mail') {
+				// Check unread messages and display counter
+				// next to mail button
+				getUnreadCount(function(res) {
+					// Append mail button
+					if(res.status == 'DX-OK') {
+						if(res.message > 0) {
+							var DOM = $('#headerControls #left').html();
+							DOM += '<span id="unreadCount">' + res.message + '</span>';
+							$('#headerControls #left').html(DOM);
+						}
+					}
+				});
+			}
+
+			setInterval(function() {
+				$.ajax({
+					url: '/api/session',
+					data: {
+						r: 'state'
+					}
+				}).done(function(res) {
+					if(res.status == 'DX-OK') {
+						if(res.message == 'false') {
+							window.location.href = '/signin';
+						}
+					}
+				});
+			}, 120000);
+		}
+
+
+
+
+	});
+	
 
 	// General click handler
 	$(document).on('click', function(e) {
@@ -16,6 +73,13 @@ $(function() {
 	// MenuButton - on click
 	$('#pageHeader #menuButton').on('click', function() {
 		toggleMenu();
+	});
+
+	// bind page message click to remove it faster
+	$(document).on('click', '#pageMessage', function() {
+		$('#pageMessage').removeClass('showPageMessage');
+		$('#pageMessage').css('max-height', '0px');
+		$('#pageMessage').html('');
 	});
 
 });
@@ -93,4 +157,17 @@ function spawnMessage(string, type) {
 		}
 	}, 50);
 	return;
+}
+
+function getPage() {
+	var page = $(document).find('title').html().substring(5);
+	return page;
+}
+
+function getUnreadCount(callback) {
+	$.ajax({
+		url: '/api/unread',
+	}).done(function(res) {
+		callback(res);
+	});
 }

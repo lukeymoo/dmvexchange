@@ -138,6 +138,14 @@ module.exports = {
 		});
 	},
 
+	findMail: function(sessionObj) {
+		var db = _db;
+		var mailCol = db.collection('MAIL');
+
+		mailCol.find({
+		}).sort(-1).limit(60).toArray();
+	},
+
 	getDB: function() {
 		return _db;
 	}

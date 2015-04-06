@@ -105,23 +105,40 @@ block registerForm
 
 block mailBlock
 	div(id='mailWrapper')
-		div(id='backgroundBlur')
+		div(id='pageMessage')
 
-		div(id='composeForm')
+		div(id='messageViewer', data-active='false')
+			div(id='closeButton') X
+			div(id='title') Cop these jawns
+			div(id='from') lukeymoo2
+			div(id='to') lukeymoo, johnny, billy ( and 4 more )
+			div(id='content') I got DS jordan 12 sz 9.5 ill take $250 or trades
+				| for foams ( any but id prefer spidermans )
+			div(id='reply')
+				textarea
+			
+
+		div(id='backgroundBlur', data-active='false')
+		div(id='composeForm', data-active='false')
+
 			label(id='titleLabel') Title
-			input(type='text', id='title', autocomplete='off')
+			input(type='text', id='title', autocomplete='off', spellcheck='false', tabindex=1)
 			label(id='targetLabel') Recipients
-			input(id='target', contentEditable='true')
+			input(id='target', spellcheck='false', tabindex=3)
 			button(id='addTargetButton') Add
+
 			div(id='currentTargets')
-				div(class='target') Sample_user
-					span(id='close') x
+
+				//
+					div(class='target') Sample_user
+						span(id='close') x
+
 			label(id='messageLabel') Message
 			span(id='characterCount') 240
-			textarea(id='message')
+			textarea(id='message', spellcheck='false', tabindex=2)
 			div(id='buttons')
 				button(id='cancelButton') Cancel 
-				button(id='sendButton') Send
+				button(id='sendButton', tabindex=4) Send
 
 		div(id='mailControlsContainer')
 			div(id='mailControls')
@@ -130,7 +147,11 @@ block mailBlock
 				div(id='trash', data-selected='false') Trash
 
 		div(id='mailContent')
-			div(id='mailActions')
+			div(id='mailActionsContainer', data-active='false')
+				div(id='mailActionsButton') Actions
+					div(id='mailActions', data-selected='false')
+					
+			div(id='mailFilters')
 				div(id='selectAll') 
 					input(type='checkbox')
 					span Select all

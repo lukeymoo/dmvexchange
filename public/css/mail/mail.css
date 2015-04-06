@@ -14,6 +14,10 @@
 	-webkit-box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.2);
 	-moz-box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.2);
 	box-shadow: 1px 0px 5px rgba(0, 0, 0, 0.2);
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
 }
 
 #mailControls {
@@ -63,20 +67,24 @@
 	background-color: rgb(230, 230, 230);
 }
 
-#mailActions {
+#mailFilters {
 	display: table;
 	width: calc(100% - 100px);
 	background-color: #fff;
 	border-bottom: 1px solid rgb(220, 220, 220);
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
 }
 
-#mailActions div {
+#mailFilters div {
 	display: table-cell;
 	border-left: 1px solid rgb(200, 200, 200);
 	text-align: center;
 }
 
-#mailActions #selectAll {
+#mailFilters #selectAll {
 	width: 50px;
 	height: 30px;
 	text-align: center;
@@ -85,36 +93,41 @@
 	pointer: hand;
 }
 
-#mailActions #selectAll span {
+#mailFilters #selectAll span {
 	font-size: .8em;
 }
 
-#mailActions #selectAll input {
+#mailFilters #selectAll input {
 	display: block;
 	margin-left: 20px;
 	cursor: pointer;
 	pointer: hand;
 }
 
-#mailActions #select {
+#mailFilters #select {
 	width: 50px;
 }
 
-#mailActions #title {
+#mailFilters #title {
 	width: 425px;
 }
 
-#mailActions #from {
+#mailFilters #from {
 	width: 250px;
 }
 
-#mailActions #date {
+#mailFilters #date {
 	width: 195px;
 }
 
 #messageContainer {
 	display: inline-table;
 	width: calc(100% - 100px);
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+
 }
 
 #messageContainer .message {
@@ -123,6 +136,8 @@
 	line-height: 30px;
 	background-color: #eee;
 	border-bottom: 1px solid rgb(200, 200, 200);
+
+	font-size: .85em;
 
 	cursor: pointer;
 	pointer: hand;
@@ -134,7 +149,7 @@
 	text-align: center;
 }
 
-.message #id {
+.message #id, .message #content {
 	display: none;
 }
 
@@ -157,6 +172,10 @@
 
 .message #date {
 	width: 195px;
+}
+
+.unread {
+	font-weight: bold;
 }
 
 #messageContainer .message:hover {
@@ -191,8 +210,9 @@
 	display: block;
 }
 
-#composeForm input {
+#composeForm input, #composeForm textarea, #composeForm #target {
 	padding-left: 5px;
+	border: 2px solid rgb(200, 200, 200);
 }
 
 #composeForm input:focus, #composeForm textarea:focus {
@@ -224,8 +244,6 @@
 	width: 275px;
 	height: 24px;
 	font-size: 1.1em;
-	border: 1px solid #aaa;
-	border-left: none;
 	background-color: #fff;
 }
 
@@ -234,23 +252,52 @@
 	margin-left: -42px;
 	margin-top: 60px;
 	width: 301px;
-	height: 315px;
+	height: 313px;
+	padding-top: 2px;
 	border: 1px solid #aaa;
 	background-color: rgb(150, 225, 200);
 	padding-left: 10px;
 	padding-right: 10px;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+#currentTargets div:before {
+	content: '@';
 }
 
 #currentTargets div {
-	background-color: 
+	display: inline-block;
+	background-color: rgb(75, 150, 225);
+	padding: 0px 5px;
+
+	font-size: .9em;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	margin-right: 2px;
+	margin-bottom: 2px;
+	
+	cursor: pointer;
+	pointer: hand;
+}
+
+#currentTargets span {
+	margin-left: 10px;
+	color: red;
 }
 
 #composeForm #addTargetButton {
 	position: absolute;
 	margin-left: -42px;
 	margin-top: 21px;
-	height: 28px;
-	border: 1px solid rgb(175, 175, 175);
+	height: 30px;
+	border: 2px solid rgb(175, 175, 175);
+	border-right: none;
 }
 
 #composeForm #message {
@@ -291,4 +338,306 @@
 	background-color: rgb(0, 225, 200);
 	border: 1px solid rgb(150, 150, 150);
 	float: right;
+}
+
+#mailActionsContainer {
+	display: inline-block;
+	width: 150px;
+	line-height: 50px;
+	text-align: center;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+[data-active=true] {
+	background-color: rgb(25, 150, 200);
+}
+
+[data-active=false]{
+	background-color: rgb(100, 100, 100);
+}
+
+#mailActionsContainer #mailActionsButton {
+	display: inline-block;
+	width: 100%;
+	height: 50px;
+	background-color: inherit;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#mailActions {
+	position: absolute;
+	display: block;
+	max-height: 0px;
+	overflow: hidden;
+	background-color: inherit;
+}
+
+#mailActions div {
+	width: 150px;
+	height: 50px;
+	line-height: 50px;
+	text-align: center;
+	border-top: 1px solid rgb(0, 200, 200);
+	background-color: inherit;
+}
+
+[data-active=true] #mailActions div:hover {
+	background-color: rgb(0, 175, 200);
+}
+
+#markGoneContainer {
+	display: none;
+	position: absolute;
+	z-index: 1001;
+	top: 75px;
+	margin-left: 175px;
+	width: 675px;
+	height: 500px;
+	color: grey;
+	background-color: black;
+	padding: 0px 25px;
+}
+
+#markGoneContainer #header {
+	font-family: DX-COND;
+	font-size: 1.75em;
+	position: absolute;
+	margin-top: 25px;
+	margin-left: 275px;
+	color: orange;
+}
+
+#markGoneContainer #cancelMarkGone, #markGoneContainer #confirmMarkGone {
+	margin-top: 380px;
+	cursor: pointer;
+	pointer: hand;
+}
+
+#markGoneContainer #cancelMarkGone {
+	display: inline-block;
+	float: left;
+	width: 150px;
+	color: black;
+	background-color: rgb(0, 200, 100);
+	text-align: center;
+	padding: 25px 25px;
+}
+
+#markGoneContainer #confirmMarkGone {
+	display: inline-block;
+	float: right;
+	color: white;
+	background-color: rgb(175, 0, 0);
+	width: 150px;
+	text-align: center;
+	padding: 25px 25px;
+}
+
+#messageViewer {
+	position: absolute;
+	z-index: 1001;
+	top: 100px;
+	left: 100px;
+	width: 924px;
+	background-color: #ddd;
+	overflow: hidden;
+	height: 600px;
+	max-height: 0px;
+}
+
+#messageViewer #closeButton {
+	display: block;
+	width: 100px;
+	padding: 10px 0px;
+	color: white;
+	background-color: rgb(175, 0, 0);
+	text-align: center;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#messageViewer #title {
+	margin-top: 5px;
+	margin-left: 5px;
+	font-size: 1.5em;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+	width: 75%;
+}
+
+#messageViewer #to:before {
+	content: 'to: ';
+	font-weight: bold;
+}
+
+#messageViewer #to {
+	font-size: .75em;
+	margin-left: 5px;
+}
+
+#messageViewer #from:before {
+	content: 'From: ';
+	font-weight: bold;
+	font-size: .8em;
+}
+
+#messageViewer #from {
+	margin-left: 5px;
+}
+
+#messageViewer #content {
+	margin-top: 25px;
+	margin-left: 5px;
+	width: 98.5%;
+	margin-bottom: 25px;
+}
+
+#messageViewer #reply {
+	border-top: 1px solid rgba(0, 0, 0, 0.25);
+	width: 70%;
+	padding-top: 5px;
+	margin-left: 5px;
+}
+
+#messageViewer #reply textarea {
+	width: 90%;
+	height: 150px;
+	resize: none;
+}
+
+.showActionsMenu {
+	-webkit-animation: showActionsMenu .5s forwards 0s 1 normal;
+	-moz-animation: showActionsMenu .5s forwards 0s 1 normal;
+	animation: showActionsMenu .5s forwards 0s 1 normal;
+}
+
+.showActionsMenu-reverse {
+	-webkit-animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
+	-moz-animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
+	animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
+}
+
+@-webkit-keyframes showActionsMenu {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 250px;
+	}
+}
+
+@-moz-keyframes showActionsMenu {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 250px;
+	}
+}
+
+@keyframes showActionsMenu {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 250px;
+	}
+}
+
+@-webkit-keyframes showActionsMenu-reverse {
+	from {
+		max-height: 250px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
+
+@-moz-keyframes showActionsMenu-reverse {
+	from {
+		max-height: 250px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
+
+@keyframes showActionsMenu-reverse {
+	from {
+		max-height: 250px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
+
+.showMessage {
+	-webkit-animation: showMessage .75s forwards 0s 1 normal;
+	-moz-animation: showMessage .75s forwards 0s 1 normal;
+	animation: showMessage .75s forwards 0s 1 normal;
+}
+
+.showMessage-reverse {
+	-webkit-animation: showMessage-reverse .25s forwards 0s 1 normal;
+	-moz-animation: showMessage-reverse .25s forwards 0s 1 normal;
+	animation: showMessage-reverse .25s forwards 0s 1 normal;
+}
+
+@-webkit-keyframes showMessage {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 575px;
+	}
+}
+
+@-moz-keyframes showMessage {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 575px;
+	}
+}
+
+@keyframes showMessage {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 575px;
+	}
+}
+
+@-webkit-keyframes showMessage-reverse {
+	from {
+		max-height: 550px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
+
+@-moz-keyframes showMessage-reverse {
+	from {
+		max-height: 550px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
+
+@keyframes showMessage-reverse {
+	from {
+		max-height: 550px;
+	}
+	to {
+		max-height: 0px;
+	}
 }

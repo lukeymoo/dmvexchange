@@ -29,9 +29,6 @@ var api = require('./routes/api');
 var account = require('./routes/account');
 var user = require('./routes/user');
 
-// Custom middleware
-var xsess = require('./modules/xsess/xsess');
-
 var app = express();
 
 // view engine setup
@@ -75,27 +72,6 @@ app.use(function(req, res, next) {
   }
   next();
 });
-
-/*
-
-// Custom middleware ensure authenticated user for specified paths
-// uses sendTO, vars
-var xsessPaths = [
-  { path: '/signup', sendTo: '/', vars: { LOGGED_IN: false } },
-  { path: '/signin', sendTo: '/', vars: { LOGGED_IN: false } },
-  { path: 'user/account' },
-  { path: 'user/mail' },
-  { path: 'logout', sentTo: '/' }
-];
-
-app.use(xsess(xsessPaths, {
-    strict: true,
-    sendTo: '/login',
-    defaultKeyPairs: { LOGGED_IN: true }
-  }
-));
-
-*/
 
 // routes
 app.use(router);
