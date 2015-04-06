@@ -272,6 +272,11 @@ router.get('/mail', function(req, res, next) {
 				res.send({status: 'DX-REJECTED', message: 'Must specify target(s) and in array format'});
 				return;
 			}
+			// Ensure there is a message
+			if(!('message' in req.query.message) || req.query.message.message.length < 2) {
+				res.send({status: 'DX-REJECTED', message: 'Must have at least 2 characters in message'});
+				return;
+			}
 
 			// create and parse message object
 			var validTarget = [];
@@ -326,13 +331,13 @@ router.get('/mail', function(req, res, next) {
 
 		case 'UPDATE':
 			// ensure they sent update to
-			if(!('to') in req.query || req.query.to.length == 0) {
+			if(!('to' in req.query) || req.query.to.length == 0) {
 				res.send({status: 'DX-REJECTED', message: 'Must specify update `to`'});
 				return;
 			}
 
 			//ensure they sent array of IDS
-			if(!('messages') in req.query || req.query.messages.length == 0) {
+			if(!('messages' in req.query) || req.query.messages.length == 0) {
 				res.send({status: 'DX-REJECTED', message: 'No messages specified'});
 				return;
 			}
@@ -422,7 +427,9 @@ router.get('/mail', function(req, res, next) {
 				_id: {
 					$in: validatedIDs
 				}
-			})
+			}, { $pull: { targets: { username: req.session.USERNAME.toLowerCase() } } }, {multi:true});
+			res.send({status: 'DX-OK', message: 'Removed'});
+			return;
 			break;
 
 		default:

@@ -307,12 +307,14 @@ $(function() {
 	});
 
 	// cancel mark gone
-	$(document).on('click', '#cancelMarkGone', function() {
-		cancelMarkGone();
+	$(document).on('click', '#markGoneContainer #cancelMarkGone', function() {
+		closeMarkGone();
 	});
 
 	// Officially delete forever
-	$(document).on('click', '#confirmMarkGone', function() {
+	$(document).on('click', '#markGoneContainer #confirmMarkGone', function() {
+		// Close markGone
+		closeMarkGone();
 		markGone(function(res) {
 			// Hide from view initially
 			$('#messageContainer').find('.message').each(function() {
@@ -349,12 +351,57 @@ $(function() {
 
 	// Bind message on click
 	$(document).on('click', '#messageContainer .message', function(e) {
-		if()
-		showMessage($(this));
+		if(!$(this).find('#select').is(e.target)
+			&& $(this).find('#select').has(e.target).length === 0) {
+			hideActionsMenu();
+			// Send read message to server
+			if($(this).hasClass('unread')) {
+				$(this).removeClass('unread');
+			}
+			readMessage($(this).find('#id').html());
+			showMessage($(this));
+		}
 	});
 
 	$(document).on('click', '#messageViewer #closeButton', function() {
 		hideMessage();
+	});
+
+	$(document).on('keyup change', '#messageViewer textarea', function() {
+		if(validateMessage($(this).val())) {
+			goodStyle($(this));
+		} else {
+			badStyle($(this));
+		}
+	});
+
+	// Bind message reply button
+	$(document).on('click', '#messageViewer #replyButton', function() {
+
+		// validate content then parse into object and call sendMail()
+		if(validateMessage($('#messageViewer textarea').val())) {
+			goodStyle($('#messageViewer textarea'));
+			var replyMessage = {};
+			replyMessage.title = $('#messageViewer #title').html();
+			if(replyMessage.title.indexOf('RE: ') == -1) {
+				replyMessage.title = 'RE: ' + replyMessage.title;
+			}
+			replyMessage.message = $('#messageViewer textarea').val();
+			replyMessage.targets = [$('#messageViewer #from').html()];
+			sendMail(replyMessage, function(res) {
+				// Remove overlays
+				hideMessage();
+
+				if(res.status == 'DX-OK') {
+					spawnMessage(res.message, true);
+				} else {
+					spawnMessage(res.message, false);
+				}
+			});
+		} else {
+			badStyle($('#messageViewer textarea'));
+		}
+
 	});
 
 	// Set interval update view every 15 seconds
@@ -381,7 +428,30 @@ function toggleMessage() {
 	return;
 }
 
+function readMessage(messageId) {
+	$.ajax({
+		url: '/api/mail',
+		data: {
+			request: 'UPDATE',
+			to: 'READ',
+			messages: [messageId]
+		}
+	}).done(function(res) {
+	});
+}
+
 function showMessage(messageObj) {
+	// Fill in the divs
+	var title = $(messageObj).find('#title').html();
+	var from = $(messageObj).find('#from').html();
+	var to = $(messageObj).find('#to').html();
+	var content = $(messageObj).find('#content').html();
+
+	$('#messageViewer #title').html(title);
+	$('#messageViewer #from').html(from);
+	$('#messageViewer #to').html(to);
+	$('#messageViewer #content').html(content);
+
 	$('#mailWrapper #backgroundBlur').fadeIn();
 
 	if($('#mailWrapper #messageViewer').hasClass('showMessage-reverse')) {
@@ -395,6 +465,10 @@ function showMessage(messageObj) {
 }
 
 function hideMessage() {
+	// Clear reply and goodstyle it
+	$('#mailWrapper #messageViewer').find('textarea').val('');
+	goodStyle($('#mailWrapper #messageViewer').find('textarea'));
+
 	$('#mailWrapper #backgroundBlur').fadeOut();
 
 	if($('#mailWrapper #messageViewer').hasClass('showMessage')) {
@@ -465,7 +539,7 @@ function askMarkGone() {
 	$('#markGoneContainer').fadeIn();
 }
 
-function cancelMarkGone() {
+function closeMarkGone() {
 	// Ask user if sure
 	$('#backgroundBlur').fadeOut();
 	$('#markGoneContainer').fadeOut();
@@ -655,6 +729,7 @@ function parseJSON(arrayObj) {
 		if(!exist) {
 
 			var unread = '';
+			var targets = 'you';
 
 			// see if we have read it or not
 			for(var user in arrayObj.message[message].targets) {
@@ -662,11 +737,14 @@ function parseJSON(arrayObj) {
 					if(!arrayObj.message[message].targets[user].read) {
 						unread = ' unread';
 					}
+				} else {
+					targets += ', ' + arrayObj.message[message].targets[user].username;
 				}
 			}
 
 			DOM += '<div class="message' + unread + '">\
 			<div id="id">' + arrayObj.message[message]._id + '</div>\
+			<div id="to">' + targets + '</div>\
 			<div id="select"><input type="checkbox"></div>\
 			<div id="title">' + arrayObj.message[message].title + '</div>\
 			<div id="content">' + arrayObj.message[message].message + '</div>\
