@@ -2,6 +2,9 @@ body {
 	background-color: #EFF3FA;
 }
 
+a, a:active, a:visited, a:hover, a:link {
+	text-decoration: none;
+}
 
 #wrapper {
 	max-width: 1024px;
@@ -9,12 +12,98 @@ body {
 	margin-right: auto;
 }
 
+#heroContainer {
+	width: 100%;
+	height: 378px;
+	overflow: hidden;
+	background-image: url('/img/capitol.jpg');
+}
+
+#heroContaine #overlay {
+	position: absolute;
+	top: 50px;
+	left: 0px;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+#heroContainer #welcome {
+	position: absolute;
+	z-index: 1;
+	color: white;
+	top: 0px;
+	left: 0px;
+	padding-left: 135px;
+	height: 350px;
+	line-height: 350px;
+	font-family: DX-LIGHT;
+	font-size: 4em;
+}
+
+#heroContainer #overlay {
+	position: absolute;
+
+	top: 50px;
+	left: 0px;
+
+	background-color: rgba(0, 0, 0, 0.8);
+
+	width: 100%;
+	height: 378px;
+}
+
+#getStarted {
+	display: inline-block;
+	position: relative;
+	z-index: 3;
+	margin-top: 250px;
+	margin-left: 460px;
+
+	padding: 0px 20px;
+	height: 40px;
+	line-height: 40px;
+
+	text-align: center;
+	
+	color: white;
+	
+	font-size: .85em;
+	font-family: DX-REG;
+	font-weight: bold;
+
+	border: 1px solid #C5E4FF;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .25s linear 0s;
+	-moz-transition: background-color .25s linear 0s;
+	transition: background-color .25s linear 0s;
+
+	-webkit-transition: border-color .1s linear 0s;
+	-moz-transition: border-color .1s linear 0s;
+	transition: border-color .1s linear 0s;
+}
+
+#getStarted:hover {
+	border-color: #2469A4;
+	background-color: #2469A4;
+}
+
+.block {
+	width: 100%;
+	height: 400px;
+	display: block;
+}
+
 #pageHeader {
 	position: relative;
 	z-index: 999;
 	width: 100%;
 	height: 50px;
-	border-bottom: 1px solid #C2C9D4;
 	background-color: #fff;
 
 	-webkit-user-select: none;
@@ -72,10 +161,10 @@ body {
 	width: 50%;
 	height: 50px;
 	line-height: 50px;
-	font-size: 150%;
+	font-size: 160%;
 	font-family: fancy;
 	font-weight: lighter;
-	margin-left: 20.5%;
+	margin-left: 24%;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
@@ -88,7 +177,7 @@ body {
 	height: 50px;
 	font-family: DX-REG;
 	color: rgb(0, 150, 200);
-	font-size: .78em;
+	font-size: .85em;
 	font-weight: bold;
 	margin-left: 45px;
 	white-space: nowrap;
@@ -99,12 +188,10 @@ body {
 	background-color: orange;
 	border-radius: 2px;
 	color: black;
-	padding: 1px 5px;
+	padding: 2px;
+	padding-bottom: 1px;
+	padding-right: 3px;
 	vertical-align: middle;
-}
-
-#headerControls #right {
-	text-transform: capitalize;
 }
 
 #headerControls div {
@@ -182,10 +269,6 @@ body {
 	font-family: DX-REG;
 	max-height: 0px;
 	overflow: hidden;
-
-	-webkit-box-shadow: 1px 2px 10px #D5FFFF;
-	-moz-box-shadow: 1px 2px 10px #D5FFFF;
-	box-shadow: 1px 2px 10px #D5FFFF;
 }
 
 #headerMenu li {
@@ -246,7 +329,7 @@ body {
 	font-family: DX-REG;
 	position: absolute;
 	top: 100px;
-	left: 24.25%;
+	left: 26.5%;
 	border: 1px solid rgb(50, 150, 200);
 	background-color: #fff;
 	padding: 50px 50px;
@@ -263,6 +346,7 @@ body {
 #loginForm label {
 	font-family: DX-COND;
 	font-weight: bold;
+	font-size: 1.2em;
 }
 
 #loginForm input {
@@ -367,7 +451,7 @@ body {
 	font-family: DX-REG;
 	position: absolute;
 	top: 100px;
-	left: 24.25%;
+	left: 26.5%;
 	border: 1px solid rgb(50, 150, 200);
 	background-color: #fff;
 	padding: 50px 50px;
@@ -503,7 +587,6 @@ body {
 #tosError {
 	margin-bottom: 10px;
 }
-
 
 .showLoginErrors {
 	-webkit-animation: showLoginErrors .25s forwards 0s 1 normal;

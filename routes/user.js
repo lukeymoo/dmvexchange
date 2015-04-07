@@ -6,6 +6,17 @@ var router = express.Router();
 var sessionManager = require('../modules/session/session');
 
 
+/** CURRENTLY ALL PATHS ARE DISABLED **/
+router.get('*', function(req, res, next) {
+	res.redirect('/');
+});
+
+
+
+
+
+
+
 router.get('/', function(req, res, next) {
 	if(!sessionManager.isLoggedIn(req.session)) {
 		res.redirect('/signin');
@@ -15,7 +26,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/:username', function(req, res, next) {
-	res.send('User with param will be a users profile page');
+	res.render('index', { title: 'Profile', USER: req.session });
 });
 
 module.exports = router;

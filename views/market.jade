@@ -1,0 +1,21 @@
+extends layouts/marketLayout
+
+block headerMenu
+	ul(id='headerMenu', data-selected='false')
+		if USER.LOGGED_IN
+			a(href='/market')
+				li Home
+			a(href='/account')
+				li Account
+			a(href='/logout')
+				li Logout
+		else
+			a(href='/')
+				li Home
+			a(href='/tips')
+				li Have tips?
+			a(href='/signin')
+				li Log in
+			a(href='/signup')
+				li Sign up
+	div(id='pageMessage')

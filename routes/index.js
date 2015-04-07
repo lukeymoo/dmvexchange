@@ -16,7 +16,10 @@ var sessionManager = require('../modules/session/session');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	sessionManager.isLoggedIn(req.session);
+	if(sessionManager.isLoggedIn(req.session)) {
+		res.redirect('/market');
+		return;
+	}
 	res.render('index', { title: 'Home', USER: req.session });
 });
 
@@ -208,6 +211,11 @@ router.post('/process', function(req, res, next) {
 		}
 	});
 
+});
+
+/** GET tips page, Allow people to submit anonymous tips to better the website **/
+router.get('/tips', function(req, res, next) {
+	res.render('index', { title: 'Tips', USER: req.session });
 });
 
 /** GET forgot **/

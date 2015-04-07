@@ -2,19 +2,22 @@ extends layouts/layout
 
 block headerMenu
 	ul(id='headerMenu', data-selected='false')
-		a(href='/')
-			li Home
-		li Report Bug
 		if USER.LOGGED_IN
+			a(href='/market')
+				li Home
 			a(href='/account')
 				li Account
 			a(href='/logout')
 				li Logout
 		else
+			a(href='/')
+				li Home
 			a(href='/signin')
 				li Log in
 			a(href='/signup')
 				li Sign up
+			a(href='/tips')
+				li Have tips?
 	div(id='pageMessage')
 
 block accountBlock
@@ -171,3 +174,26 @@ block mailBlock
 						div(id='date') Apr. 1
 
 
+block profileBlock
+	div(id='avatarContainer')
+		img(id='avatar', alt='ProfilePic')
+
+
+block tipsBlock
+	div(id='tipsContainer')
+		form(id='tipsForm')
+			label(id='inputLabel') Got any tips for us ?
+			textarea(id='tips', placeholder='Tell us here...')
+		button Submit
+		label(id='submitLabel') Yes, we do read these.
+
+block frontPageBlock
+	if USER.LOGGED_IN
+	else
+		div(id='heroContainer')
+				div(id='welcome') Welcome to the DMV Exchange					
+				div(id='overlay')
+				a(href='/market')
+						div(id='getStarted') Get started
+		div(class='block') What is the DMV Exchange ?
+		div(class='block') Buy, sell trade

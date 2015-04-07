@@ -8,6 +8,7 @@ var formManager = require('../modules/form/form');
 var databaseManger = require('../modules/database/database');
 var sessionManager = require('../modules/session/session');
 var ObjectID = require('mongodb').ObjectID;
+var fs = require('fs');
 
 
 /**
@@ -17,6 +18,33 @@ var ObjectID = require('mongodb').ObjectID;
 	2. DX-REJECTED -- Bad parameters for request ( EX: Incorrect password )
 	3. DX-FAILED -- Invalid request outright ( EX: Failed tests || Missing session values )
 */
+
+
+router.get('*', function(req, res, next) {
+	if(!req.xhr) {
+		res.send({status: 'DX-REJECTED', message: 'Access denied'});
+		return;
+	}
+	next();
+});
+
+// Catch tip submissions
+router.get('/savetip', function(req, res, next) {
+	// Ensure we received the message
+	if(!('message' in req.query) || req.query.message.length < 2) {
+		// Drop the request
+		res.send({status: 'DX-REJECTED', message: 'No message received'});
+		return;
+	}
+
+	var message = '\n\n========\n\n' + req.query.message.toLowerCase();
+
+	fs.appendFile('tip_submission', message, function(err) {
+		res.send({status: 'DX-OK', message: 'Tip received'});
+		return;
+	});
+	
+});
 
 // Catch state request
 router.get('/session', function(req, res, next) {

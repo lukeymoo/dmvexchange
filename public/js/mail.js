@@ -49,6 +49,10 @@ $(function() {
 
 	// Bind validate message as entered
 	$('#composeForm #message').on('keyup change', function() {
+		// Update the character count
+		var characters = 240 - $(this).val().length;
+		$('#composeForm #characterCount').html(characters);
+
 		if(validateMessage($(this).val())) {
 			goodStyle($(this));
 		} else {
@@ -240,7 +244,8 @@ $(function() {
 					$('#messageContainer').find('.message').each(function() {
 						for(var id in selectedMessages) {
 							if(selectedMessages[id] == $(this).find('#id').html()) {
-								// Deselect select all
+								// Deselect select all and disable action menu
+								disableActionMenu();
 								$('#mailFilters #selectAll').find('input').prop('checked', false);
 								$(this).remove();
 							}
@@ -279,7 +284,8 @@ $(function() {
 					$('#messageContainer').find('.message').each(function() {
 						for(var id in selectedMessages) {
 							if(selectedMessages[id] == $(this).find('#id').html()) {
-								// Deselect select all
+								// Deselect select all and disable action menu
+								disableActionMenu();
 								$('#mailFilters #selectAll').find('input').prop('checked', false);
 								$(this).remove();
 							}
@@ -325,11 +331,13 @@ $(function() {
 				}
 			});
 			if(res.status == 'DX-OK') {
+				spawnMessage('Messages deleted', true);
 				// Remove node from container
 				$('#messageContainer').find('.message').each(function() {
 					for(var id in selectedMessages) {
 						if(selectedMessages[id] == $(this).find('#id').html()) {
 							// Deselect select all
+							disableActionMenu();
 							$('#mailFilters #selectAll').find('input').prop('checked', false);
 							$(this).remove();
 						}
@@ -425,6 +433,12 @@ $(function() {
 
 
 function toggleMessage() {
+	return;
+}
+
+function disableActionMenu() {
+	// disable action menu
+	$('#mailActionsContainer').attr('data-active', 'false');
 	return;
 }
 

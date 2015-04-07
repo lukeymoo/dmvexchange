@@ -28,8 +28,12 @@ var index = require('./routes/index');
 var api = require('./routes/api');
 var account = require('./routes/account');
 var user = require('./routes/user');
+var market = require('./routes/market');
 
 var app = express();
+
+// set the env port variable
+process.env.PORT = '80';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -77,8 +81,9 @@ app.use(function(req, res, next) {
 app.use(router);
 app.use('/', index);
 app.use('/api', api);
-app.use('/account', account);
 app.use('/user', user);
+app.use('/market', market);
+app.use('/account', account);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

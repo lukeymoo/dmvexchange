@@ -1,0 +1,76 @@
+#tipsContainer {
+	position: absolute;
+	display: inline-block;
+	padding: 25px 75px;
+
+	margin-top: 75px;
+	margin-left: 260px;
+
+	border-radius: 3px;
+	background-color: #2E9FFF;
+
+	font-family: DX-REG;
+}
+
+#tipsForm {
+	display: block;
+	text-align: center;
+}
+
+#tipsForm #inputLabel {
+	display: block;
+	font-size: 1.08em;
+}
+
+#tipsForm textarea {
+	resize: none;
+
+	margin-top: 25px;
+
+	width: 350px;
+	height: 150px;
+
+	border-radius: 3px;
+
+	padding: 5px;
+}
+
+#tipsContainer button {
+	width: 100px;
+	height: 32px;
+
+	margin-top: 10px;
+	margin-left: 130px;
+
+	border-radius: 3px;
+	border: 1px solid white;
+	color: white;
+	background-color: rgba(0, 0, 0, 0);
+
+	font-family: DX-COND;
+	font-size: 1.2em;
+
+	-webkit-transition: background-color .25s linear 0s;
+	-moz-transition: background-color .25s linear 0s;
+	transition: background-color .25s linear 0s;
+
+	-webkit-transition: border-color .1s linear 0s;
+	-moz-transition: border-color .1s linear 0s;
+	transition: border-color .1s linear 0s;
+}
+
+#tipsContainer button:focus {
+	outline: none;
+}
+
+#tipsContainer button:hover {
+	border-color: #2469A4;
+	background-color: #2469A4;
+}
+
+#tipsContainer #submitLabel {
+	position: absolute;
+
+	margin-top: 15px;
+	margin-left: 10px;
+}

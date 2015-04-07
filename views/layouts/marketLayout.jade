@@ -1,0 +1,43 @@
+doctype html
+html
+	head
+		title DX &#8212; #{title}
+		link(rel='stylesheet', href='/css/normalize.css')
+		link(rel='stylesheet', href='/css/main.css')
+		link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
+		link(rel='stylesheet', href='/css/common/common.css')
+		if title == 'Account'
+			link(rel='stylesheet', href='/css/account/account.css')
+		if title == 'Mail'
+			link(rel='stylesheet', href='/css/mail/mail.css')
+		if title == 'Profile'
+			link(rel='stylesheet', href='/css/user/user.css')
+		if title == 'Tips'
+			link(rel='stylesheet', href='/css/tips/tips.css')
+	body
+		div(id='wrapper')
+			div(id='pageHeader')
+				div(id='menuButtonContainer')
+					span(id='menuButton') &#9776;
+				a(href='/')
+					div(id='headerLogo')  DMV EXCHANGE 
+				div(id='headerControls')
+					if USER.LOGGED_IN
+						a(href='/account/mail')
+							div(id='left') Mail					
+						a(href='/tips')
+							div(id='right') Any tips?
+						//
+							a(href='/user/#{USER.USERNAME}')
+								div(id='right') #{USER.USERNAME}
+					else
+						a(href='/signin')
+							div(data-selected='false', id='left') Log in
+						a(href='/signup')
+							div(id='signup') Sign up
+
+			block headerMenu
+
+		script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+		script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js')
+		script(src='/js/common.js')
