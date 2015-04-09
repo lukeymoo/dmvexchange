@@ -15,13 +15,13 @@ var router = express.Router();
 */
 var redisStore = require('connect-redis')(session);
 var redis = require('redis').createClient();
-redis.auth('redis&lukeymoo');
+redis.auth('9b3af6edcf71b34520a7d16412ad9325OMGOMG');
 
 /**
   MongoDB as primary database
 */
-var database = require('./modules/database/database');
-database.initMongo();
+var databaseManager = require('./modules/database/database');
+databaseManager.initMongo();
 
 // Routes
 var index = require('./routes/index');
@@ -85,6 +85,14 @@ app.use('/user', user);
 app.use('/market', market);
 app.use('/account', account);
 
+
+
+// Record the IP + Request before letting bad request be catched
+app.use(function(req, res, next) {
+	databaseManager.recordBadRequest(req);
+	next();
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -92,7 +100,7 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handlers
+// Catch errors + Log the request ip and the path requested
 
 // development error handler
 // will print stacktrace

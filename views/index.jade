@@ -23,11 +23,28 @@ block headerMenu
 block accountBlock
 	div(id='accountControlsContainer')
 		span Settings
-		<!--div(data-active='false') Account-->
-		div(data-active='true') Password
+		div(id='accountTab', data-selected='true') Account
+		div(id='passwordTab', data-selected='false') Password
 	div(id='accountPanel')
-		div(id='accountHeader') Change Password
+		div(id='accountHeader') Account settings
 		div(id='accountSettings')
+			div(id='usernameContainer')
+				label(id='usernameLabel') Username
+				span(value='#{USER.USERNAME}', id='currentUsername') #{USER.USERNAME}
+				button(id='changeUsername') Change
+				div(id='newUsernameContainer')
+					input(id='newUsername', type='text', placeholder='New username...')
+					button(id='confirmUsername') Confirm
+					button(id='cancelUsername') Cancel
+			div(id='emailContainer')
+				label(id='linkedEmailLabel') Linked emails
+				span(value='#{USER.EMAIL}', id='primaryEmail') Primary: #{USER.EMAIL}
+				if DATA
+					each item in DATA
+						br
+						span(value='#{item}', class='email')= item
+							button(id='removeEmail') Remove
+				button(id='addEmail') Add new email
 
 		div(id='passwordPanel')
 			label Enter current password
@@ -197,3 +214,28 @@ block frontPageBlock
 						div(id='getStarted') Get started
 		div(class='block') What is the DMV Exchange ?
 		div(class='block') Buy, sell trade
+
+block accountActivated
+	div(id='overlayMessage')
+		label Account Activated
+		span Thanks for activating your account, more features have
+			| become available to you.
+		a(href='/')
+			div(id='continueLink') Main page
+
+
+block accountCanceled
+	div(id='overlayMessage')
+		label Are you sure you want to unlink email?
+		span Your email will no longer be associated with this account
+		a(href='/')
+			div(id='wrongLink') No, don't unlink my email
+		div(id='confirmLink') Yes, unlink my email
+
+block accountActive
+	div(id='overlayMessage')
+		label This account has already been activated!
+		span The activation code has already been used and
+			| the account activated!
+		a(href='/')
+			div(id='continueLink') Continue

@@ -21,11 +21,11 @@
 	margin-bottom: 15px;
 }
 
-#accountControlsContainer div[data-active='true'] {
+#accountControlsContainer div[data-selected='true'] {
 	border-right: 3px solid rgb(50, 150, 200);
 }
 
-#accountControlsContainer div[data-active='false'] {
+#accountControlsContainer div[data-selected='false'] {
 	border-right: 3px solid rgb(225, 225, 225);
 }
 
@@ -72,9 +72,9 @@
 
 #passwordPanel {
 	position: relative;
-	display: inline-block;
+	display: none;
 	padding: 25px 100px;
-	left: 133px;
+	left: 0px;
 	text-align: center;
 	font-family: DX-REG;
 }
@@ -123,4 +123,323 @@
 #passwordPanel button:hover {
 	border-color: rgb(50, 200, 210);
 	background-color: #40e6ff;
+}
+
+#overlayMessage {
+	
+	width: 500px;
+	height: 200px;
+	padding: 10px 20px;
+	margin-top: 125px;
+	margin-left: auto;
+	margin-right: auto;
+	
+	text-align: center;
+	
+	color: grey;
+	background-color: black;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+#overlayMessage label {
+	color: orange;
+	display: block;
+}
+
+#overlayMessage div {
+	margin-top: 50px;
+	height: 40px;
+	line-height: 40px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 0px 20px;
+
+	text-align: center;
+	
+	color: white;
+	
+	font-size: .85em;
+	font-family: DX-REG;
+	font-weight: bold;
+
+	border: 1px solid #C5E4FF;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .25s linear 0s;
+	-moz-transition: background-color .25s linear 0s;
+	transition: background-color .25s linear 0s;
+
+	-webkit-transition: border-color .1s linear 0s;
+	-moz-transition: border-color .1s linear 0s;
+	transition: border-color .1s linear 0s;
+}
+
+#overlayMessage #wrongLink {
+	float: left;
+	border-color: #2469A4;
+	background-color: #2469A4;
+}
+
+#overlayMessage #confirmLink {
+	float: right;
+	border-color: rgb(175, 0, 0);
+	background-color: rgb(180, 0, 0);
+}
+
+#overlayMessage #continueLink {
+	-webkit-transition: background-color .25s linear 0s;
+	-moz-transition: background-color .25s linear 0s;
+	transition: background-color .25s linear 0s;
+}
+
+#overlayMessage #continueLink:hover {
+	background-color: rgb(0, 175, 200);
+}
+
+#emailContainer {
+	display: inline-block;
+}
+
+#emailContainer #linkedEmailLabel {
+	display: block;
+}
+
+#emailContainer #addEmail {
+	display: block;
+	margin-top: 10px;
+
+	padding: 0px 20px;
+	width: 100%;
+	height: 33px;
+	line-height: 33px;
+
+	text-align: center;
+	
+	color: black;
+	
+	font-size: .85em;
+	font-family: DX-REG;
+	font-weight: bold;
+
+	border: none;
+	background-color: rgb(0, 125, 175);
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .25s linear 0s;
+	-moz-transition: background-color .25s linear 0s;
+	transition: background-color .25s linear 0s;
+}
+
+#emailContainer #addEmail:hover {
+	background-color: rgb(0, 200, 200);
+}
+
+.newEmailContainer {
+	display: block;
+	margin-top: 5px;
+}
+
+.newEmailContainer input {
+	display: inline-block;
+	font-family: DX-REG;
+	padding-top: 2px;
+	padding-left: 5px;
+
+	border: 1px solid rgb(175, 175, 175);
+
+	width: 200px;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	-webkit-transition: background-color .25s linear 0s;
+	-moz-transition: background-color .25s linear 0s;
+	transition: background-color .25s linear 0s;
+}
+
+.newEmailContainer input:focus {
+	outline: none;
+}
+
+.newEmailContainer button {
+	margin-left: 5px;
+	width: 100px;
+	height: 25px;
+	vertical-align: top;
+
+	border: none;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .15s linear 0s;
+	-moz-transition: background-color .15s linear 0s;
+	transition: background-color .15s linear 0s;
+}
+
+.newEmailContainer #confirmAddEmail {
+	background-color: rgb(0, 150, 200);
+}
+
+.newEmailContainer #cancelAddEmail {
+	color: rgb(200, 200, 200);
+	background-color: rgb(175, 0, 0);
+}
+
+.newEmailContainer #confirmAddEmail:hover {
+	background-color: rgb(0, 175, 225);
+}
+
+.newEmailContainer #cancelAddEmail:hover {
+	background-color: rgb(225, 0, 0);
+}
+
+#emailContainer .email, #emailContainer #primaryEmail {
+	display: inline-table;
+	width: 350px;
+}
+
+#emailContainer #primaryEmail {
+	cursor: default;
+	pointer: default;
+}
+
+#emailContainer .email {
+	cursor: pointer;
+	pointer: hand;
+}
+
+#removeEmail {
+	display: inline-block;
+	opacity: 0;
+	float: right;
+	margin-left: 10px;
+	width: 100px;
+	height: 25px;
+	vertical-align: top;
+
+	border: none;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .15s linear 0s;
+	-moz-transition: background-color .15s linear 0s;
+	transition: background-color .15s linear 0s;
+}
+
+#emailContainer .email:hover #removeEmail {
+	opacity: 1;
+}
+
+#usernameContainer {
+	margin-bottom: 25px;
+}
+
+#usernameContainer #currentUsername:before {
+	content: 'Current username: ';
+	font-family: DX-COND;
+}
+
+#usernameContainer #changeUsername {
+	display: inline-block;
+	margin-left: 10px;
+	width: 75px;
+	height: 25px;
+	vertical-align: top;
+	font-weight: bold;
+	font-size: .9em;
+
+	border: none;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .15s linear 0s;
+	-moz-transition: background-color .15s linear 0s;
+	transition: background-color .15s linear 0s;
+}
+
+#usernameContainer #usernameLabel {
+	display: block;
+}
+
+#usernameContainer #newUsernameContainer {
+	display: none;
+}
+
+#usernameContainer #newUsername {
+	display: inline-block;
+	font-family: DX-REG;
+	padding-top: 2px;
+	padding-left: 5px;
+
+	border: 1px solid rgb(175, 175, 175);
+
+	width: 200px;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	-webkit-transition: background-color .25s linear 0s;
+	-moz-transition: background-color .25s linear 0s;
+	transition: background-color .25s linear 0s;
+}
+
+#newUsernameContainer button {
+	width: 70px;
+	height: 25px;
+	vertical-align: top;
+	margin-left: 5px;
+
+	border: none;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .15s linear 0s;
+	-moz-transition: background-color .15s linear 0s;
+	transition: background-color .15s linear 0s;
+}
+
+#newUsernameContainer #confirmUsername {
+	background-color: rgb(0, 150, 200);
+}
+
+#newUsernameContainer #cancelUsername {
+	color: rgb(200, 200, 200);
+	background-color: rgb(175, 0, 0);
 }

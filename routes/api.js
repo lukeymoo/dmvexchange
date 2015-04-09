@@ -10,6 +10,10 @@ var sessionManager = require('../modules/session/session');
 var ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
 
+var pmSystem = require('../modules/PM/pm');
+var smtp = require('../modules/smtp/smtp');
+var uuid = require('node-uuid');
+
 
 /**
 	RESPONSE TYPES
@@ -26,6 +30,29 @@ router.get('*', function(req, res, next) {
 		return;
 	}
 	next();
+});
+
+// Catch account cancellation confirmation
+router.get('/confirm_account_canceled', function(req, res, next) {
+	if(!('ACCOUNT_ID' in req.session) || req.session.ACCOUNT_ID.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'No account ID specified, ensure the complete cancel link is in URL'});
+		return;
+	}
+
+	// Find account with specified ID and remove it from the database
+	var database = databaseManger.getDB();
+	var usrCol = database.collection('USERS');
+	usrCol.update({
+		_id: ObjectID(req.session.ACCOUNT_ID)
+	}, { $unset: { email: '', activation: '' } });
+
+	// Send PM to user notifying the unlinking of email
+	// Point them to account settings page where they may set a new one
+	pmSystem.serverSend(req.session.USERNAME, 'The email you registered with has been unlinked with account, please link a new email in the account settings page');
+
+	delete req.session.ACCOUNT_ID;
+	delete req.session.USERNAME;
+	res.send({status: 'DX-OK', message: 'Email address unlinked'});
 });
 
 // Catch tip submissions
@@ -196,10 +223,6 @@ router.get('/mail', function(req, res, next) {
 
 	// Ensure they have an identity ( Username & Email in session )
 	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
-		res.send({status: 'DX-REJECTED', message: 'Could not resolve identity please try re-logging in'});
-		return;
-	}
-	if(!('EMAIL') in req.session || req.session.EMAIL.length == 0) {
 		res.send({status: 'DX-REJECTED', message: 'Could not resolve identity please try re-logging in'});
 		return;
 	}
@@ -467,6 +490,161 @@ router.get('/mail', function(req, res, next) {
 	}
 });
 
+
+// Account Settings page add new email
+router.get('/addEmail', function(req, res, next) {
+	// Ensure they're logged in
+	if(!sessionManager.isLoggedIn(req.session)) {
+		res.send({status: 'DX-REJECTED', message: 'Not logged in, please log in again'});
+		return;
+	}
+
+	// Ensure they've sent the email
+	if(!('email' in req.query) || req.query.email.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'No new email specified'});
+		return;
+	}
+
+	// Validate the email
+	if(formManager.validateEmail(req.query.email)) {
+		// Ensure this email isn't already present in database
+		var database = databaseManger.getDB();
+		var usrCol = database.collection('USERS');
+
+		usrCol.findOne({
+			$or: [
+				{ email: req.query.email.toLowerCase() },
+				{ other_emails: req.query.email.toLowerCase() }
+			]
+		}, function(err, doc) {
+			if(err) {
+				console.log('[-] MongoDB error while adding new email');
+				res.send({status: 'DX-FAILED', message: 'Error while adding email, please try again.'});
+				return;
+			}
+			if(doc) {
+				// Email in use
+				res.send({status: 'DX-REJECTED', message: 'Email is already in use!'});
+				return;
+			} else {
+				// Find the user by username
+				usrCol.findOne({
+					username: req.session.USERNAME
+				}, function(err, doc) {
+					// does the user have a primary email ?
+					if(!('email' in doc) || doc.email.length == 0) {
+
+						var activation = {
+							token: uuid.v1(),
+							cancel: uuid.v1() + '-cancel',
+							used: false
+						};
+
+						// Make primary email
+						usrCol.update({
+							username: req.session.USERNAME
+						}, { $set: { email: req.query.email.toLowerCase(), activation: activation } });
+
+						// Set the session variable
+						req.session.EMAIL = req.query.email.toLowerCase();
+
+						// prepare to email activation for newly set primary email
+						var message = {
+							to: req.session.EMAIL,
+							subject: 'DMV Exchange Registration',
+							text: 'New primary email has been set. Activate it using the link below\r\n\
+								http://dmv-exchange.com/account/ack?token='+activation.token+'\r\n\r\n\r\n\
+								 If you want to cancel activation of this email use the following link\r\n\
+								 http://dmv-exchange.com/account/ack?token='+activation.cancel
+						};
+
+						// Email the user activation code
+						smtp.send(message, function(err, result) {
+							// Send reminder to activate account through internal PM system
+							pmSystem.serverSend(req.session.USERNAME, 'Don\'t forget to activate your account, activation link was sent to email ' + req.session.EMAIL);
+							res.send({
+								status: 'DX-OK',
+								message: 'Email has been added',
+								email: req.query.email,
+								refresh: true
+							});
+							return;
+						});
+					} else {
+						// if not push into other emails
+						usrCol.update({
+							username: req.session.USERNAME
+						}, { $push: { other_emails: req.query.email.toLowerCase() } });
+
+						// Tell the user to activate the new emails
+						pmSystem.serverSend(req.session.USERNAME, 'New email ' + req.query.email + ' has been linked with account.');
+
+						res.send({
+							status: 'DX-OK',
+							message: 'Email has been added',
+							email: req.query.email
+						});
+						return;
+					}
+				});
+			}
+		});
+	} else {
+		res.send({status: 'DX-REJECTED', message: 'The email specified is not a valid email'});
+		return;
+	}
+});
+
+// Account Settings page add new email
+router.get('/removeEmail', function(req, res, next) {
+	// Ensure they're logged in
+	if(!sessionManager.isLoggedIn(req.session)) {
+		res.send({status: 'DX-REJECTED', message: 'Not logged in, please log in again'});
+		return;
+	}
+
+	// Ensure they've sent the email
+	if(!('email' in req.query) || req.query.email.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'No new email specified'});
+		return;
+	}
+
+	// Validate the email
+	if(formManager.validateEmail(req.query.email)) {
+		// Ensure this email isn't already present in database
+		var database = databaseManger.getDB();
+		var usrCol = database.collection('USERS');
+
+		usrCol.findOne({
+			username: req.session.USERNAME,
+			other_emails: req.query.email
+		}, function(err, doc) {
+			if(err) {
+				console.log('[-] MongoDB error while removing email :: ' + err);
+				res.send({status: 'DX-FAILED', message: 'Error occurred while removing email, please refresh page and try again'});
+				return;
+			}
+			if(doc) {
+				// Remove the email
+				usrCol.update({
+					username: req.session.USERNAME
+				}, { $pull: { other_emails: req.query.email.toLowerCase() } });
+				// Send PM
+				pmSystem.serverSend(req.session.USERNAME, 'Email ' + req.query.email + ' has been removed from account.');
+				res.send({status: 'DX-OK', message: 'Email removed'});
+				return;
+			} else {
+				// Email not in collection
+				res.send({status: 'DX-REJECTED', message: 'Email not found in account'});
+				return;
+			}
+		});
+
+	} else {
+		res.send({status: 'DX-REJECTED', message: 'The email specified is not a valid email'});
+		return;
+	}
+});
 
 
 module.exports = router;

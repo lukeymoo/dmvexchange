@@ -200,10 +200,10 @@
 #mailWrapper #composeForm {
 	position: absolute;
 	z-index: 1001;
-	top: 75px;
+	top: 65px;
 	left: 25px;
 	width: 94%;
-	height: 78vh;
+	height: 80vh;
 	background-color: #eee;
 	padding: 25px 75px;
 	display: none;
@@ -322,7 +322,7 @@
 }
 
 #composeForm #buttons {
-	margin-top: 370px;
+	margin-top: 365px;
 }
 
 #composeForm #cancelButton {

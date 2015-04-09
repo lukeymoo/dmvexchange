@@ -1,0 +1,34 @@
+{
+  "name": "nodemailer-direct-transport",
+  "version": "1.0.2",
+  "description": "Direct transport for Nodemailer",
+  "main": "src/direct-transport.js",
+  "scripts": {
+    "test": "grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/andris9/nodemailer-direct-transport.git"
+  },
+  "keywords": [
+    "SMTP",
+    "Nodemailer"
+  ],
+  "author": "Andris Reinman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andris9/nodemailer-direct-transport/issues"
+  },
+  "homepage": "http://github.com/andris9/nodemailer-direct-transport",
+  "dependencies": {
+    "smtp-connection": "^1.2.0"
+  },
+  "devDependencies": {
+    "chai": "^2.1.1",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-mocha-test": "^0.12.7",
+    "sinon": "^1.13.0",
+    "smtp-server": "^1.1.0"
+  }
+}

@@ -1,0 +1,24 @@
+show dbs
+clear
+show users
+use dmvexchange
+clear
+show users
+use admin
+show users
+db.createUser({user: 'trippymane', pwd: 'xbBfpNMWdNFvhe8t21W0HS+MPsFVIOClQ0a4P3QnAgqE+XFt4kHQ556uwAQLfvNu', roles: [{role: 'root', db: 'admin'}]})
+db.createUser({user: 'trippymane', pwd: 'xbBfpNMWdNFvhe8t21W0HS+MPsFVIOClQ0a4P3QnAgqE+XFt4kHQ556uwAQLfvNu', roles: [{role: 'root', db: 'dmvexchange'}]})
+db.createUser({user: 'trippymane', pwd: 'xbBfpNMWdNFvhe8t21W0HS+MPsFVIOClQ0a4P3QnAgqE+XFt4kHQ556uwAQLfvNu', roles: [{role: 'root', db: 'admin'}]})
+show users
+show dbs
+show collections
+ls
+clear
+show users
+create db
+use dmvexchange
+show users
+ls
+show users
+show dbs
+show dbs

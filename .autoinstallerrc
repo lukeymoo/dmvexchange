@@ -1,0 +1,8 @@
+# (mt) Parallels Plesk Panel repository mirror configuration
+# DO NOT EDIT OR REMOVE THIS FILE
+SOURCE_TYPE="network"
+SOURCE="http://pleskrepo.mediatemple.net/plesk"
+USE_PLESK_UPDATES="yes"
+TARGET="/var/cache/mt"
+SEPARATE_LOGS="yes"
+DEBUG="yes"

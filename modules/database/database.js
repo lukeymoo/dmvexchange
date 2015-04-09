@@ -9,9 +9,9 @@ var crypto = require('crypto');
 // Will hold the connection
 var _db;
 
-var pwd = 'xbBfpNMWdNFvhe8t21W0HS+MPsFVIOClQ0a4P3QnAgqE+XFt4kHQ556uwAQLfvNu';
+var pwd = '9d9066cf90755496ec7ed3392e638fc111';
 
-var url = 'mongodb://me:' + pwd + '@localhost:27017/dmvexchange';
+var url = 'mongodb://dxb:' + pwd + '@localhost:27017/dmvexchange';
 
 module.exports = {
 
@@ -31,14 +31,18 @@ module.exports = {
 					if(collections) {
 						var colExist = {
 							USERS: false,
-							MAIL: false
-						}
+							MAIL: false,
+							BAD_REQUESTS: false
+						};
 						for(var collection in collections) {
 							if(collections[collection].namespace == 'dmvexchange.USERS') {
 								colExist.USERS = true;
 							}
 							if(collections[collection].namespace == 'dmvexchange.MAIL') {
 								colExist.MAIL = true;
+							}
+							if(collections[collection].namespace == 'dmvexchange.BAD_REQUESTS') {
+								colExist.BAD_REQUESTS = true;
 							}
 						}
 						if(!colExist.USERS) {
@@ -48,6 +52,11 @@ module.exports = {
 						if(!colExist.MAIL) {
 							dbObj.createCollection('MAIL', function(){});
 							console.log('[+] MongoDB Created collection `MAIL`');
+						}
+						if(!colExist.BAD_REQUESTS) {
+							// Stores bad request to help identify bots
+							dbObj.createCollection('BAD_REQUESTS', function(){});
+							console.log('[+] MongoDB Created collection BAD_REQUESTS');
 						}
 					}
 				});
@@ -116,6 +125,11 @@ module.exports = {
 		var db = _db;
 		var userCol = db.collection('USERS');
 
+		var tokens = {
+			good: uuid.v1(),
+			bad: uuid.v1() + '-cancel'
+		};
+
 		// The user object
 		var user = {
 			name: {
@@ -126,16 +140,34 @@ module.exports = {
 			email: userObj.e,
 			password: crypto.createHash('md5').update(String(userObj.p)).digest('hex'),
 			activation: {
-				token: uuid.v1(),
-				cancel: uuid.v1() + '-cancel',
+				token: tokens.good,
+				cancel: tokens.bad,
 				used: false
 			}
 		};
 
 		// Insert object
 		userCol.insert(user, function(err, doc) {
-			callback(err, doc);
+			callback(err, doc, tokens);
 		});
+	},
+
+	recordBadRequest: function(req) {
+		var addr = req.ip || false;
+
+		if(!addr) {
+			console.log('[-] Failed to capture bad request');
+			return;
+		}
+
+		var db = _db;
+		var reqCol = db.collection('BAD_REQUESTS');
+
+		// insert the IP and path requested
+		reqCol.update({
+			ip: addr
+		}, { $push: { paths: req.originalUrl }}, {upsert: true});
+		console.log('[+] Bad request has been logged');
 	},
 
 	findMail: function(sessionObj) {

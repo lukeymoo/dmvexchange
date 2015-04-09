@@ -7,6 +7,10 @@ var formManager = require('../modules/form/form');
 var databaseManager = require('../modules/database/database');
 var sessionManager = require('../modules/session/session');
 
+var smtp = require('../modules/smtp/smtp');
+
+var pmSystem = require('../modules/PM/pm');
+
 /**
 	RESTRICT ACCESS TO THE FOLLOWING ROUTES ( Must be logged in )
 	1. account
@@ -185,22 +189,35 @@ router.post('/process', function(req, res, next) {
 				e: req.body.e,
 				p: req.body.p,
 			};
-			databaseManager.saveAccount(user, function(err, doc) {
+			databaseManager.saveAccount(user, function(err, doc, tokens) {
 				if(err) {
 					console.log('[-] MongoDB Error while creating account :: ' + err);
 					res.send('Error occurred while creating account, <a href="/signup">please try again.</a>');
 					return;
 				}
 
+				var message = {
+					to: user.e,
+					subject: 'DMV Exchange Registration',
+					text: 'Thanks for registering! Activate your account using the link below\r\n\
+						http://dmv-exchange.com/account/ack?token='+tokens.good+'\r\n\r\n\r\n\
+						 If you did not register at this website use the following link\r\n\
+						 http://dmv-exchange.com/account/ack?token='+tokens.bad
+				};
+
 				if(doc) {
 					// Email the user activation code
-					// Set session values and redirect
-					req.session.LOGGED_IN = true;
-					req.session.USERNAME = user.u;
-					req.session.EMAIL = user.e;
-					req.session.LAST_ACTIVITY = Date.now();
-					res.redirect('/');
-					return;
+					smtp.send(message, function(err, result) {
+						// Send reminder to activate account through internal PM system
+						pmSystem.serverSend(user.u, 'Don\'t forget to activate your account, activation link was sent to email ' + user.e);
+						// Set session values and redirect
+						req.session.LOGGED_IN = true;
+						req.session.USERNAME = user.u;
+						req.session.EMAIL = user.e;
+						req.session.LAST_ACTIVITY = Date.now();
+						res.redirect('/');
+						return;
+					});
 				} else {
 					console.log('[-] MongoDB Error write failed :: ' + err);
 					res.send('Error occurred while creating account, <a href="/signup">please try again.</a>');

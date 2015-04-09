@@ -12,7 +12,7 @@ var validateName = function(string) {
 var validateEmail = function(string) {
 	var status = true;
 	var reg = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-	if(!reg.test(string)) {
+	if(!reg.test(string) || string.length > 64) {
 		status = false;
 	}
 	return status;

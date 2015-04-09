@@ -8,6 +8,12 @@ html
 		link(rel='stylesheet', href='/css/common/common.css')
 		if title == 'Account'
 			link(rel='stylesheet', href='/css/account/account.css')
+		if title == 'Umm'
+			link(rel='stylesheet', href='/css/account/account.css')
+		if title == 'Activated'
+				link(rel='stylesheet', href='/css/account/account.css')
+		if title == 'Sorry'
+				link(rel='stylesheet', href='/css/account/account.css')
 		if title == 'Mail'
 			link(rel='stylesheet', href='/css/mail/mail.css')
 		if title == 'Profile'
@@ -55,6 +61,13 @@ html
 			if title == 'Tips'
 				block tipsBlock
 
+			if title == 'Activated'
+				block accountActivated
+			if title == 'Sorry'
+				block accountCanceled
+			if title == 'Umm'
+				block accountActive
+
 			if title == 'Error'
 				block content		
 
@@ -71,3 +84,7 @@ html
 			script(src='/js/mail.js')
 		if title == 'Tips'
 			script(src='/js/tips.js')
+		if title == 'Activated'
+			script(src='/js/token.js')
+		if title == 'Sorry'
+			script(src='/js/token.js')
