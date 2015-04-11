@@ -60,6 +60,7 @@ Messenger.toggleForm = function() {
 
 Messenger.showForm = function() {
 	$('#composeForm').css('display', 'inline-block');
+	$('#composeForm #messageTo').focus();
 	this.isOpen = true;
 };
 
@@ -193,8 +194,6 @@ Messenger.discard = function() {
 
 
 
-
-
 $(function() {
 
 
@@ -308,7 +307,8 @@ $(function() {
 
 	$('#composeForm #sendMessage').on('click', function() {
 		Messenger.send(function() {
-
+			// Close the form
+			Messenger.discard();
 		});
 	});
 
