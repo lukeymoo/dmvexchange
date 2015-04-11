@@ -1,3 +1,8 @@
+/**
+	Contains methods to switch views and interact with message action
+	menu
+*/
+
 'use strict';
 
 var Controls = {

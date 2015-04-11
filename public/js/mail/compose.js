@@ -1,3 +1,8 @@
+/**
+	Contains methods that allow the user to
+	interact with the compose message form
+*/
+
 'use strict';
 
 // Contains our methods for Message manipulation

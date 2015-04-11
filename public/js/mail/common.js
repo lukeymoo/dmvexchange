@@ -1,3 +1,10 @@
+/**
+	Contains methods that pretty much handle any
+	i/o from server and parsing of messages for
+	client side api	
+*/
+
+
 'use strict';
 
 var Main = {
@@ -127,10 +134,8 @@ Main.toggleMessage = function(id) {
 	// Determine the current view
 	switch(this.view) {
 		case '[INBOX]':
-			console.log('inbox view looking for :: ' + id);
 			// remove
 			for(var i = 0; i < this.selectedMessages.length; i++) {
-				console.log('ID :: ' + id);
 				if(this.selectedMessages[i] == id) {
 					// see if selected all
 					if(this.selectedMessages.length == this.parsedInbox.length) {
@@ -138,7 +143,6 @@ Main.toggleMessage = function(id) {
 						$('#mailFilters #selectAll').find('input').prop('checked', false);
 					}
 					this.selectedMessages.splice(i, 1);
-					console.log('R: ' + this.selectedMessages.length + ' :: ' + this.parsedInbox.length);
 
 					// deactivate actions menu
 					if(this.selectedMessages.length > 0) {
@@ -153,7 +157,6 @@ Main.toggleMessage = function(id) {
 
 			// add
 			this.selectedMessages.push(id);
-			console.log('A:' + this.selectedMessages.length + ' :: ' + this.parsedInbox.length);
 			// see if selected all
 			if(this.selectedMessages.length == this.parsedInbox.length) {
 				// if yes deselect selectall
@@ -180,7 +183,7 @@ Main.selectMessage = function(obj) {
 		this.hideActionsMenu();
 	}
 
-	var id = $(obj).find('#id').html();
+	var id = $(obj).find('#messageid').html();
 
 	// ensure its not already added
 	var add = true;
@@ -207,7 +210,7 @@ Main.deselectMessage = function(obj) {
 		this.hideActionsMenu();
 	}
 
-	var id = $(obj).find('#id').html();
+	var id = $(obj).find('#messageid').html();
 
 	// Determine the view
 	switch(this.view) {
