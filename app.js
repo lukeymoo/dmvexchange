@@ -48,7 +48,7 @@ app.use(cookieParser());
 
 // enable sessions using Redis
 app.use(session({
-  store: new redisStore({ host: '72.47.237.205', port: '6379', client: redis }),
+  store: new redisStore({ host: '127.0.0.1', port: '6379', client: redis }),
   secret: 'keyboard cat',
   resave: true,
   saveUninitialized: true,
