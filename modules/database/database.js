@@ -11,7 +11,7 @@ var _db;
 
 var pwd = '9d9066cf90755496ec7ed3392e638fc111';
 
-var url = 'mongodb://dxb:' + pwd + '@localhost:27017/dmvexchange';
+var url = 'mongodb://dxb:' + pwd + '@dmv-exchange.com:27017/dmvexchange';
 
 module.exports = {
 

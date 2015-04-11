@@ -33,7 +33,7 @@ var market = require('./routes/market');
 var app = express();
 
 // set the env port variable
-process.env.PORT = '80';
+process.env.PORT = '8080';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -48,7 +48,7 @@ app.use(cookieParser());
 
 // enable sessions using Redis
 app.use(session({
-  store: new redisStore({ host: '127.0.0.1', port: '6379', client: redis }),
+  store: new redisStore({ host: '72.47.237.205', port: '6379', client: redis }),
   secret: 'keyboard cat',
   resave: true,
   saveUninitialized: true,
