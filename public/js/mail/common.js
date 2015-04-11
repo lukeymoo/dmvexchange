@@ -8,10 +8,54 @@
 'use strict';
 
 var Main = {
+	init: false,
 	view: '[INBOX]',
 	parsedInbox: [],
 	parsedTrash: [],
-	selectedMessages: []
+	inboxDOM: '',
+	trashDOM: '',
+	selectedMessages: [],
+	actionsMenu: ''
+};
+
+// Calls get and generates actions menu
+Main.init = function() {
+	this.get();
+	this.createActionMenu();
+};
+
+Main.createActionMenu = function() {
+	var DOM = '';
+	// Remove actions
+	this.actionsMenu = '';
+	$('#mailActions').empty();
+
+	switch(this.view) {
+		case '[INBOX]':
+		// Delete mark gone
+		$('#markGoneContainer').remove();
+		DOM = '<div id="markRead">Mark read</div>\
+			<div id="markUnread">Mark unread</div>\
+			<div id="markTrash">Move to trash</div>';
+			break;
+		case '[TRASH]':
+			var confirmGoneElem = '<div id="markGoneContainer">\
+			<div id="header">Are you sure ?</div>\
+			<div id="cancelMarkGone">Cancel</div>\
+			<div id="confirmMarkGone">Yes, Delete forever</div>\
+			</div>';
+			DOM = '<div id="markInbox">Move to inbox</div>\
+			<div id="markGone">Delete forever</div>';
+
+			// Append wrapper with confirmGoneElem
+			$('#mailWrapper').append(confirmGoneElem);
+			break;
+	}
+
+	this.actionsMenu = DOM;
+	// Append the dom
+	$('#mailActions').append(this.actionsMenu);
+	return;
 };
 
 Main.get = function() {
@@ -30,63 +74,143 @@ Main.load = function(callback) {
 };
 
 Main.parse = function(json) {
-	var DOM = '';
 
 	if(json.returned == 0) {
 		return;
 	}
 
+	// Parse JSON response into collections split by label ( inbox, trash etc.. )
 	for(var msgObj in json.message) {
 
-		var recipients = 'you';
+		// Get label, is read, and other recipients
+		var recipients = '';
+		var inboxDOM = '';
+		var trashDOM = '';
 
-		// Capture the other recipients if any
-		var location = '';
-		for(var user in json.message[msgObj].recipients) {
-			// Capture the label for user -- Where is message ( Inbox ? Trash ? )
-			if(json.message[msgObj].recipients[user].username == state.USERNAME) {
-				location = json.message[msgObj].recipients[user].label;
+		for(var recip in json.message[msgObj].recipients) {
+			
+			if(!json.message[msgObj].recipients[recip].username != state.USERNAME) {
+				// Add to recipients
+				recipients += json.message[msgObj].recipients[recip].username;
 			}
 
-			if(json.message[msgObj].recipients[user].username != state.USERNAME) {
-				recipients += ' ' + json.message[msgObj].recipients[user].username;
+			if(json.message[msgObj].recipients[recip].username == state.USERNAME) {
+
+				switch(json.message[msgObj].recipients[recip].label) {
+
+					case '[INBOX]':
+						// Check if it's already been parsed
+						var added = false;
+
+						for(var id in this.parsedInbox) {
+							if(json.message[msgObj]._id == this.parsedInbox[id].id) {
+								added = true;
+							}
+						}
+						if(!added) {
+							var classLabel = 'message';
+
+							if(!json.message[msgObj].recipients[recip].read) {
+								classLabel += ' unread';
+							}
+
+							// Parse message and add to inboxDOM
+							inboxDOM += "<div class='" + classLabel + "'>" +
+											"<div id='messageid'>" + json.message[msgObj]._id + "</div>" +
+											"<div id='to'>" + recipients + "</div>" +
+											"<div id='select'><input type='checkbox'></div>" +
+											"<div id='subject'>" + json.message[msgObj].subject + "</div>" +
+											"<div id='message'>" + json.message[msgObj].message + "</div>" +
+											"<div id='from'>" + json.message[msgObj].from + "</div>" +
+											"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
+										"</div>";
+							this.parsedInbox.push({id: json.message[msgObj]._id, html: inboxDOM});
+						}
+						break;
+					case '[TRASH]':
+						// Check if it's already been parsed
+						var added = false;
+
+						for(var id in this.parsedTrash) {
+							if(json.message[msgObj]._id == this.parsedTrash[id].id) {
+								added = true;
+							}
+						}
+						if(!added) {
+							var classLabel = 'message';
+
+							if(!json.message[msgObj].recipients[recip].read) {
+								classLabel += ' unread';
+							}
+
+							// Parse message and add to inboxDOM
+							trashDOM += "<div class='" + classLabel + "'>" +
+											"<div id='messageid'>" + json.message[msgObj]._id + "</div>" +
+											"<div id='to'>" + recipients + "</div>" +
+											"<div id='select'><input type='checkbox'></div>" +
+											"<div id='subject'>" + json.message[msgObj].subject + "</div>" +
+											"<div id='message'>" + json.message[msgObj].message + "</div>" +
+											"<div id='from'>" + json.message[msgObj].from + "</div>" +
+											"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
+										"</div>";
+							this.parsedTrash.push({id: json.message[msgObj]._id, html: trashDOM});
+						}
+						break;
+				}
 			}
 		}
-
-		// Determine which view to parse
-		if(this.view == '[INBOX]' && location == '[INBOX]') {
-			// Parse DOM
-			DOM += "<div class='message'>" +
-						"<div id='messageid'>" + json.message[msgObj]._id + "</div>" +
-						"<div id='to'>" + recipients + "</div>" +
-						"<div id='select'><input type='checkbox'></div>" +
-						"<div id='subject'>" + json.message[msgObj].subject + "</div>" +
-						"<div id='message'>" + json.message[msgObj].message + "</div>" +
-						"<div id='from'>" + json.message[msgObj].from + "</div>" +
-						"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
-					"</div>";
-			this.parsedInbox.push(json.message[msgObj]._id);
-
-		} else if(this.view == '[TRASH]' && location == '[TRASH]') {
-			// Parse DOM
-			DOM += "<div class='message'>" +
-						"<div id='messageid'>" + json.message[msgObj]._id + "</div>" +
-						"<div id='to'>" + recipients + "</div>" +
-						"<div id='select'><input type='checkbox'></div>" +
-						"<div id='subject'>" + json.message[msgObj].subject + "</div>" +
-						"<div id='message'>" + json.message[msgObj].message + "</div>" +
-						"<div id='from'>" + json.message[msgObj].from + "</div>" +
-						"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
-					"</div>";
-			this.parsedTrash.push(json.message[msgObj]._id);
-		}
 	}
-	
-	// Prepend DOM
-	if(DOM.length > 0) {
-		$('#mailFilters #selectAll').find('input').prop('checked', false);	
-		$('#messageContainer').prepend(DOM);
+
+	var DOM = '';
+
+	// Loop through all parsed and display
+	switch(this.view) {
+		case '[INBOX]':
+			for(var msg in this.parsedInbox) {
+				DOM += this.parsedInbox[msg].html;
+			}
+
+			// Prepend DOM
+			if(DOM.length > 0) {
+				$('#mailFilters #selectAll').find('input').prop('checked', false);	
+				$('#messageContainer').prepend(DOM);
+			}
+			break;
+		case '[TRASH]':
+			for(var msg in this.parsedTrash) {
+				DOM += this.parsedTrash[msg].html;
+			}
+
+			// Prepend DOM
+			if(DOM.length > 0) {
+				$('#mailFilters #selectAll').find('input').prop('checked', false);	
+				$('#messageContainer').prepend(DOM);
+			}
+			break;
 	}
+};
+
+Main.show = function() {
+	var DOM = '';
+	// Show DOM
+	switch(this.view) {
+		case '[INBOX]':
+			for(var msg in this.parsedInbox) {
+				DOM += this.parsedInbox[msg].html;
+			}
+			$('#messageContainer').html(DOM);
+			break;
+		case '[TRASH]':
+			for(var msg in this.parsedTrash) {
+				DOM += this.parsedTrash[msg].html;
+			}
+			$('#messageContainer').html(DOM);
+			break;
+	}
+};
+
+Main.update = function() {
+	// Update view
 };
 
 Main.toDate = function(messageID) {
@@ -128,7 +252,7 @@ Main.toDate = function(messageID) {
 
 Main.toggleMessage = function(id) {
 	if($('#mailActions').attr('data-selected') == 'true') {
-		this.hideActionsMenu();
+		Controls.hide();
 	}
 
 	// Determine the current view
@@ -144,13 +268,12 @@ Main.toggleMessage = function(id) {
 					}
 					this.selectedMessages.splice(i, 1);
 
-					// deactivate actions menu
+					// enable/disable actions menu
 					if(this.selectedMessages.length > 0) {
-						$('#mailActionsContainer').attr('data-active', 'true');
+						Controls.enable();
 					} else {
-						$('#mailActionsContainer').attr('data-active', 'false');
+						Controls.disable();
 					}
-
 					return;
 				}
 			}
@@ -165,14 +288,49 @@ Main.toggleMessage = function(id) {
 
 			// deactivate actions menu
 			if(this.selectedMessages.length > 0) {
-				$('#mailActionsContainer').attr('data-active', 'true');
+				Controls.enable();
 			} else {
-				$('#mailActionsContainer').attr('data-active', 'false');
+				Controls.disable();
 			}
 			return;
 			break;
 
 		case '[TRASH]':
+			// remove
+			for(var i = 0; i < this.selectedMessages.length; i++) {
+				if(this.selectedMessages[i] == id) {
+					// see if selected all
+					if(this.selectedMessages.length == this.parsedTrash.length) {
+						// if yes deselect selectall
+						$('#mailFilters #selectAll').find('input').prop('checked', false);
+					}
+					this.selectedMessages.splice(i, 1);
+
+					// enable/disable actions menu
+					if(this.selectedMessages.length > 0) {
+						Controls.enable();
+					} else {
+						Controls.disable();
+					}
+					return;
+				}
+			}
+
+			// add
+			this.selectedMessages.push(id);
+			// see if selected all
+			if(this.selectedMessages.length == this.parsedTrash.length) {
+				// if yes deselect selectall
+				$('#mailFilters #selectAll').find('input').prop('checked', true);
+			}
+
+			// deactivate actions menu
+			if(this.selectedMessages.length > 0) {
+				Controls.enable();
+			} else {
+				Controls.disable();
+			}
+			return;
 			break;
 	}
 };
@@ -180,7 +338,7 @@ Main.toggleMessage = function(id) {
 Main.selectMessage = function(obj) {
 
 	if($('#mailActions').attr('data-selected') == 'true') {
-		this.hideActionsMenu();
+		Controls.hide();
 	}
 
 	var id = $(obj).find('#messageid').html();
@@ -199,7 +357,14 @@ Main.selectMessage = function(obj) {
 		this.selectedMessages.push(id);
 	}
 
-	// check
+	// enable/disable contols
+	if(this.selectedMessages.length > 0) {
+		Controls.enable();
+	} else {
+		Controls.disable();
+	}
+
+	// add check
 	$(obj).find('input').prop('checked', true);
 
 	return;
@@ -207,7 +372,7 @@ Main.selectMessage = function(obj) {
 
 Main.deselectMessage = function(obj) {
 	if($('#mailActions').attr('data-selected') == 'true') {
-		this.hideActionsMenu();
+		Controls.hide();
 	}
 
 	var id = $(obj).find('#messageid').html();
@@ -244,20 +409,16 @@ Main.deselectMessage = function(obj) {
 			break;
 	}
 
+	// deactivate actions menu
+	if(this.selectedMessages.length > 0) {
+		Controls.enable();
+	} else {
+		Controls.disable();
+	}
+
+
 	// uncheck
 	$(obj).find('input').prop('checked', false);
-	return;
-};
-
-Main.hideActionsMenu = function() {
-	if($('#mailActions').hasClass('showActionsMenu')) {
-		$('#mailActions').removeClass('showActionsMenu');
-
-		if(!$('#mailActions').hasClass('showActionsMenu-reverse')) {
-			$('#mailActions').addClass('showActionsMenu-reverse');
-		}
-	}
-	$('#mailActions').attr('data-selected', 'false');
 	return;
 };
 
@@ -268,7 +429,7 @@ Main.hideActionsMenu = function() {
 $(function() {
 
 	// Load messages for default view [INBOX]
-	Main.get();
+	Main.init();
 
 	// Toggle Compose Message
 	$('#mailControls #compose').on('click', function() {

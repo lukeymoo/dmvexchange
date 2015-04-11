@@ -314,6 +314,9 @@ $(function() {
 		Messenger.send(function() {
 			// Close the form
 			Messenger.discard();
+
+			// Update view
+			Main.get();
 		});
 	});
 
