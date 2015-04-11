@@ -22,3 +22,13 @@ ls
 show users
 show dbs
 show dbs
+db.USERS.find().toArray()
+db.USERS.drop()
+db.MAIL.drop()
+db.USERS.find().toArray()
+db.BAD_REQUESTS.find().toArray()
+clear
+db.BAD_REQUESTS.find().toArray()
+db.USERS.find()
+db.USERS.find().toArray()
+db.MAIL.find().toArray()

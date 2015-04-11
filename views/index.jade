@@ -25,17 +25,15 @@ block accountBlock
 		span Settings
 		div(id='accountTab', data-selected='true') Account
 		div(id='passwordTab', data-selected='false') Password
+
 	div(id='accountPanel')
 		div(id='accountHeader') Account settings
 		div(id='accountSettings')
+
 			div(id='usernameContainer')
 				label(id='usernameLabel') Username
 				span(value='#{USER.USERNAME}', id='currentUsername') #{USER.USERNAME}
-				button(id='changeUsername') Change
-				div(id='newUsernameContainer')
-					input(id='newUsername', type='text', placeholder='New username...')
-					button(id='confirmUsername') Confirm
-					button(id='cancelUsername') Cancel
+
 			div(id='emailContainer')
 				label(id='linkedEmailLabel') Linked emails
 				span(value='#{USER.EMAIL}', id='primaryEmail') Primary: #{USER.EMAIL}
@@ -129,37 +127,28 @@ block mailBlock
 
 		div(id='messageViewer', data-active='false')
 			div(id='closeButton') X
-			div(id='title') Cop these jawns
-			div(id='from') lukeymoo2
-			div(id='to') lukeymoo, johnny, billy ( and 4 more )
-			div(id='content') I got DS jordan 12 sz 9.5 ill take $250 or trades
-				| for foams ( any but id prefer spidermans )
+			div(id='title') 
+			div(id='from') 
+			div(id='to') 
+			div(id='content') 
 			div(id='reply')
 				textarea(placeholder='Reply...')
 			button(id='replyButton') Reply
-			
-
-		div(id='backgroundBlur', data-active='false')
+		
 		div(id='composeForm', data-active='false')
+			div(id='header') New message
+				div(id='controls')
+					div(id='close') &times;
 
-			label(id='titleLabel') Title
-			input(type='text', id='title', autocomplete='off', spellcheck='false', tabindex=1)
-			label(id='targetLabel') Recipients
-			input(id='target', spellcheck='false', tabindex=3)
-			button(id='addTargetButton') Add
-
-			div(id='currentTargets')
-
-				//
-					div(class='target') Sample_user
-						span(id='close') x
-
-			label(id='messageLabel') Message
-			span(id='characterCount') 240
-			textarea(id='message', spellcheck='false', tabindex=2)
-			div(id='buttons')
-				button(id='cancelButton') Cancel 
-				button(id='sendButton', tabindex=4) Send
+			div(id='messageToContainer')
+				div(id='chipsContainer')
+				div(id='inputContainer')
+					input(id='messageTo', type='text', placeholder='Add Recipient', tabindex=1)
+			input(id='messageSubject', type='text', placeholder='Message Subject', tabindex=2)
+			textarea(id='messageText', placeholder='Message...', tabindex=3)
+			button(id='sendMessage') Send
+			button(id='messageImage') Image
+			button(id='cancelMessage') Cancel
 
 		div(id='mailControlsContainer')
 			div(id='mailControls')

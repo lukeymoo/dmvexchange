@@ -1,7 +1,7 @@
 'use strict';
 
 
-var currentView = '[INBOX]'; // CHANGE BACK TO INBOX
+var currentView = '[INBOX]';
 
 var parsedMessages = [];
 var selectedMessages = [];
@@ -15,102 +15,6 @@ $(function() {
 	updateView(function(res) {
 		// Parse the response
 		parseJSON(res);
-	});
-
-	// Bind validate title as entered
-	$('#composeForm #title').on('keyup change', function(e) {
-		if(e.which == 13) {
-			if(validateTitle($(this).val())) {
-				$('#composeForm #message').focus();
-			}
-		}
-		if(validateTitle($(this).val())) {
-			goodStyle($(this));
-		} else {
-			badStyle($(this));
-		}
-	});
-
-	// Bind validate recipient as entered
-	$('#composeForm #target').on('keyup change', function(e) {
-		if(e.which == 13) {
-			addTarget($(this).val());
-		}
-		if($(this).val().length > 0) {
-			if(validateTarget($(this).val())) {
-				goodStyle($(this));
-			} else {
-				badStyle($(this));
-			}
-		} else {
-			goodStyle($(this));
-		}
-	});
-
-	// Bind validate message as entered
-	$('#composeForm #message').on('keyup change', function() {
-		// Update the character count
-		var characters = 240 - $(this).val().length;
-		$('#composeForm #characterCount').html(characters);
-
-		if(validateMessage($(this).val())) {
-			goodStyle($(this));
-		} else {
-			badStyle($(this));
-		}
-	});
-
-	// Bind event to compose button
-	$('#mailControls #compose').on('click', function() {
-		// rollup action menu
-		hideActionsMenu();
-
-		composeMessage();
-		$('#composeForm #title').focus();
-	});
-
-	// Bind backgroundBlur click
-	$('#mailWrapper #backgroundBlur').on('click', function() {
-		if($('#composeForm').attr('data-active') == 'true') {
-			closeMessageForm();
-		}
-		if($('#messageViewer').attr('data-active') == 'true') {
-			hideMessage();
-		}
-	});
-
-	// Bind send mail button
-	$('#composeForm #sendButton').on('click', function() {
-		if(validateMessageForm()) {
-			// Clear form and close
-			closeMessageForm();
-
-			// parse message send to server
-			parseMessage(function(parsedMessage) {
-				sendMail(parsedMessage, function(res) {
-					if(res.status == 'DX-OK') {
-						spawnMessage(res.message, true);
-						// update view
-						updateView(function(res) {
-							parseJSON(res);
-						});
-					} else {
-						spawnMessage(res.message, false);
-					}
-				});
-			});
-		}
-	});
-
-	// Bind cancel mail button
-	$('#composeForm #cancelButton').on('click', function() {
-		closeMessageForm();
-	});
-
-	// Bind remove target on click
-	$(document).on('click', '#currentTargets .target', function() {
-		$(this).find('span').remove();
-		$(this).remove();
 	});
 
 	// Bind selectAll
@@ -175,11 +79,10 @@ $(function() {
 	// Bind actions menu on click
 	$('#mailActionsContainer #mailActionsButton').on('click', function() {
 		if(selectedMessages.length > 0) {
+			Messenger.hideForm();
 			toggleActionsMenu();
 		}
 	});
-
-	// bind message click to read it
 
 	// bind mark as read action
 	$(document).on('click', '#markRead', function() {
@@ -390,7 +293,7 @@ $(function() {
 		if(validateMessage($('#messageViewer textarea').val())) {
 			goodStyle($('#messageViewer textarea'));
 			var replyMessage = {};
-			replyMessage.title = $('#messageViewer #title').html();
+			replyMessage.title = $('#messageViewer #messageSubject').html();
 			if(replyMessage.title.indexOf('RE: ') == -1) {
 				replyMessage.title = 'RE: ' + replyMessage.title;
 			}
@@ -429,10 +332,29 @@ $(function() {
 
 /** HELPER FUNCTIONS **/
 
+function toggleCompose() {
+	if($('#mailWrapper #composeForm').attr('data-active') == 'false') {
+		composeMessage();
+	} else if($('#mailWrapper #composeForm').attr('data-active') == 'true') {
+		closeCompose();
+	}
+	return;
+}
 
+function composeMessage() {
+	if($('#mailWrapper #composeForm').attr('data-active') == 'false') {
+		$('#mailWrapper #composeForm').show();
+		$('#composeForm #messageTo').focus();
+		$('#mailWrapper #composeForm').attr('data-active', 'true');
+	}
+	return;
+}
 
-
-function toggleMessage() {
+function closeCompose() {
+	if($('#mailWrapper #composeForm').attr('data-active') == 'true') {
+		$('#mailWrapper #composeForm').hide();
+		$('#mailWrapper #composeForm').attr('data-active', 'false');
+	}
 	return;
 }
 
@@ -461,7 +383,7 @@ function showMessage(messageObj) {
 	var to = $(messageObj).find('#to').html();
 	var content = $(messageObj).find('#content').html();
 
-	$('#messageViewer #title').html(title);
+	$('#messageViewer #messageSubject').html(title);
 	$('#messageViewer #from').html(from);
 	$('#messageViewer #to').html(to);
 	$('#messageViewer #content').html(content);
@@ -535,6 +457,7 @@ function markInbox(callback) {
 }
 
 function markTrash(callback) {
+	console.log(selectedMessages);
 	$.ajax({
 		url: '/api/mail',
 		data: {
@@ -571,28 +494,15 @@ function markGone(callback) {
 	});
 }
 
-function composeMessage() {
-
-	if($('#mailWrapper #backgroundBlur').attr('data-active') == 'false') {
-		$('#mailWrapper #backgroundBlur').fadeIn();
-		$('#mailWrapper #backgroundBlur').attr('data-active', 'true');
-	}
-	if($('#mailWrapper #composeForm').attr('data-active') == 'false') {
-		$('#mailWrapper #composeForm').fadeIn();
-		$('#mailWrapper #composeForm').attr('data-active', 'true');
-	}
-	return;
-}
-
 function validateMessageForm() {
 	var status = true;
 
 	// title
-	if(!validateTitle($('#composeForm #title').val())) {
-		badStyle($('#composeForm #title'));
+	if(!validateTitle($('#composeForm #messageSubject').val())) {
+		badStyle($('#composeForm #messageSubject'));
 		status = false;
 	} else {
-		goodStyle($('#composeForm #title'));
+		goodStyle($('#composeForm #messageSubject'));
 	}
 
 	// Message
@@ -620,9 +530,9 @@ function validateMessage(string) {
 function validateRecipients() {
 	var status = true;
 
-	// targets ( Must be at least one child .target )
+	// targets ( Must be at least one child .messageTo )
 	var targetCount = 0;
-	$('#currentTargets').find('.target').each(function() {
+	$('#currentTargets').find('.messageTo').each(function() {
 		targetCount += 1;
 	});
 	if(targetCount == 0) {
@@ -642,31 +552,25 @@ function addTarget(string) {
 	if(validateTarget(string)) {
 
 		var exist = false;
-		$('#currentTargets').find('.target').each(function() {
+		$('#currentTargets').find('.messageTo').each(function() {
 			if($(this).attr('value') == string) {
 				exist = true;
 			}
 		});
 
 		if(!exist) {
-			var DOM = '<div value="' + string + '" class="target">' + string + '\
+			var DOM = '<div value="' + string + '" class="messageTo">' + string + '\
 			<span id="close">x</span>\
 			</div>';
 
 			$('#currentTargets').css('border', '1px solid #aaa');
-			$('#composeForm #target').val('');
-			goodStyle($('#composeForm #target'));
+			$('#composeForm #messageTo').val('');
+			goodStyle($('#composeForm #messageTo'));
 			$('#currentTargets').append(DOM);
 		}
 	}
 
 
-}
-
-function validateTarget(string) {
-	return (/^[A-Za-z0-9_]+$/.test(string)
-		&& string.length >= 2
-		&& string.length < 16) ? true : false;
 }
 
 function sendMail(messageObj, callback) {
@@ -679,18 +583,6 @@ function sendMail(messageObj, callback) {
 	}).done(function(res) {
 		callback(res);
 	});
-}
-
-function closeMessageForm() {
-	if($('#mailWrapper #backgroundBlur').attr('data-active') == 'true') {
-		$('#mailWrapper #backgroundBlur').fadeOut();
-		$('#mailWrapper #backgroundBlur').attr('data-active', 'false');
-	}
-	if($('#mailWrapper #composeForm').attr('data-active') == 'true') {
-		$('#mailWrapper #composeForm').fadeOut();
-		$('#mailWrapper #composeForm').attr('data-active', 'false');
-	}
-	return;
 }
 
 function updateView(callback) {
@@ -709,12 +601,12 @@ function updateView(callback) {
 function parseMessage(callback) {
 	var parsed = {};
 
-	parsed.title = $('#composeForm #title').val().toLowerCase();
+	parsed.title = $('#composeForm #messageSubject').val().toLowerCase();
 	parsed.message = $('#composeForm #message').val().toLowerCase();
 
 	// Loop through recipients and add to array
 	var recipients = [];
-	$('#currentTargets').find('.target').each(function() {
+	$('#currentTargets').find('.messageTo').each(function() {
 		recipients.push($(this).attr('value'));
 	});
 
@@ -746,13 +638,13 @@ function parseJSON(arrayObj) {
 			var targets = 'you';
 
 			// see if we have read it or not
-			for(var user in arrayObj.message[message].targets) {
-				if(arrayObj.message[message].targets[user].username == state.USERNAME) {
-					if(!arrayObj.message[message].targets[user].read) {
+			for(var user in arrayObj.message[message].recipients) {
+				if(arrayObj.message[message].recipients[user].username == state.USERNAME) {
+					if(!arrayObj.message[message].recipients[user].read) {
 						unread = ' unread';
 					}
 				} else {
-					targets += ', ' + arrayObj.message[message].targets[user].username;
+					targets += ', ' + arrayObj.message[message].recipients[user].username;
 				}
 			}
 
@@ -760,9 +652,9 @@ function parseJSON(arrayObj) {
 			<div id="id">' + arrayObj.message[message]._id + '</div>\
 			<div id="to">' + targets + '</div>\
 			<div id="select"><input type="checkbox"></div>\
-			<div id="title">' + arrayObj.message[message].title + '</div>\
+			<div id="title">' + arrayObj.message[message].subject + '</div>\
 			<div id="content">' + arrayObj.message[message].message + '</div>\
-			<div id="from">' + arrayObj.message[message].origin + '</div>\
+			<div id="from">' + arrayObj.message[message].from + '</div>\
 			<div id="date">' + toDate(arrayObj.message[message].timestamp) + '</div>\
 			</div>'
 
@@ -1024,6 +916,5 @@ function deselectMessages(obj) {
 
 	// uncheck
 	$(obj).find('input').prop('checked', false);
-	console.log('selectedMessages: ' + selectedMessages.length);
 	return;
 }

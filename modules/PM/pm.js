@@ -3,6 +3,16 @@
 
 var databaseManager = require('../database/database');
 
+var validateSubject = function(string) {
+	return (string.length >= 0 && string.length < 32) ? 
+		true : false;
+};
+
+var validateMessage = function(string) {
+	return (string.length > 1 && string.length < 360) ?
+		true : false;
+};
+
 var serverSend = function(user, message) {
 	var database = databaseManager.getDB();
 	var mailCol = database.collection('MAIL');
@@ -18,5 +28,7 @@ var serverSend = function(user, message) {
 };
 
 module.exports = {
-	serverSend: serverSend
+	serverSend: serverSend,
+	validateSubject: validateSubject,
+	validateMessage: validateMessage
 };

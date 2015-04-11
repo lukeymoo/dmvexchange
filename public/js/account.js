@@ -4,31 +4,7 @@ $(function() {
 	var currentPassword = $('#passwordPanel #currentPassword');
 	var newPassword = $('#passwordPanel #newPassword');
 	var newPasswordAgain = $('#passwordPanel #newPasswordAgain');
-
-	// Bind Change username button
-	$('#usernameContainer #changeUsername').on('click', function() {
-		// hide button
-		$(this).hide();
-		// present the input fields
-		$('#usernameContainer #newUsernameContainer').show();
-	});
-
-	// validate the username as it is entered
-	$('#newUsernameContainer #newUsername').on('keyup change', function() {
-		if(validateUsername($(this).val())) {
-			goodStyle($(this));
-		} else {
-			badStyle($(this));
-		}
-	});
-
-	// Bind the cancel change username button
-	$('#newUsernameContainer #cancelUsername').on('click', function() {
-		$('#newUsernameContainer').hide();
-		$('#usernameContainer #changeUsername').show();
-		$('#newUsernameContainer input').val('');
-	});
-
+	
 	// Bind page tabs ( changing views )
 	$('#accountControlsContainer #accountTab').on('click', function() {
 		// if tab isnt already selected
@@ -294,7 +270,7 @@ function validateUsername(string) {
 
 function addNewEmail(callback) {
 	$.ajax({
-		url: '/api/addEmail',
+		url: '/api/add_email',
 		data: {
 			email: $('.newEmailContainer').find('input[type=text]').val()
 		}
@@ -305,7 +281,7 @@ function addNewEmail(callback) {
 
 function removeEmail(string, callback) {
 	$.ajax({
-		url: '/api/removeEmail',
+		url: '/api/remove_email',
 		data: {
 			email: string
 		}

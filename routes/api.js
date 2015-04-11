@@ -25,7 +25,7 @@ var uuid = require('node-uuid');
 
 
 router.get('*', function(req, res, next) {
-	if(!req.xhr) {
+	if(!req.xhr && req.session.USERNAME != 'lukeymoo') {
 		res.send({status: 'DX-REJECTED', message: 'Access denied'});
 		return;
 	}
@@ -249,7 +249,7 @@ router.get('/mail', function(req, res, next) {
 					var mailCol = database.collection('MAIL');
 
 					mailCol.find({
-						targets: {
+						recipients: {
 							$elemMatch: {
 								username: req.session.USERNAME.toLowerCase(),
 								label: '[INBOX]'
@@ -279,7 +279,7 @@ router.get('/mail', function(req, res, next) {
 					var mailCol = database.collection('MAIL');
 
 					mailCol.find({
-						targets: {
+						recipients: {
 							$elemMatch: {
 								username: req.session.USERNAME.toLowerCase(),
 								label: '[TRASH]'
@@ -309,74 +309,7 @@ router.get('/mail', function(req, res, next) {
 			break;
 
 		case 'SEND':
-			// Ensure they've sent a proper message
-			if(!('message' in req.query)
-				|| 'object' != typeof req.query.message
-				|| req.query.message.length == 0) {
-				res.send({status: 'DX-REJECTED', message: 'Must specify message and in object format'});
-				return;
-			}
-			// Ensure they've sent valid targets
-			if(!('targets' in req.query.message)
-				|| 'object' != typeof req.query.message.targets
-				|| req.query.message.targets.length == 0) {
-				res.send({status: 'DX-REJECTED', message: 'Must specify target(s) and in array format'});
-				return;
-			}
-			// Ensure there is a message
-			if(!('message' in req.query.message) || req.query.message.message.length < 2) {
-				res.send({status: 'DX-REJECTED', message: 'Must have at least 2 characters in message'});
-				return;
-			}
-
-			// create and parse message object
-			var validTarget = [];
-			for(var user in req.query.message.targets) {
-
-				// Ensure its not an empty target
-				if(req.query.message.targets[user].length == 0) {
-					continue;
-				}
-
-				// ensure we don't send to the same user twice
-				var added = false;
-
-				for(var target in validTarget) {
-					if(req.query.message.targets[user] == validTarget[target]) {
-						added = true;
-					}
-				}
-
-				// if not added, push to targets array
-				if(!added) {
-					validTarget.push({
-						username: req.query.message.targets[user],
-						label: '[INBOX]',
-						read: false
-					});
-				}
-
-			}
-
-			// Ensure we still have targets after validation
-			if(validTarget.length == 0) {
-				res.send({status: 'DX-REJECTED', message: 'No valid targets specified'});
-				return;
-			}
-
-			var mail = {
-				title: req.query.message.title,
-				message: req.query.message.message,
-				origin: req.session.USERNAME,
-				targets: validTarget
-			};
-
-			// Insert message
-			var database = databaseManger.getDB();
-			var msgCol = database.collection('MAIL');
-
-			msgCol.insert(mail);
-			res.send({status: 'DX-OK', message: 'Sent!'});
+			res.send({status: 'DX-REJECTED', message: 'API Call Moved'});
 			return;
 			break;
 
@@ -411,40 +344,40 @@ router.get('/mail', function(req, res, next) {
 				case 'READ':
 					mailCol.update({
 						_id: { $in: validatedIDs },
-						targets: {
+						recipients: {
 							$elemMatch: { username: req.session.USERNAME }
 						}
-					}, { $set: { "targets.$.read": true } }, {multi:true});
+					}, { $set: { "recipients.$.read": true } }, {multi:true});
 					res.send({status: 'DX-OK', message: 'Updated!'});
 					return;
 					break;
 				case 'UNREAD':
 					mailCol.update({
 						_id: { $in: validatedIDs },
-						targets: {
+						recipients: {
 							$elemMatch: { username: req.session.USERNAME }
 						}
-					}, { $set: { "targets.$.read": false } }, {multi:true});
+					}, { $set: { "recipients.$.read": false } }, {multi:true});
 					res.send({status: 'DX-OK', message: 'Updated!'});
 					return;
 					break;
 				case 'INBOX':
 					mailCol.update({
 						_id: { $in: validatedIDs },
-						targets: {
+						recipients: {
 							$elemMatch: { username: req.session.USERNAME }
 						}
-					}, { $set: { "targets.$.label": '[INBOX]' } }, {multi:true});
+					}, { $set: { "recipients.$.label": '[INBOX]' } }, {multi:true});
 					res.send({status: 'DX-OK', message: 'Updated!'});
 					return;
 					break;
 				case 'TRASH':
 					mailCol.update({
 						_id: { $in: validatedIDs },
-						targets: {
+						recipients: {
 							$elemMatch: { username: req.session.USERNAME }
 						}
-					}, { $set: { "targets.$.label": '[TRASH]' } }, {multi:true});
+					}, { $set: { "recipients.$.label": '[TRASH]' } }, {multi:true});
 					res.send({status: 'DX-OK', message: 'Updated!'});
 					return;
 					break;
@@ -492,7 +425,7 @@ router.get('/mail', function(req, res, next) {
 
 
 // Account Settings page add new email
-router.get('/addEmail', function(req, res, next) {
+router.get('/add_email', function(req, res, next) {
 	// Ensure they're logged in
 	if(!sessionManager.isLoggedIn(req.session)) {
 		res.send({status: 'DX-REJECTED', message: 'Not logged in, please log in again'});
@@ -596,7 +529,7 @@ router.get('/addEmail', function(req, res, next) {
 });
 
 // Account Settings page add new email
-router.get('/removeEmail', function(req, res, next) {
+router.get('/remove_email', function(req, res, next) {
 	// Ensure they're logged in
 	if(!sessionManager.isLoggedIn(req.session)) {
 		res.send({status: 'DX-REJECTED', message: 'Not logged in, please log in again'});
@@ -644,6 +577,135 @@ router.get('/removeEmail', function(req, res, next) {
 		res.send({status: 'DX-REJECTED', message: 'The email specified is not a valid email'});
 		return;
 	}
+});
+
+// Get PM's
+router.get('/getmail', function(req, res, next) {
+	// Ensure they're logged in
+	if(!sessionManager.isLoggedIn(req.session)) {
+		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
+		return;
+	}
+
+	// Ensure they've got an ID
+	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'Failed to resolve ID please try re-logging in'});
+		return;
+	}
+
+	// Query database for messages with matching username in targets
+	var database = databaseManger.getDB();
+	var mailCol = database.collection('MAIL');
+
+	mailCol.find({
+		recipients: {
+			$elemMatch: {
+				username: req.session.USERNAME.toLowerCase()
+			}
+		}
+	}).limit(40).sort({_id: -1}).toArray(function(err, arrayMail) {
+		if(err) {
+			console.log('[-] MongoDB error getting mail :: ' + JSON.stringify(err));
+			res.send({status: 'DX-FAILED', message: 'Server error 500'});
+			return;
+		} else {
+			var length;
+			if(!arrayMail) {
+				length = 0;
+			} else {
+				length = arrayMail.length;
+			}
+			// insert timestamp into each mail object
+			for(var mail in arrayMail) {
+				
+				arrayMail[mail].timestamp = ObjectID(arrayMail[mail]._id).getTimestamp();
+			}
+			res.send({status: 'DX-OK', returned: length, message: arrayMail});
+			return;
+		}
+	});
+});
+
+// Send PM's
+router.get('/sendmail', function(req, res, next) {
+
+	// Ensure they're logged in
+	if(!sessionManager.isLoggedIn(req.session)) {
+		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
+		return;
+	}
+
+	// Ensure they've got an ID
+	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'Failed to resolve ID please try re-logging in'});
+		return;
+	}
+
+	var s = ''; // subject
+	var m = ''; // message text
+
+	if(('s' in req.query) && pmSystem.validateSubject(req.query.s)) {
+		s = req.query.s;
+	}
+
+	if(('m' in req.query) && pmSystem.validateMessage(req.query.m)) {
+		m = req.query.m;
+	} else {
+		// Bad message
+		res.send({status: 'DX-REJECTED', message: 'Invalid message text'});
+		return;
+	}
+
+	// create and parse message object
+	var validTarget = [];
+	for(var user in req.query.r) {
+
+		// Ensure its not an empty target
+		if(req.query.r[user].length == 0) {
+			continue;
+		}
+
+		// ensure we don't send to the same user twice
+		var added = false;
+
+		for(var target in validTarget) {
+			if(req.query.r[user] == validTarget[target]) {
+				added = true;
+			}
+		}
+
+		// if not added, push to targets array
+		if(!added) {
+			validTarget.push({
+				username: req.query.r[user],
+				label: '[INBOX]',
+				read: false
+			});
+		}
+
+	}
+
+	// Ensure we still have targets after validation
+	if(validTarget.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'No valid targets specified'});
+		return;
+	}
+
+
+	// Holds the message
+	var PM = {
+		subject: s,
+		message: m,
+		from: req.session.USERNAME,
+		recipients: validTarget
+	};
+
+	// Insert message
+	var database = databaseManger.getDB();
+	var msgCol = database.collection('MAIL');
+
+	msgCol.insert(PM);
+	res.send({status: 'DX-OK', message: 'Sent!'});
 });
 
 

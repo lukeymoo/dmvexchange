@@ -1216,3 +1216,150 @@ clear
 exit
 clear
 nano public/css/common/common.css 
+clear
+ls
+cd /
+cd etc/redis/
+ls
+clear
+nano redis.conf 
+clear
+cd /
+service redis restart
+clear
+/etc/init.d/redis-server restart
+clear
+ls
+jobs
+clear
+ps aux | grep npm
+ps aux | grep nohup
+killall nohup
+clear
+ps -ef
+kill 5155
+clear
+ps -ef
+kill 5164
+clear
+npm start
+ls
+clear
+cd /
+ls
+cd ~
+clear
+ls
+clear
+npm start
+clear
+npm start
+clear
+git init
+clear
+git add .
+clear
+git commit -m 'Update from server'
+clear
+git push dx master
+clear
+ls
+clear
+npm start
+clear
+npm start
+clear
+ls
+cd /mongo/mongo/
+clear
+ls
+clear
+cd bin/
+clear
+ls
+clear
+./mongo -u dxb -p
+clear
+./mongo dmvexchange -u dxb -p
+clear
+ls
+clear
+cd /mongo/mongo/
+clear
+ls
+cd bin/
+clear
+ls
+clear
+./mongo dmvexchange -u dxb -p
+clear
+ls
+clear
+ls
+npm start
+clear
+ls
+nano modules/database/database.js 
+clear
+ls
+clear
+ls
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+npm start
+clear
+cd /mongo/mongo/bin/
+clear
+./mongo dmvexchange -u dxb -p
+clear
+cd ~
+clear
+npm start
+clear
+ps aux
+clear
+npm start
+clear
+~.
+clear
+~.
+clear
+ssh
+clear
+ps aux
+netstat
+clear
+ps aux
+clear
+exit
+clear
+npm start
+clear
+exit
