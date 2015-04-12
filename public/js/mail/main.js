@@ -15,8 +15,19 @@ var Main = {
 	inboxDOM: '',
 	trashDOM: '',
 	selectedMessages: [],
-	actionsMenu: ''
+	actionsMenu: '',
+	messages: []
 };
+
+// Custom sort function for message timestamps
+function cmpT(a, b) {
+	if(a.timestamp < b.timestamp) {
+		return -1;
+	} else if(a.timestamp > b.timestamp) {
+		return 1;
+	}
+	return 0;
+}
 
 // Calls get and generates actions menu
 Main.init = function() {
@@ -61,7 +72,8 @@ Main.createActionMenu = function() {
 Main.get = function() {
 	// Ajax -> Parse -> Prepend DOM
 	this.load(function(res){
-		Main.parse(res);
+		Main.save(res);
+		Main.display();
 	});
 };
 
@@ -69,140 +81,212 @@ Main.load = function(callback) {
 	$.ajax({
 		url: '/api/getmail'
 	}).done(function(res) {
-		console.log(res);
 		callback(res);
 	});
 };
 
-Main.parse = function(json) {
+Main.display = function() {
 
+	// Iterate through collection and display in message container
+	switch(this.view) {
+		case '[INBOX]':
+
+			// Sort by timestamp
+			this.parsedInbox.sort(cmpT);
+
+			// Iterate through each message
+			for(var i = 0; i < this.parsedInbox.length; i++) {
+
+				// Iterate through messageContainer, determine if it's already been displayed
+				var added = false;
+				$('#messageContainer').find('.message').each(function() {
+					if($(this).find('#messageid').html() == Main.parsedInbox[i].id) {
+						added = true;
+					}
+				});
+
+				if(added) {
+					continue;
+				}
+
+				var newElem =
+
+				"<div class='" + this.parsedInbox[i].classes + "'>" + // Message wrapper
+					"<div id='messageid'>" + this.parsedInbox[i].id + "</div>" + // Message id
+					"<div id='select'><input type='checkbox'></div>" + // Select button
+					"<div id='subject'>" + this.parsedInbox[i].subject + "</div>" + // Subject
+					"<div id='from'>" + this.parsedInbox[i].from + "</div>" + // From
+					"<div id='recipients'>" + JSON.stringify(this.parsedInbox[i].recipients) + "</div>" +
+					"<div id='message'>" + this.parsedInbox[i].text + "</div>" + // Message text
+					"<div id='date'>" + this.toDate(this.parsedInbox[i].timestamp) + "</div>" + // Timestamp
+				"</div>";
+
+				// Prepend message container ( display message )
+				$('#messageContainer').prepend(newElem);
+
+			}
+
+			break;
+		case '[TRASH]':
+
+			// Sort by timestamp
+			this.parsedTrash.sort(cmpT);
+
+			// Iterate through each message
+			for(var i = 0; i < this.parsedTrash.length; i++) {
+
+				// Iterate through messageContainer, determine if it's already been displayed
+				var added = false;
+				$('#messageContainer').find('.message').each(function() {
+					if($(this).find('#messageid').html() == Main.parsedTrash[i].id) {
+						added = true;
+					}
+				});
+
+				if(added) {
+					continue;
+				}
+
+				var newElem =
+
+				"<div class='" + this.parsedTrash[i].classes + "'>" + // Message wrapper
+					"<div id='messageid'>" + this.parsedTrash[i].id + "</div>" + // Message id
+					"<div id='select'><input type='checkbox'></div>" + // Select button
+					"<div id='subject'>" + this.parsedTrash[i].subject + "</div>" + // Subject
+					"<div id='from'>" + this.parsedTrash[i].from + "</div>" + // From
+					"<div id='recipients'>" + JSON.stringify(this.parsedTrash[i].recipients) + "</div>" +
+					"<div id='message'>" + this.parsedTrash[i].text + "</div>" + // Message text
+					"<div id='date' value='" + this.parsedTrash[i].timestamp + "'>" + this.toDate(this.parsedTrash[i].timestamp) + "</div>" + // Timestamp
+				"</div>";
+
+				// Prepend message container ( display message )
+				$('#messageContainer').prepend(newElem);
+
+			}
+
+			break;
+	}
+};
+
+// Resaves the message with updated properties from DOM element
+Main.resave = function(obj) {
+
+	var updatedMessage = {
+		classes: $(obj).attr('class'),
+		id: $(obj).find('#messageid').html(),
+		subject: $(obj).find('#subject').html(),
+		text: $(obj).find('#message').html(),
+		from: $(obj).find('#from').html(),
+		recipients: JSON.parse($(obj).find('#recipients').html()),
+		timestamp: $(obj).find('#date').attr('value')
+	};
+
+	// Find message in collection, splice it, then push new message to replace it
+	switch(this.view) {
+		case '[INBOX]':
+			for(var i = 0; i < this.parsedInbox.length; i++) {
+				if(this.parsedInbox[i].id == $(obj).find('#messageid').html()) {
+					this.parsedInbox.splice(i, 1);
+
+					// Now push new message
+					this.parsedInbox.push(updatedMessage);
+				}
+			}
+			break;
+		case '[TRASH]':
+			for(var i = 0; i < this.parsedTrash.length; i++) {
+				if(this.parsedTrash[i].id == $(obj).find('#messageid').html()) {
+					this.parsedTrash.splice(i, 1);
+
+					// Now push new message
+					this.parsedTrash.push(updatedMessage);
+				}
+			}
+			break;
+	}
+
+};
+
+// Separate and save messages in collection as object
+Main.save = function(json) {
+
+	// Did we receive any messages
 	if(json.returned == 0) {
 		return;
 	}
 
-	// Parse JSON response into collections split by label ( inbox, trash etc.. )
-	var DOM = '';
-	for(var msgObj in json.message) {
+	var Messages = json.message;
 
-		// Get label, is read, and other recipients
-		var recipients = '';
-		var inboxDOM = '';
-		var trashDOM = '';
+	for(var msg in Messages) {
 
-		for(var recip in json.message[msgObj].recipients) {
-			
-			if(!json.message[msgObj].recipients[recip].username != state.USERNAME) {
-				// Add to recipients
-				recipients += json.message[msgObj].recipients[recip].username;
+		// Determine if message has already been added to collection
+		var added = false;
+
+		// Inbox
+		for(var i = 0; i < this.parsedInbox.length; i++) {
+			if(this.parsedInbox[i].id == Messages[msg]._id) {
+				added = true;
 			}
+		}
 
-			if(json.message[msgObj].recipients[recip].username == state.USERNAME) {
+		// Trash
+		for(var i = 0; i < this.parsedTrash.length; i++) {
+			if(this.parsedTrash[i].id == Messages[msg]._id) {
+				added = true;
+			}
+		}
 
-				switch(json.message[msgObj].recipients[recip].label) {
+		if(added) {
+			continue;
+		}
 
-					case '[INBOX]':
-						// Check if it's already been parsed
-						var added = false;
+		// Parse top level properties
+		var parsedMessage = {
+			classes: 'message',
+			id: Messages[msg]._id,
+			subject: Messages[msg].subject,
+			text: Messages[msg].message,
+			from: Messages[msg].from,
+			recipients: [],
+			timestamp: Messages[msg].timestamp
+		};
 
-						for(var id in this.parsedInbox) {
-							if(json.message[msgObj]._id == this.parsedInbox[id].id) {
-								added = true;
-							}
-						}
-						if(!added) {
-							var classLabel = 'message';
+		// Parse recipients
+		var location = '';
+		for(var r in Messages[msg].recipients) {
 
-							if(!json.message[msgObj].recipients[recip].read) {
-								classLabel += ' unread';
-							}
+			// Save class properties of message for current user
+			if(Messages[msg].recipients[r].username == state.USERNAME) {
 
-							// Parse message and add to inboxDOM
-							inboxDOM += "<div class='" + classLabel + "'>" +
-											"<div id='messageid'>" + json.message[msgObj]._id + "</div>" +
-											"<div id='to'>" + recipients + "</div>" +
-											"<div id='select'><input type='checkbox'></div>" +
-											"<div id='subject'>" + json.message[msgObj].subject + "</div>" +
-											"<div id='message'>" + json.message[msgObj].message + "</div>" +
-											"<div id='from'>" + json.message[msgObj].from + "</div>" +
-											"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
-										"</div>";
-							if(this.view == '[INBOX]') {
-								DOM += inboxDOM;
-							}
-							this.parsedInbox.push({id: json.message[msgObj]._id, html: inboxDOM});
-						}
-						break;
-					case '[TRASH]':
-						// Check if it's already been parsed
-						var added = false;
+				// Where is message ( inbox, trash ? )
+				location =  Messages[msg].recipients[r].label;
 
-						for(var id in this.parsedTrash) {
-							if(json.message[msgObj]._id == this.parsedTrash[id].id) {
-								added = true;
-							}
-						}
-						if(!added) {
-							var classLabel = 'message';
-
-							if(!json.message[msgObj].recipients[recip].read) {
-								classLabel += ' unread';
-							}
-
-							// Parse message and add to inboxDOM
-							trashDOM += "<div class='" + classLabel + "'>" +
-											"<div id='messageid'>" + json.message[msgObj]._id + "</div>" +
-											"<div id='to'>" + recipients + "</div>" +
-											"<div id='select'><input type='checkbox'></div>" +
-											"<div id='subject'>" + json.message[msgObj].subject + "</div>" +
-											"<div id='message'>" + json.message[msgObj].message + "</div>" +
-											"<div id='from'>" + json.message[msgObj].from + "</div>" +
-											"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
-										"</div>";
-							if(this.view == '[TRASH]') {
-								DOM += trashDOM;
-							}
-							this.parsedTrash.push({id: json.message[msgObj]._id, html: trashDOM});
-						}
-						break;
+				// Is the message read or unread ?
+				if(!Messages[msg].recipients[r].read) {
+					parsedMessage.classes += ' unread';
 				}
-			}
-		}
-	}
 
-	if(this.loaded) {
-		// Prepend DOM
-		if(DOM.length > 0) {
-			$('#mailFilters #selectAll').find('input').prop('checked', false);	
-			$('#messageContainer').prepend(DOM);
+				// What is the message priority
+				// -- Underconstruction --
+
+			}
+
+			parsedMessage.recipients.push({
+				label: Messages[msg].recipients[r].label,
+				username: Messages[msg].recipients[r].username,
+				read: Messages[msg].recipients[r].read
+			});
 		}
-	} else {
-		DOM = '';
-		// Loop through all parsed and display
-		switch(this.view) {
+
+		// Based on label specified for current user, push to inbox || trash collection
+		switch(location) {
 			case '[INBOX]':
-				for(var msg in this.parsedInbox) {
-					DOM += this.parsedInbox[msg].html;
-				}
-
-				// Prepend DOM
-				if(DOM.length > 0) {
-					$('#mailFilters #selectAll').find('input').prop('checked', false);	
-					$('#messageContainer').prepend(DOM);
-				}
+				Main.parsedInbox.push(parsedMessage);
 				break;
 			case '[TRASH]':
-				for(var msg in this.parsedTrash) {
-					DOM += this.parsedTrash[msg].html;
-				}
-
-				// Prepend DOM
-				if(DOM.length > 0) {
-					$('#mailFilters #selectAll').find('input').prop('checked', false);	
-					$('#messageContainer').prepend(DOM);
-				}
+				Main.parsedTrash.push(parsedMessage);
 				break;
 		}
-		this.loaded = true;
 	}
 };
 
@@ -446,7 +530,7 @@ $(function() {
 	// Update message container every 10 seconds
 	setInterval(function() {
 		Main.init();
-	}, 10000);
+	}, 2000);
 
 	// Toggle Compose Message
 	$('#mailControls #compose').on('click', function() {

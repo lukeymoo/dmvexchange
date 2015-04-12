@@ -216,7 +216,7 @@ Controls.switchView = function(string) {
 	Main.createActionMenu();
 
 	// show parsed messages for particular view
-	Main.show();
+	Main.display();
 	return;
 };
 
@@ -261,17 +261,10 @@ $(function() {
 				// Remove unread class
 				Controls.removeClass('unread');
 
-				// Save new parsedInbox DOM
-				var inboxDOM = [];
-
+				// Grab each message in container and Main.resave it
 				$('#messageContainer').find('.message').each(function() {
-					// Grab each message and save to parsedInbox again
-					var messageID = $(this).find('#messageid').html();
-					var messageHTML = $(this).wrap('<p>').parent().html();
-					inboxDOM.push({id: messageID, html: messageHTML});
+					Main.resave($(this));
 				});
-
-				Main.parsedInbox = inboxDOM;
 			} else {
 				// Spawn error
 				spawnMessage(res.message, false);
@@ -286,17 +279,11 @@ $(function() {
 				// Add unread class
 				Controls.addClass('unread');
 
-				// Save new parsedInbox DOM
-				var inboxDOM = [];
+				// Grab each message in container and Main.resave it
 				$('#messageContainer').find('.message').each(function() {
-					// Grab each message id and HTML and push to array
-					var messageID = $(this).find('#messageid').html();
-					var messageHTML = $(this).wrap('<p>').parent().html();
-					$(this).unwrap();
-					inboxDOM.push({id: messageID, html: messageHTML});
+					Main.resave($(this));
 				});
-				// Save new parsed inbox
-				Main.parsedInbox = inboxDOM;
+
 			} else {
 				// Spawn error
 				spawnMessage(res.message, false);
@@ -308,6 +295,7 @@ $(function() {
 	$(document).on('click', '#markInbox', function() {
 		// Hide message temporarily
 		Controls.hideSelected();
+		
 		Controls.markInbox(function(res) {
 			if(res.status == 'DX-OK') {
 				// Move selected messages from parsedInbox to parsedTrash

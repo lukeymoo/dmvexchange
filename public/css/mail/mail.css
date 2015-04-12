@@ -149,7 +149,7 @@
 	text-align: center;
 }
 
-.message #messageid, .message #message {
+.message #messageid, .message #message, .message #recipients {
 	display: none;
 }
 
