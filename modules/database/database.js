@@ -108,8 +108,8 @@ module.exports = {
 
 		usrCol.findOne({
 			$or: [
-				{ username: userObj.username },
-				{ email: userObj.email }
+				{ username: userObj.username.toLowerCase() },
+				{ email: userObj.email.toLowerCase() }
 			],
 			password: crypto.createHash('md5').update(String(userObj.password)).digest('hex')
 		}, function(err, doc) {

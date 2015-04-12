@@ -33,7 +33,7 @@ var market = require('./routes/market');
 var app = express();
 
 // set the env port variable
-process.env.PORT = '8080';
+process.env.PORT = '80';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

@@ -8,6 +8,7 @@ a, a:active, a:visited, a:hover, a:link {
 
 #wrapper {
 	max-width: 1024px;
+	min-height: 100vh;
 	margin-left: auto;
 	margin-right: auto;
 }
