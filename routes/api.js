@@ -325,6 +325,7 @@ router.get('/mail', function(req, res, next) {
 				res.send({status: 'DX-REJECTED', message: 'No valid messages specified'});
 				return;
 			}
+
 			// delete
 			var database = databaseManger.getDB();
 			var mailCol = database.collection('MAIL');
@@ -333,7 +334,7 @@ router.get('/mail', function(req, res, next) {
 				_id: {
 					$in: validatedIDs
 				}
-			}, { $pull: { targets: { username: req.session.USERNAME.toLowerCase() } } }, {multi:true});
+			}, { $pull: { recipients: { username: req.session.USERNAME.toLowerCase() } } }, {multi:true});
 			res.send({status: 'DX-OK', message: 'Removed'});
 			return;
 			break;

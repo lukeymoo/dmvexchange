@@ -260,6 +260,18 @@ $(function() {
 			if(res.status == 'DX-OK') {
 				// Remove unread class
 				Controls.removeClass('unread');
+
+				// Save new parsedInbox DOM
+				var inboxDOM = [];
+
+				$('#messageContainer').find('.message').each(function() {
+					// Grab each message and save to parsedInbox again
+					var messageID = $(this).find('#messageid').html();
+					var messageHTML = $(this).wrap('<p>').parent().html();
+					inboxDOM.push({id: messageID, html: messageHTML});
+				});
+
+				Main.parsedInbox = inboxDOM;
 			} else {
 				// Spawn error
 				spawnMessage(res.message, false);
@@ -271,8 +283,20 @@ $(function() {
 	$(document).on('click', '#markUnread', function() {
 		Controls.markUnread(function(res) {
 			if(res.status == 'DX-OK') {
-				// Remove unread class
+				// Add unread class
 				Controls.addClass('unread');
+
+				// Save new parsedInbox DOM
+				var inboxDOM = [];
+				$('#messageContainer').find('.message').each(function() {
+					// Grab each message id and HTML and push to array
+					var messageID = $(this).find('#messageid').html();
+					var messageHTML = $(this).wrap('<p>').parent().html();
+					$(this).unwrap();
+					inboxDOM.push({id: messageID, html: messageHTML});
+				});
+				// Save new parsed inbox
+				Main.parsedInbox = inboxDOM;
 			} else {
 				// Spawn error
 				spawnMessage(res.message, false);
@@ -297,6 +321,14 @@ $(function() {
 						}
 					}
 				}
+
+				// All messages that were selected have been moved so deselect checkall
+				$('#mailFilters #selectAll').find('input').prop('checked', false);
+
+				// If parsedTrash is empty, disable action menu
+				if(Main.parsedTrash.length == 0) {
+					Controls.disable();
+				}
 			} else {
 				Controls.showSelected();
 				spawnMessage(res.message, false);
@@ -320,6 +352,64 @@ $(function() {
 							i -= 1;
 						}
 					}
+				}
+
+				// All messages that were selected have been moved so deselect checkall
+				$('#mailFilters #selectAll').find('input').prop('checked', false);
+
+				// If parsedTrash is empty, disable action menu
+				if(Main.parsedInbox.length == 0) {
+					Controls.disable();
+				}
+			} else {
+				Controls.showSelected();
+				spawnMessage(res.message, false);
+			}
+		});
+	});
+
+	// Show confirmation to delete forever
+	$(document).on('click', '#markGone', function() {
+		Controls.askMarkGone();
+	});
+
+	// Delete forever
+	$(document).on('click', '#cancelMarkGone', function() {
+		Controls.closeMarkGone();
+	});
+
+	$(document).on('click', '#confirmMarkGone', function() {
+		// Hide messages temp
+		Controls.hideSelected();
+
+		// Close markgone
+		Controls.closeMarkGone();
+
+		Controls.markGone(function(res) {
+			if(res.status == 'DX-OK') {
+				// Remove from DOM & collection
+				for(var id in Main.selectedMessages) {
+					// Remove from container
+					$('#messageContainer').find('.message').each(function() {
+						if($(this).find('#messageid').html() == Main.selectedMessages[id]) {
+							$(this).remove();
+						}
+					});
+					for(var i = 0; i < Main.parsedTrash.length; i++) {
+						if(Main.parsedTrash[i].id == Main.selectedMessages[id]) {
+							// Remove it
+							Main.parsedTrash.splice(i, 1);
+							i -= 1;
+						}
+					}
+				}
+
+				// All messages that were selected have been moved so deselect checkall
+				$('#mailFilters #selectAll').find('input').prop('checked', false);
+
+				// If parsedTrash is empty, disable action menu
+				if(Main.parsedTrash.length == 0) {
+					Controls.disable();
 				}
 			} else {
 				Controls.showSelected();

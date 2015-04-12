@@ -18,10 +18,10 @@ var serverSend = function(user, message) {
 	var mailCol = database.collection('MAIL');
 
 	var message = {
-		title: '[DMV Exchange Server Message]',
+		subject: '[ DMV Exchange Server Message ]',
 		message: message,
-		origin: '[DMV EXCHANGE]',
-		targets: [{username: user, label: '[INBOX]', read: false}]
+		from: '[ DMV EXCHANGE ]',
+		recipients: [{username: user, label: '[INBOX]', read: false}]
 	};
 	
 	mailCol.insert(message);

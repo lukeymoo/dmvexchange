@@ -8,7 +8,7 @@
 'use strict';
 
 var Main = {
-	init: false,
+	loaded: false,
 	view: '[INBOX]',
 	parsedInbox: [],
 	parsedTrash: [],
@@ -69,6 +69,7 @@ Main.load = function(callback) {
 	$.ajax({
 		url: '/api/getmail'
 	}).done(function(res) {
+		console.log(res);
 		callback(res);
 	});
 };
@@ -80,6 +81,7 @@ Main.parse = function(json) {
 	}
 
 	// Parse JSON response into collections split by label ( inbox, trash etc.. )
+	var DOM = '';
 	for(var msgObj in json.message) {
 
 		// Get label, is read, and other recipients
@@ -124,6 +126,9 @@ Main.parse = function(json) {
 											"<div id='from'>" + json.message[msgObj].from + "</div>" +
 											"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
 										"</div>";
+							if(this.view == '[INBOX]') {
+								DOM += inboxDOM;
+							}
 							this.parsedInbox.push({id: json.message[msgObj]._id, html: inboxDOM});
 						}
 						break;
@@ -153,6 +158,9 @@ Main.parse = function(json) {
 											"<div id='from'>" + json.message[msgObj].from + "</div>" +
 											"<div id='date'>" + this.toDate(json.message[msgObj].timestamp) + "</div>" +
 										"</div>";
+							if(this.view == '[TRASH]') {
+								DOM += trashDOM;
+							}
 							this.parsedTrash.push({id: json.message[msgObj]._id, html: trashDOM});
 						}
 						break;
@@ -161,32 +169,40 @@ Main.parse = function(json) {
 		}
 	}
 
-	var DOM = '';
+	if(this.loaded) {
+		// Prepend DOM
+		if(DOM.length > 0) {
+			$('#mailFilters #selectAll').find('input').prop('checked', false);	
+			$('#messageContainer').prepend(DOM);
+		}
+	} else {
+		DOM = '';
+		// Loop through all parsed and display
+		switch(this.view) {
+			case '[INBOX]':
+				for(var msg in this.parsedInbox) {
+					DOM += this.parsedInbox[msg].html;
+				}
 
-	// Loop through all parsed and display
-	switch(this.view) {
-		case '[INBOX]':
-			for(var msg in this.parsedInbox) {
-				DOM += this.parsedInbox[msg].html;
-			}
+				// Prepend DOM
+				if(DOM.length > 0) {
+					$('#mailFilters #selectAll').find('input').prop('checked', false);	
+					$('#messageContainer').prepend(DOM);
+				}
+				break;
+			case '[TRASH]':
+				for(var msg in this.parsedTrash) {
+					DOM += this.parsedTrash[msg].html;
+				}
 
-			// Prepend DOM
-			if(DOM.length > 0) {
-				$('#mailFilters #selectAll').find('input').prop('checked', false);	
-				$('#messageContainer').prepend(DOM);
-			}
-			break;
-		case '[TRASH]':
-			for(var msg in this.parsedTrash) {
-				DOM += this.parsedTrash[msg].html;
-			}
-
-			// Prepend DOM
-			if(DOM.length > 0) {
-				$('#mailFilters #selectAll').find('input').prop('checked', false);	
-				$('#messageContainer').prepend(DOM);
-			}
-			break;
+				// Prepend DOM
+				if(DOM.length > 0) {
+					$('#mailFilters #selectAll').find('input').prop('checked', false);	
+					$('#messageContainer').prepend(DOM);
+				}
+				break;
+		}
+		this.loaded = true;
 	}
 };
 
@@ -430,6 +446,11 @@ $(function() {
 
 	// Load messages for default view [INBOX]
 	Main.init();
+
+	// Update message container every 15 seconds
+	setInterval(function() {
+		Main.init();
+	}, 10000);
 
 	// Toggle Compose Message
 	$('#mailControls #compose').on('click', function() {
