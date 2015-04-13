@@ -193,7 +193,7 @@ router.get('/unread', function(req, res, next) {
 	var mailCol = database.collection('MAIL');
 
 	mailCol.find({
-		targets: {
+		recipients: {
 			$elemMatch: {
 				username: req.session.USERNAME.toLowerCase(),
 				label: '[INBOX]',

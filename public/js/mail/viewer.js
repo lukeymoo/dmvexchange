@@ -10,5 +10,13 @@ var Viewer = {};
 Viewer.show = function(id) {
 };
 
+Viewer.hide = function() {
+};
+
 $(function() {
+
+	// Show message on click
+	$(document).on('click', '.message', function() {
+	});
+
 });

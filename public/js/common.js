@@ -25,10 +25,11 @@ $(function() {
 			if(page != 'Mail') {
 				// Check unread messages and display counter
 				// next to mail button
+				console.log('checking unread');
 				getUnreadCount(function(res) {
 					// Append mail button
 					if(res.status == 'DX-OK') {
-						if(res.message > 0) {
+						if(parseInt(res.message) > 0) {
 							var DOM = $('#headerControls #left').html();
 							DOM += '<span id="unreadCount">' + res.message + '</span>';
 							$('#headerControls #left').html(DOM);

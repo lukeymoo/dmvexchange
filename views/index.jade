@@ -126,8 +126,19 @@ block mailBlock
 		div(id='pageMessage')
 		div(id='backgroundBlur')
 
-		div(id='messageViewerContainer')
-			div(id='messageViewerHeader')
+		div(id='viewerContainer', class='showMessage')
+			div(id='viewerControls')
+				div(id='back')
+					label(id='backLabel') back
+				div(id='trash') Trash
+				div(id='reply') Reply
+			div(id='viewerContent')
+				div(id='subject') Message subject
+				div(id='from') from_username
+				div(id='to') you, johnny_
+				div(id='text') This is a message bruh
+					| i want you to cop these shoes i got
+					| Ill sell em for $175 they're 9/10 cond, & sz 10
 				
 		
 		div(id='composeForm', data-active='false')
