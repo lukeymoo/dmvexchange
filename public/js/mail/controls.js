@@ -140,7 +140,6 @@ Controls.markInbox = function(callback) {
 };
 
 Controls.markTrash = function(callback) {
-	console.log(Main.selectedMessages);
 	$.ajax({
 		url: '/api/mail',
 		data: {
@@ -293,22 +292,23 @@ $(function() {
 
 	// Move to inbox
 	$(document).on('click', '#markInbox', function() {
+
 		// Hide message temporarily
 		Controls.hideSelected();
 		
 		Controls.markInbox(function(res) {
 			if(res.status == 'DX-OK') {
-				// Move selected messages from parsedInbox to parsedTrash
-				for(var id in Main.selectedMessages) {
-					for(var i = 0; i < Main.parsedTrash.length; i++) {
-						if(Main.parsedTrash[i].id == Main.selectedMessages[id]) {
-							// Move to trash
-							Main.parsedInbox.push({id: Main.parsedTrash[i].id, html: Main.parsedTrash[i].html});
-							Main.parsedTrash.splice(i, 1);
-							i -= 1;
-						}
-					}
+				
+				// Iterate through selected messages and use Main.move foreach
+				for(var i = 0; i < Main.selectedMessages.length; i++) {
+					Main.move(Main.selectedMessages[i], '[INBOX]');
 				}
+
+				// Clear selected messages
+				Main.selectedMessages = [];
+
+				// Redraw container
+				Main.display();
 
 				// All messages that were selected have been moved so deselect checkall
 				$('#mailFilters #selectAll').find('input').prop('checked', false);
@@ -326,21 +326,23 @@ $(function() {
 
 	// Move message to trash
 	$(document).on('click', '#markTrash', function() {
+
 		// Hide message temporarily
 		Controls.hideSelected();
+
 		Controls.markTrash(function(res) {
 			if(res.status == 'DX-OK') {
-				// Move selected messages from parsedInbox to parsedTrash
-				for(var id in Main.selectedMessages) {
-					for(var i = 0; i < Main.parsedInbox.length; i++) {
-						if(Main.parsedInbox[i].id == Main.selectedMessages[id]) {
-							// Move to trash
-							Main.parsedTrash.push({id: Main.parsedInbox[i].id, html: Main.parsedInbox[i].html});
-							Main.parsedInbox.splice(i, 1);
-							i -= 1;
-						}
-					}
+				
+				// Iterate through selected messages and Main.move foreach
+				for(var i = 0; i < Main.selectedMessages.length; i++) {
+					Main.move(Main.selectedMessages[i], '[TRASH]');
 				}
+
+				// Clear selected messages
+				Main.selectedMessages = [];
+
+				// Redraw container
+				Main.display();
 
 				// All messages that were selected have been moved so deselect checkall
 				$('#mailFilters #selectAll').find('input').prop('checked', false);
@@ -377,14 +379,16 @@ $(function() {
 			if(res.status == 'DX-OK') {
 				// Remove from DOM & collection
 				for(var id in Main.selectedMessages) {
+
 					// Remove from container
 					$('#messageContainer').find('.message').each(function() {
 						if($(this).find('#messageid').html() == Main.selectedMessages[id]) {
 							$(this).remove();
 						}
 					});
+
 					for(var i = 0; i < Main.parsedTrash.length; i++) {
-						if(Main.parsedTrash[i].id == Main.selectedMessages[id]) {
+						if(Main.selectedMessages[id] == Main.parsedTrash[i].id) {
 							// Remove it
 							Main.parsedTrash.splice(i, 1);
 							i -= 1;

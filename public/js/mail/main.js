@@ -168,6 +168,99 @@ Main.display = function() {
 	}
 };
 
+// Move message to new collection
+Main.move = function(mid, loc) {
+	switch(loc) {
+		case '[INBOX]':
+
+			// Ensure message isn't already in that location ( In this case the [INBOX] )
+			var valid = true;
+
+			for(var i = 0; i < this.parsedInbox.length; i++) {
+				if(this.parsedInbox[i].id == mid) {
+					valid = false;
+				}
+			}
+
+			if(!valid) {
+				return;
+			}
+
+			// Find message id in trash collection and move it
+			var message = {};
+
+			for(var i = 0; i < this.parsedTrash.length; i++) {
+				if(this.parsedTrash[i].id == mid) {
+					
+					// copy the message
+					message = this.parsedTrash[i];
+
+					// remove from current collection ( trash )
+					this.parsedTrash.splice(i, 1);
+
+					// remove from message container
+					$('#messageContainer').find('.message').each(function() {
+						if($(this).find('#messageid').html() == mid) {
+							$(this).remove();
+						}
+					});
+
+					// Push message into new collection ( inbox )
+					this.parsedInbox.push(message);
+
+					break;
+				}
+			}
+
+
+			break;
+		case '[TRASH]':
+
+			// Ensure message isn't already in that location ( In this case the [INBOX] )
+			var valid = true;
+
+			for(var i = 0; i < this.parsedTrash.length; i++) {
+				if(this.parsedTrash[i].id == mid) {
+					valid = false;
+				}
+			}
+
+			if(!valid) {
+				return;
+			}
+
+			// Find message id in inbox collection and move it
+			var message = {};
+
+			for(var i = 0; i < this.parsedInbox.length; i++) {
+				if(this.parsedInbox[i].id == mid) {
+					
+					// copy the message
+					message = this.parsedInbox[i];
+
+					// remove from current collection ( inbox )
+					this.parsedInbox.splice(i, 1);
+
+					// remove from message container
+					$('#messageContainer').find('.message').each(function() {
+						if($(this).find('#messageid').html() == mid) {
+							$(this).remove();
+						}
+					});
+
+					// Push message into new collection ( trash )
+					this.parsedTrash.push(message);
+
+					break;
+				}
+			}
+
+			break;
+		default:
+			break;
+	}
+};
+
 // Resaves the message with updated properties from DOM element
 Main.resave = function(obj) {
 
@@ -530,7 +623,7 @@ $(function() {
 	// Update message container every 10 seconds
 	setInterval(function() {
 		Main.init();
-	}, 2000);
+	}, 10000);
 
 	// Toggle Compose Message
 	$('#mailControls #compose').on('click', function() {
