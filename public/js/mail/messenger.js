@@ -76,21 +76,30 @@ Messenger.hideForm = function() {
 
 Messenger.addRecipient = function() {
 	// Ensure they're not already added
+	var ignore = false;
 	$('#chipsContainer').find('span').each(function() {
-		
+		if($(this).html() == Messenger.getRecipientInput()) {
+			ignore = true;
+		}
 	});
 
-	// Add input to recipients collection
-	this.messageRecipients.push(this.getRecipientInput());
+	if(this.getRecipientInput() == '') {
+		ignore = true;
+	}
 
-	// Parse DOM with appropriate style
-	var DOM = this.parseRecipientInput(this.getRecipientInput());
+	if(!ignore) {
+		// Add input to recipients collection
+		this.messageRecipients.push(this.getRecipientInput());
 
-	// Append to chips container
-	$('#chipsContainer').append(DOM);
+		// Parse DOM with appropriate style
+		var DOM = this.parseRecipientInput(this.getRecipientInput());
 
-	// Resize Chips Container
-	this.resizeChips();
+		// Append to chips container
+		$('#chipsContainer').append(DOM);
+
+		// Resize Chips Container
+		this.resizeChips();
+	}
 
 	// Clear input field so we can prepare for new chip
 	$('#messageTo').val('');
