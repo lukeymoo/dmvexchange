@@ -6,14 +6,7 @@ html
 		link(rel='stylesheet', href='/css/main.css')
 		link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
 		link(rel='stylesheet', href='/css/common/common.css')
-		if title == 'Account'
-			link(rel='stylesheet', href='/css/account/account.css')
-		if title == 'Mail'
-			link(rel='stylesheet', href='/css/mail/mail.css')
-		if title == 'Profile'
-			link(rel='stylesheet', href='/css/user/user.css')
-		if title == 'Tips'
-			link(rel='stylesheet', href='/css/tips/tips.css')
+		link(rel='stylesheet', href='/css/market/market.css')
 	body
 		div(id='wrapper')
 			div(id='pageHeader')
@@ -25,8 +18,8 @@ html
 					if USER.LOGGED_IN
 						a(href='/account/mail')
 							div(id='left') Mail					
-						a(href='/tips')
-							div(id='right') Any tips?
+						a(href='/market/create')
+							div(id='right') Create Listing
 						//
 							a(href='/user/#{USER.USERNAME}')
 								div(id='right') #{USER.USERNAME}
@@ -37,6 +30,7 @@ html
 							div(id='signup') Sign up
 
 			block headerMenu
+			block createBlock
 
 		script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
 		script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js')

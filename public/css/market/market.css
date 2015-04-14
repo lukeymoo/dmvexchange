@@ -1,0 +1,31 @@
+#createContainer {
+	width: 60%;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 10px 0px;
+}
+
+#createButton {
+	vertical-align: top;
+	display: inline-block;
+	padding-left: 10px;
+	padding-right: 10px;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+	border: 1px solid #C5E4FF;
+	border-radius: 3px;
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .075s linear 0s;
+	-moz-transition: background-color .075s linear 0s;
+	transition: background-color .075s linear 0s;
+}
+
+#createPlaceholder {
+	display: inline-block;
+	height: 40px;
+	line-height: 40px;
+	background-color: #fff;
+}

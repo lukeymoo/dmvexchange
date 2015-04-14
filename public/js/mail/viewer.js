@@ -47,6 +47,8 @@ Viewer.show = function(id) {
 					Viewer.text = Main.parsedInbox[i].text;
 					Viewer.to = '';
 
+					$('#viewerControls #trash').html('Trash');
+
 					if(Viewer.from == '[ DMV EXCHANGE ]') {
 						$('#viewerControls #reply').css('display', 'none');
 					} else {
@@ -87,6 +89,8 @@ Viewer.show = function(id) {
 					Viewer.from = Main.parsedTrash[i].from;
 					Viewer.text = Main.parsedTrash[i].text;
 					Viewer.to = '';
+
+					$('#viewerControls #trash').html('Delete forever');
 
 					if(Viewer.from == '[ DMV EXCHANGE ]') {
 						$('#viewerControls #reply').hide();

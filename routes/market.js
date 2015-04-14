@@ -12,4 +12,12 @@ router.get('/', function(req, res, next) {
 	res.render('market', { title: 'Market', USER: req.session });
 });
 
+router.get('/create', function(req, res, next) {
+	if(!sessionManager.isLoggedIn(req.session)) {
+		res.redirect('/signin');
+		return;
+	}
+	res.render('market', { title: 'Create Listing', USER: req.session });
+});
+
 module.exports = router;

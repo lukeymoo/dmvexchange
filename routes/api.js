@@ -569,6 +569,9 @@ router.get('/sendmail', function(req, res, next) {
 
 	if(('s' in req.query) && pmSystem.validateSubject(req.query.s)) {
 		s = req.query.s;
+		if(s.length == 0) {
+			s = 'No subject';
+		}
 	}
 
 	if(('m' in req.query) && pmSystem.validateMessage(req.query.m)) {
