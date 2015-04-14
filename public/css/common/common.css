@@ -187,9 +187,9 @@ a, a:active, a:visited, a:hover, a:link {
 
 #headerControls #unreadCount {
 	margin-left: 5px;
-	background-color: orange;
-	border-radius: 2px;
 	color: black;
+	background-color: yellow;
+	border-radius: 2px;
 	padding: 2px;
 	padding-bottom: 1px;
 	padding-right: 3px;

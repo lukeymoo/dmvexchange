@@ -30,8 +30,7 @@ $(function() {
 					// Append mail button
 					if(res.status == 'DX-OK') {
 						if(parseInt(res.message) > 0) {
-							var DOM = $('#headerControls #left').html();
-							DOM += '<span id="unreadCount">' + res.message + '</span>';
+							var DOM = 'Mail<span id="unreadCount">' + res.message + '</span>';
 							$('#headerControls #left').html(DOM);
 						}
 					}

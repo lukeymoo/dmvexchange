@@ -665,6 +665,7 @@
 
 
 #viewerContainer {
+	display: none;
 	position: absolute;
 	top: 50px;
 	left: 100px;
@@ -803,10 +804,16 @@
 }
 
 .showMessage {
-	animation: showMessage ;
+	-webkit-animation: showMessage .25s forwards 0s 1 normal;
+	-moz-animation: showMessage .25s forwards 0s 1 normal;
+	animation: showMessage .25s forwards 0s 1 normal;
 }
 
-
+.hideMessage {
+	-webkit-animation: showMessage-reverse .25s forwards 0s 1 normal;
+	-moz-animation: showMessage-reverse .25s forwards 0s 1 normal;
+	animation: showMessage-reverse .25s forwards 0s 1 normal;
+}
 
 
 
