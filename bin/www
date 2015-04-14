@@ -22,7 +22,9 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-if(cluster.isMaster) {
+ var useMultiCore = false;
+
+if(cluster.isMaster && useMultiCore) {
   for(var i = 0; i < cpu; i++) {
     cluster.fork();
   }

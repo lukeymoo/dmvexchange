@@ -816,9 +816,59 @@
 }
 
 
+@-webkit-keyframes showMessage {
+	from {
+		margin-left: 100vw;
+	}
+	to {
+		margin-left: 0px;
+	}
+}
 
+@-moz-keyframes showMessage {
+	from {
+		margin-left: 100vw;
+	}
+	to {
+		margin-left: 0px;
+	}
+}
 
+@keyframes showMessage {
+	from {
+		margin-left: 100vw;
+	}
+	to {
+		margin-left: 0px;
+	}
+}
 
+@-webkit-keyframes showMessage-reverse {
+	from {
+		margin-left: 0px;
+	}
+	to {
+		margin-left: 100vw;
+	}
+}
+
+@-moz-keyframes showMessage-reverse {
+	from {
+		margin-left: 0px;
+	}
+	to {
+		margin-left: 100vw;
+	}
+}
+
+@keyframes showMessage-reverse {
+	from {
+		margin-left: 0px;
+	}
+	to {
+		margin-left: 100vw;
+	}
+}
 
 
 
