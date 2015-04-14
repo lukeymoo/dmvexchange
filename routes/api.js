@@ -592,7 +592,7 @@ router.get('/sendmail', function(req, res, next) {
 		var added = false;
 
 		for(var target in validTarget) {
-			if(req.query.r[user] == validTarget[target]) {
+			if(req.query.r[user] == validTarget[target].username) {
 				added = true;
 			}
 		}

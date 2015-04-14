@@ -75,6 +75,11 @@ Messenger.hideForm = function() {
 };
 
 Messenger.addRecipient = function() {
+	// Ensure they're not already added
+	$('#chipsContainer').find('span').each(function() {
+		
+	});
+
 	// Add input to recipients collection
 	this.messageRecipients.push(this.getRecipientInput());
 

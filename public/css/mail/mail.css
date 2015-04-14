@@ -667,6 +667,7 @@
 #viewerContainer {
 	display: none;
 	position: absolute;
+	z-index: 999;
 	top: 50px;
 	left: 100px;
 	width: calc(100% - 100px);
@@ -682,6 +683,10 @@
 	height: 60px;
 	border-bottom: 1px solid rgb(210, 210, 210);
 	background-color: rgb(245, 245, 245);
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
 }
 
 #viewerControls #back {

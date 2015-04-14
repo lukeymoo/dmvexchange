@@ -16,6 +16,25 @@ var Viewer = {
 // Find ID of message in view and parse its data into view
 Viewer.show = function(id) {
 
+	$('#messageContainer').find('.message').each(function() {
+		if($(this).find('#messageid').html() == id) {
+			
+			// If its the current message in view, make sure its selected
+			if(!$(this).find('input[type=checkbox]').is(':checked')) {
+				// select message
+				$(this).find('input[type=checkbox]').click();
+			}
+
+		} else {
+
+			// If its the current message in view, make sure its selected
+			if($(this).find('input[type=checkbox]').is(':checked')) {
+				// Deselect message
+				$(this).find('input[type=checkbox]').click();
+			}
+		}
+	});
+
 	switch(Main.view) {
 		case '[INBOX]':
 			for(var i = 0; i < Main.parsedInbox.length; i++) {
@@ -29,7 +48,7 @@ Viewer.show = function(id) {
 					Viewer.to = '';
 
 					if(Viewer.from == '[ DMV EXCHANGE ]') {
-						$('#viewerControls #reply').hide();
+						$('#viewerControls #reply').css('display', 'none');
 					} else {
 						$('#viewerControls #reply').show();
 					}
@@ -61,15 +80,15 @@ Viewer.show = function(id) {
 			for(var i = 0; i < Main.parsedTrash.length; i++) {
 				if(Main.parsedTrash[i].id == id) {
 
-					// Grab message properties
-					var message = {
-						id: id,
-						subject: Main.parsedTrash[i].subject,
-						from: Main.parsedTrash[i].from,
-						text: Main.parsedTrash[i].text
-					};
 
-					if(message.from == '[ DMV EXCHANGE ]') {
+					// Grab message properties
+					Viewer.id = id;
+					Viewer.subject = Main.parsedTrash[i].subject;
+					Viewer.from = Main.parsedTrash[i].from;
+					Viewer.text = Main.parsedTrash[i].text;
+					Viewer.to = '';
+
+					if(Viewer.from == '[ DMV EXCHANGE ]') {
 						$('#viewerControls #reply').hide();
 					} else {
 						$('#viewerControls #reply').show();
@@ -91,10 +110,10 @@ Viewer.show = function(id) {
 						}
 					}
 					
-					$('#viewerContent #subject').html(message.subject);
-					$('#viewerContent #from').html(message.from);
+					$('#viewerContent #subject').html(Viewer.subject);
+					$('#viewerContent #from').html(Viewer.from);
 					$('#viewerContent #to').html(Viewer.to);
-					$('#viewerContent #text').html(message.text);
+					$('#viewerContent #text').html(Viewer.text);
 				}
 			}
 			break;
@@ -105,9 +124,13 @@ Viewer.show = function(id) {
 
 Viewer.hide = function() {
 
-	// Remove message from selected message
+	Viewer.nextID = '';
+
+	// deselect all
 	$('#messageContainer').find('.message').each(function() {
-		
+		if($(this).find('input').is(':checked')) {
+			$(this).find('input').click();
+		}
 	});
 
 	// Empty the viewers content
@@ -119,40 +142,36 @@ Viewer.hide = function() {
 };
 
 Viewer.delete = function() {
-	// Find the message in view, hide it, splice it then remove it
-	// Shift viewer to next message in collection
 	switch(Main.view) {
 		case '[INBOX]':
 
-			var nextMessage = {};
+			Viewer.nextID = '';
 
 			for(var i = 0; i < Main.parsedInbox.length; i++) {
 				if(Main.parsedInbox[i].id == Viewer.id) {
-
-
-					// Splice the message
-					Main.parsedInbox.splice(i, 1);
-
-					// Remove from message container
-					$('#messageContainer').find('.message').each(function() {
-						if($(this).find('#messageid').html() == Viewer.id) {
-							$(this).remove();
-						}
-					});
-
-					// Close viewer
-					this.hide();
-
-					// If theres another message after Show it
-					// get next message ID ( i - 1 = top -> down in view || i + 1 = top <- down )
 					if('undefined' != typeof Main.parsedInbox[i-1]) {
-						this.show(Main.parsedInbox[i-1].id);
+						Viewer.nextID = Main.parsedInbox[i-1].id;
 					}
 				}
 			}
 
+			$(document).find('#mailActionsButton').click();
+			$(document).find('#markTrash').click();
 			break;
 		case '[TRASH]':
+
+				Viewer.nextID = '';
+
+				for(var i = 0; i < Main.parsedTrash.length; i++) {
+					if(Main.parsedTrash[i].id == Viewer.id) {
+						if('undefined' != typeof Main.parsedTrash[i-1]) {
+							Viewer.nextID = Main.parsedTrash[i-1].id;
+						}
+					}
+				}
+
+				$(document).find('#mailActionsButton').click();
+				$(document).find('#markGone').click();
 			break;
 	}
 };
@@ -161,7 +180,7 @@ $(function() {
 
 	// Show message on click
 	$(document).on('click', '.message', function(e) {
-		if(e.target.id != 'select') {
+		if(e.target.id != 'select' && e.target.nodeName != 'INPUT') {
 			Viewer.show($(this).find('#messageid').html());
 		}
 	});

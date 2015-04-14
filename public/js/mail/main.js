@@ -235,6 +235,8 @@ Main.move = function(mid, loc) {
 			for(var i = 0; i < this.parsedInbox.length; i++) {
 				if(this.parsedInbox[i].id == mid) {
 					
+					console.log('moving function');
+					
 					// copy the message
 					message = this.parsedInbox[i];
 
@@ -279,20 +281,17 @@ Main.resave = function(obj) {
 		case '[INBOX]':
 			for(var i = 0; i < this.parsedInbox.length; i++) {
 				if(this.parsedInbox[i].id == $(obj).find('#messageid').html()) {
-					this.parsedInbox.splice(i, 1);
-
-					// Now push new message
-					this.parsedInbox.push(updatedMessage);
+					
+					this.parsedInbox[i].classes = updatedMessage.classes;
 				}
 			}
 			break;
 		case '[TRASH]':
 			for(var i = 0; i < this.parsedTrash.length; i++) {
 				if(this.parsedTrash[i].id == $(obj).find('#messageid').html()) {
-					this.parsedTrash.splice(i, 1);
-
-					// Now push new message
-					this.parsedTrash.push(updatedMessage);
+					
+					this.parsedTrash[i].classes = updatedMessage.classes;
+				
 				}
 			}
 			break;

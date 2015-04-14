@@ -314,9 +314,7 @@ $(function() {
 				$('#mailFilters #selectAll').find('input').prop('checked', false);
 
 				// If parsedTrash is empty, disable action menu
-				if(Main.parsedTrash.length == 0) {
-					Controls.disable();
-				}
+				Controls.disable();
 			} else {
 				Controls.showSelected();
 				spawnMessage(res.message, false);
@@ -335,6 +333,7 @@ $(function() {
 				
 				// Iterate through selected messages and Main.move foreach
 				for(var i = 0; i < Main.selectedMessages.length; i++) {
+					console.log('markingTrash: ' + Main.selectedMessages[i]);
 					Main.move(Main.selectedMessages[i], '[TRASH]');
 				}
 
@@ -347,9 +346,14 @@ $(function() {
 				// All messages that were selected have been moved so deselect checkall
 				$('#mailFilters #selectAll').find('input').prop('checked', false);
 
-				// If parsedTrash is empty, disable action menu
-				if(Main.parsedInbox.length == 0) {
-					Controls.disable();
+				Controls.disable();
+
+				// If nextID is set
+				if(Viewer.nextID != '' && Viewer.nextID.length == 24) {
+					Viewer.show(Viewer.nextID);
+					Viewer.nextID = '';
+				} else {
+					Viewer.hide();
 				}
 			} else {
 				Controls.showSelected();
@@ -396,12 +400,23 @@ $(function() {
 					}
 				}
 
+				// Clear selected messages
+				Main.selectedMessages = [];
+
+				// Redraw container
+				Main.display();
+
 				// All messages that were selected have been moved so deselect checkall
 				$('#mailFilters #selectAll').find('input').prop('checked', false);
 
-				// If parsedTrash is empty, disable action menu
-				if(Main.parsedTrash.length == 0) {
-					Controls.disable();
+				Controls.disable();
+
+				// If nextID is set
+				if(Viewer.nextID != '' && Viewer.nextID.length == 24) {
+					Viewer.show(Viewer.nextID);
+					Viewer.nextID = '';
+				} else {
+					Viewer.hide();
 				}
 			} else {
 				Controls.showSelected();
