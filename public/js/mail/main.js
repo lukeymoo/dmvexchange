@@ -637,31 +637,54 @@ $(function() {
 
 		var propTo = $(this).find('input').prop('checked');
 
-		if(e.target.nodeName != 'INPUT') {
-			$(this).find('input').prop('checked', !propTo);
-		} else {
-			propTo = !propTo;
+		// Determine current view and if there are any messages in container
+		var canDo = false;
+		switch(Main.view) {
+			case '[INBOX]':
+				if(Main.parsedInbox.length > 0) {
+					canDo = true;
+				}
+				break;
+			case '[TRASH]':
+				if(Main.parsedTrash.length > 0) {
+					canDo = true;
+				}
+				break;
 		}
 
-		if(propTo) {
-			// deselect all
-			$('#messageContainer').find('.message').each(function() {
-				if($(this).find('input').prop('checked')) {
-					Main.deselectMessage($(this));
+		if(canDo) {
 
-					// deactivate selectedmessages ( change color )
-					$('#mailActionsContainer').attr('data-active', 'false');
-				}
-			});
+			if(e.target.nodeName != 'INPUT') {
+				$(this).find('input').prop('checked', !propTo);
+			} else {
+				propTo = !propTo;
+			}
+
+			if(propTo) {
+				// deselect all
+				$('#messageContainer').find('.message').each(function() {
+					if($(this).find('input').prop('checked')) {
+						Main.deselectMessage($(this));
+
+						// deactivate selectedmessages ( change color )
+						$('#mailActionsContainer').attr('data-active', 'false');
+					}
+				});
+			} else {
+				// select all
+				$('#messageContainer').find('.message').each(function() {
+					if(!$(this).find('input').prop('checked')) {
+						Main.selectMessage($(this));
+					}
+					// activate selectedmessages ( change color )
+					$('#mailActionsContainer').attr('data-active', 'true');
+				});
+			}
+
 		} else {
-			// select all
-			$('#messageContainer').find('.message').each(function() {
-				if(!$(this).find('input').prop('checked')) {
-					Main.selectMessage($(this));
-				}
-				// activate selectedmessages ( change color )
-				$('#mailActionsContainer').attr('data-active', 'true');
-			});
+			if(e.target.nodeName == 'INPUT') {
+				e.preventDefault();
+			}
 		}
 
 	});
