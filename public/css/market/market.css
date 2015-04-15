@@ -1,34 +1,159 @@
 #createContainer {
-	width: 39%;
+	width: 37%;
 	margin-left: auto;
 	margin-right: auto;
 	padding: 10px 0px;
 }
 
-#createButton {
-	vertical-align: top;
-	display: inline-block;
-	padding-left: 10px;
-	padding-right: 10px;
-	height: 40px;
-	line-height: 40px;
-	text-align: center;
-	border: 1px solid #C5E4FF;
-	border-radius: 3px;
-	cursor: pointer;
-	pointer: hand;
+#createCamera {
+	float: right;
+	width: 30px;
+	height: 30px;
+	background: url('/img/camera_blur.png') no-repeat center center;
 
 	-webkit-transition: background-color .075s linear 0s;
 	-moz-transition: background-color .075s linear 0s;
 	transition: background-color .075s linear 0s;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#createCamera:hover {
+	background: url('/img/camera_focus.png') no-repeat center center
 }
 
 #createPlaceholder {
 	display: inline-block;
-	width: 405px;
-	height: 40px;
-	line-height: 40px;
-	padding: 0px 10px;
-	background-color: rgb(230, 230, 230);
-	border-radius: 3px;
+	width: 100%;
+	height: 30px;
+	line-height: 30px;
+	padding: 0px 5px;
+	border: 1px solid rgb(200, 200, 200);
+	color: rgb(110, 110, 110);
+	background-color: rgb(245, 245, 245);
+
+	cursor: pointer;
+	pointer: hand;
 }
+
+#inputContainer {
+	display: none;
+	width: 100%;
+	height: 150px;
+
+	background-color: #fff;
+	padding: 5px 5px;
+
+	-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+#inputContainer textarea {
+	display: inline-block;
+	width: 100%;
+	height: 100px;
+	margin-top: 10px;
+	padding-left: 5px;
+	padding-right: 6px;
+
+	resize: none;
+	vertical-align: top;
+	border: none;
+
+	font-size: .9em;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#inputContainer textarea:focus {
+	outline: none;
+}
+
+#inputContainer #controls {
+	height: 40px;
+	border-top: 1px solid rgb(230, 230, 230);
+}
+
+#inputContainer #cancelButton {
+	position: absolute;
+	display: inline-block;
+
+	margin-top: -3px;
+	margin-left: 352px;
+
+	padding: 0px 6px;
+	text-align: center;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#inputContainer #cancelButton:hover {
+	background-color: rgb(230, 230, 230);
+}
+
+#inputContainer #controls #addPhoto {
+	display: inline-block;
+
+	margin-top: 5px;
+	margin-left: 5px;
+
+	width: 21px;
+	height: 22px;
+	background: url('/img/camera_blur.png') no-repeat center center;
+	
+	cursor: pointer;
+	pointer: hand;
+}
+
+#inputContainer #controls #addPhoto:hover {
+	background: url('/img/camera_focus.png') no-repeat center center;
+}
+
+#inputContainer #post {
+	display: inline-block;
+
+	float: right;
+
+	margin-top: 5px;
+
+	height: 25px;
+	line-height: 25px;
+
+	padding: 0px 15px;
+
+	font-size: 1.2em;
+	font-family: DX-COND;
+	background-color: rgb(0, 210, 225);
+
+	cursor: pointer;
+	pointer: hand;
+
+	-webkit-transition: background-color .125s linear 0s;
+	-moz-transition: background-color .125s linear 0s;
+	transition: background-color .125s linear 0s;
+}
+
+#inputContainer #post:hover {
+	background-color: rgb(0, 250, 250);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
