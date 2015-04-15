@@ -6,17 +6,19 @@ var MongoClient = require('mongodb').MongoClient;
 var uuid = require('node-uuid');
 var crypto = require('crypto');
 
+var secret = require('../secret/secret');
+
 // Will hold the connection
 var _db;
 
-var pwd = '9d9066cf90755496ec7ed3392e638fc111';
-
-var url = 'mongodb://dxb:' + pwd + '@72.47.237.205:27017/dmvexchange';
+var url = 'mongodb://' + secret._SECRET_USERNAME + ':' + secret._SECRET_MONGODB + '@72.47.237.205:27017/dmvexchange';
 
 module.exports = {
 
-	initMongo: function() {
+	initMongo: function(callback) {
+		console.log('Initializing MongoDB');
 		MongoClient.connect(url, function(err, dbObj) {
+			console.log('MongoDB connection callback started');
 			if(err) {
 				console.log('[-] MongoDB error :: ' + err);
 			}
@@ -25,7 +27,7 @@ module.exports = {
 				console.log('[+] MongoDB Connected !');
 				dbObj.collections(function(err, collections) {
 					if(err) {
-						console.log('[-] MongoDB error getting collections');
+						console.log('[-] MongoDB error getting collections :: ' + err);
 					}
 					// Create collections as needed
 					if(collections) {
@@ -54,12 +56,16 @@ module.exports = {
 							console.log('[+] MongoDB Created collection `MAIL`');
 						}
 						if(!colExist.BAD_REQUESTS) {
-							// Stores bad request to help identify bots
+							// Stores bad request to help identify bots searching for BS
 							dbObj.createCollection('BAD_REQUESTS', function(){});
 							console.log('[+] MongoDB Created collection BAD_REQUESTS');
 						}
 					}
 				});
+				// Callback
+				callback();
+			} else {
+				console.log('No connection object returned');
 			}
 		});
 	},

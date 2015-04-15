@@ -9,19 +9,18 @@ var bodyParser = require('body-parser');
 var compression = require('compression');
 var session = require('express-session');
 var router = express.Router();
+var secret = require('./modules/secret/secret');
 
 /**
   Redis handles storage of sessions
 */
 var redisStore = require('connect-redis')(session);
 var redis = require('redis').createClient();
-redis.auth('9b3af6edcf71b34520a7d16412ad9325OMGOMG');
+redis.auth(secret._SECRET_REDIS);
 
 /**
   MongoDB as primary database
 */
-var databaseManager = require('./modules/database/database');
-databaseManager.initMongo();
 
 // Routes
 var index = require('./routes/index');

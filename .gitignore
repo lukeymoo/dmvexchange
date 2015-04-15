@@ -1,3 +1,4 @@
 .*
 !/.gitignore
+/modules/secret
 /node_modules/mongodb

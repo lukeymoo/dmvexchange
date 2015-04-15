@@ -8,8 +8,14 @@ var app = require('../app');
 var debug = require('debug')('app:server');
 var http = require('http');
 
+// MongoDB functions
+var databaseManager = require('../modules/database/database');
+
 var cluster = require('cluster');
 var cpu = require('os').cpus().length;
+
+// server variable must be available throughout file
+var server = http.createServer(app);;
 
 /**
  * Get port from environment and store in Express.
@@ -57,15 +63,17 @@ if(cluster.isMaster && useMultiCore) {
       debug('Worker listening on ' + bind);
   });
 } else {
-  var server = http.createServer(app);
+  // init mongodb connection then start app
+  databaseManager.initMongo(function() {
 
-  /**
-  * Listen on provided port, on all network interfaces.
-  */
+    /**
+    * Listen on provided port, on all network interfaces.
+    */
 
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+  });
 }
 
 /**
