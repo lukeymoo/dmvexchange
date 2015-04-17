@@ -333,7 +333,6 @@ $(function() {
 				
 				// Iterate through selected messages and Main.move foreach
 				for(var i = 0; i < Main.selectedMessages.length; i++) {
-					console.log('markingTrash: ' + Main.selectedMessages[i]);
 					Main.move(Main.selectedMessages[i], '[TRASH]');
 				}
 

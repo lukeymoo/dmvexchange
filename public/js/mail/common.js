@@ -69,7 +69,6 @@ Main.load = function(callback) {
 	$.ajax({
 		url: '/api/getmail'
 	}).done(function(res) {
-		console.log(res);
 		callback(res);
 	});
 };

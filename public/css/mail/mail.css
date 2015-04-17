@@ -339,138 +339,6 @@
 	padding: 25px 25px;
 }
 
-.showActionsMenu {
-	-webkit-animation: showActionsMenu .5s forwards 0s 1 normal;
-	-moz-animation: showActionsMenu .5s forwards 0s 1 normal;
-	animation: showActionsMenu .5s forwards 0s 1 normal;
-}
-
-.showActionsMenu-reverse {
-	-webkit-animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
-	-moz-animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
-	animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
-}
-
-@-webkit-keyframes showActionsMenu {
-	from {
-		max-height: 0px;
-	}
-	to {
-		max-height: 250px;
-	}
-}
-
-@-moz-keyframes showActionsMenu {
-	from {
-		max-height: 0px;
-	}
-	to {
-		max-height: 250px;
-	}
-}
-
-@keyframes showActionsMenu {
-	from {
-		max-height: 0px;
-	}
-	to {
-		max-height: 250px;
-	}
-}
-
-@-webkit-keyframes showActionsMenu-reverse {
-	from {
-		max-height: 250px;
-	}
-	to {
-		max-height: 0px;
-	}
-}
-
-@-moz-keyframes showActionsMenu-reverse {
-	from {
-		max-height: 250px;
-	}
-	to {
-		max-height: 0px;
-	}
-}
-
-@keyframes showActionsMenu-reverse {
-	from {
-		max-height: 250px;
-	}
-	to {
-		max-height: 0px;
-	}
-}
-
-.showMessage {
-	-webkit-animation: showMessage .75s forwards 0s 1 normal;
-	-moz-animation: showMessage .75s forwards 0s 1 normal;
-	animation: showMessage .75s forwards 0s 1 normal;
-}
-
-.showMessage-reverse {
-	-webkit-animation: showMessage-reverse .25s forwards 0s 1 normal;
-	-moz-animation: showMessage-reverse .25s forwards 0s 1 normal;
-	animation: showMessage-reverse .25s forwards 0s 1 normal;
-}
-
-@-webkit-keyframes showMessage {
-	from {
-		max-height: 0px;
-	}
-	to {
-		max-height: 575px;
-	}
-}
-
-@-moz-keyframes showMessage {
-	from {
-		max-height: 0px;
-	}
-	to {
-		max-height: 575px;
-	}
-}
-
-@keyframes showMessage {
-	from {
-		max-height: 0px;
-	}
-	to {
-		max-height: 575px;
-	}
-}
-
-@-webkit-keyframes showMessage-reverse {
-	from {
-		max-height: 550px;
-	}
-	to {
-		max-height: 0px;
-	}
-}
-
-@-moz-keyframes showMessage-reverse {
-	from {
-		max-height: 550px;
-	}
-	to {
-		max-height: 0px;
-	}
-}
-
-@keyframes showMessage-reverse {
-	from {
-		max-height: 550px;
-	}
-	to {
-		max-height: 0px;
-	}
-}
-
 #composeForm {
 	z-index: 100;
 	display: none;
@@ -660,14 +528,78 @@
 	background-color: rgb(175, 0, 0);
 }
 
+.showActionsMenu {
+	-webkit-animation: showActionsMenu .5s forwards 0s 1 normal;
+	-moz-animation: showActionsMenu .5s forwards 0s 1 normal;
+	animation: showActionsMenu .5s forwards 0s 1 normal;
+}
 
+.showActionsMenu-reverse {
+	-webkit-animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
+	-moz-animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
+	animation: showActionsMenu-reverse .25s forwards 0s 1 normal;
+}
+
+@-webkit-keyframes showActionsMenu {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 250px;
+	}
+}
+
+@-moz-keyframes showActionsMenu {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 250px;
+	}
+}
+
+@keyframes showActionsMenu {
+	from {
+		max-height: 0px;
+	}
+	to {
+		max-height: 250px;
+	}
+}
+
+@-webkit-keyframes showActionsMenu-reverse {
+	from {
+		max-height: 250px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
+
+@-moz-keyframes showActionsMenu-reverse {
+	from {
+		max-height: 250px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
+
+@keyframes showActionsMenu-reverse {
+	from {
+		max-height: 250px;
+	}
+	to {
+		max-height: 0px;
+	}
+}
 
 
 
 #viewerContainer {
 	display: none;
 	position: absolute;
-	z-index: 999;
+	z-index: 1001;
 	top: 50px;
 	left: 100px;
 	width: calc(100% - 100px);
@@ -807,78 +739,6 @@
 	margin-top: 15px;
 	width: 85%;
 }
-
-.showMessage {
-	-webkit-animation: showMessage .25s forwards 0s 1 normal;
-	-moz-animation: showMessage .25s forwards 0s 1 normal;
-	animation: showMessage .25s forwards 0s 1 normal;
-}
-
-.hideMessage {
-	-webkit-animation: showMessage-reverse .25s forwards 0s 1 normal;
-	-moz-animation: showMessage-reverse .25s forwards 0s 1 normal;
-	animation: showMessage-reverse .25s forwards 0s 1 normal;
-}
-
-
-@-webkit-keyframes showMessage {
-	from {
-		margin-left: 100vw;
-	}
-	to {
-		margin-left: 0px;
-	}
-}
-
-@-moz-keyframes showMessage {
-	from {
-		margin-left: 100vw;
-	}
-	to {
-		margin-left: 0px;
-	}
-}
-
-@keyframes showMessage {
-	from {
-		margin-left: 100vw;
-	}
-	to {
-		margin-left: 0px;
-	}
-}
-
-@-webkit-keyframes showMessage-reverse {
-	from {
-		margin-left: 0px;
-	}
-	to {
-		margin-left: 100vw;
-	}
-}
-
-@-moz-keyframes showMessage-reverse {
-	from {
-		margin-left: 0px;
-	}
-	to {
-		margin-left: 100vw;
-	}
-}
-
-@keyframes showMessage-reverse {
-	from {
-		margin-left: 0px;
-	}
-	to {
-		margin-left: 100vw;
-	}
-}
-
-
-
-
-
 
 
 

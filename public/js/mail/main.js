@@ -235,8 +235,6 @@ Main.move = function(mid, loc) {
 			for(var i = 0; i < this.parsedInbox.length; i++) {
 				if(this.parsedInbox[i].id == mid) {
 					
-					console.log('moving function');
-					
 					// copy the message
 					message = this.parsedInbox[i];
 

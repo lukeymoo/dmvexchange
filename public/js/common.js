@@ -25,7 +25,6 @@ $(function() {
 			if(page != 'Mail') {
 				// Check unread messages and display counter
 				// next to mail button
-				console.log('checking unread');
 				getUnreadCount(function(res) {
 					// Append mail button
 					if(res.status == 'DX-OK') {

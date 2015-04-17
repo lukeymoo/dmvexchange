@@ -261,8 +261,6 @@ router.get('/mail', function(req, res, next) {
 			var database = dbManager.getDB();
 			var mailCol = database.collection('MAIL');
 
-			console.log(validatedIDs);
-
 			switch(req.query.to) {
 				case 'READ':
 					mailCol.update({
@@ -527,7 +525,7 @@ router.get('/getmail', function(req, res, next) {
 				username: req.session.USERNAME.toLowerCase()
 			}
 		}
-	}).limit(40).sort({_id: -1}).toArray(function(err, arrayMail) {
+	}).limit(250).sort({_id: -1}).toArray(function(err, arrayMail) {
 		if(err) {
 			console.log('[-] MongoDB error getting mail :: ' + JSON.stringify(err));
 			res.send({status: 'DX-FAILED', message: 'Server error 500'});

@@ -123,6 +123,8 @@ Viewer.show = function(id) {
 			break;
 	}
 
+	// update viewer height
+	$('#messageContainer').hide();
 	$('#viewerContainer').show();
 };
 
@@ -142,6 +144,7 @@ Viewer.hide = function() {
 	$('#viewerContent #from').html('');
 	$('#viewerContent #to').html('');
 	$('#viewerContent #text').html('');
+	$('#messageContainer').show();
 	$('#viewerContainer').hide();
 };
 
