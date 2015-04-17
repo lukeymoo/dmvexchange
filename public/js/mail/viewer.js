@@ -126,6 +126,18 @@ Viewer.show = function(id) {
 	// update viewer height
 	$('#messageContainer').hide();
 	$('#viewerContainer').show();
+
+	Controls.markRead(function(res) {
+		if(res.status == 'DX-OK') {
+			// Remove unread class
+			Controls.removeClass('unread');
+
+			// Grab each message in container and Main.resave it
+			$('#messageContainer').find('.message').each(function() {
+				Main.resave($(this));
+			});
+		}
+	});
 };
 
 Viewer.hide = function() {
