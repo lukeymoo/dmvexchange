@@ -38,7 +38,7 @@ $(function() {
 	// Bind link another email button
 	$(document).on('click', '#addEmail', function() {
 		// Remove the button
-		$(this).hide();
+		$(this).remove();
 		// Spawn an input field with add + cancel buttons
 		var DOM = "<span class='newEmailContainer'>\
 		<input type='text', placeholder='Email...'></input>\
@@ -71,7 +71,7 @@ $(function() {
 			goodStyle($(this).parent('.newEmailContainer').find('input[type=text]'));
 
 			// Hide the new email container
-			$(this).parent('.newEmailContainer').hide();
+			$(document).find('.newEmailContainer').hide();
 
 			// Add email
 			addNewEmail(function(res) {
@@ -84,10 +84,9 @@ $(function() {
 					}
 					updateUnread();
 					// Remove the button
-					$(this).parent('#emailContainer').find('#addEmail').remove();
-					$(this).parent('.newEmailContainer').remove();
+					$(document).find('.newEmailContainer').remove();
 					spawnMessage(res.message, true);
-					var DOM = "<br><span value='" + res.email + "' class='email'>" + res.email + "\
+					var DOM = "<span value='" + res.email + "' class='email'>" + res.email + "\
 					<button id='removeEmail'>Remove</button>\
 					</span>\
 					<button id='addEmail'>Add new email</button>";
@@ -106,9 +105,10 @@ $(function() {
 	// Cancel addEmailButton
 	$(document).on('click', '#cancelAddEmail', function() {
 		// Remove the newly created line
-		$(this).parent('.newEmailContainer').remove();
+		$(document).find('.newEmailContainer').remove();
 		// Show the add button again
-		$('#emailContainer').find('#addEmail').show();
+		var DOM = "<button id='addEmail'>Add new email</button>";
+		$('#emailContainer').append(DOM);
 	});
 
 	// On email remove button remove the email

@@ -39,7 +39,6 @@ block accountBlock
 				span(value='#{USER.EMAIL}', id='primaryEmail') Primary: #{USER.EMAIL}
 				if DATA
 					each item in DATA
-						br
 						span(value='#{item}', class='email')= item
 							button(id='removeEmail') Remove
 				button(id='addEmail') Add new email

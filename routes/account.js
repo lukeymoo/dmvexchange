@@ -4,7 +4,7 @@ var express = require('express');
 var router = express.Router();
 
 var formManager = require('../modules/form/form');
-var databaseManager = require('../modules/database/database');
+var dbManager = require('../modules/database/database');
 var sessionManager = require('../modules/session/session');
 
 var pmSystem = require('../modules/PM/pm');
@@ -20,7 +20,7 @@ router.get('/', function(req, res, next) {
 	}
 
 	// Get users other emails
-	var database = databaseManager.getDB();
+	var database = dbManager.getDB();
 	var userCol = database.collection('USERS');
 
 	var emails = '';
@@ -47,7 +47,7 @@ router.get('/ack', function(req, res, next) {
 	}
 
 	// Now query database for token and if found activate the user
-	var database = databaseManager.getDB();
+	var database = dbManager.getDB();
 	var userCol = database.collection('USERS');
 
 	userCol.findOne({
@@ -111,7 +111,7 @@ router.get('/activated', function(req, res, next) {
 		return;
 	}
 
-	var database = databaseManager.getDB();
+	var database = dbManager.getDB();
 	var userCol = database.collection('USERS');
 
 	userCol.update({

@@ -5,7 +5,7 @@ var express = require('express');
 var router = express.Router();
 
 var formManager = require('../modules/form/form');
-var databaseManger = require('../modules/database/database');
+var dbManager = require('../modules/database/database');
 var sessionManager = require('../modules/session/session');
 var ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
@@ -40,7 +40,7 @@ router.get('/confirm_account_canceled', function(req, res, next) {
 	}
 
 	// Find account with specified ID and remove it from the database
-	var database = databaseManger.getDB();
+	var database = dbManager.getDB();
 	var usrCol = database.collection('USERS');
 	usrCol.update({
 		_id: ObjectID(req.session.ACCOUNT_ID)
@@ -89,6 +89,7 @@ router.get('/session', function(req, res, next) {
 		EMAIL: req.session.EMAIL || '',
 		LOGGED_IN: req.session.LOGGED_IN || false
 	}});
+	return;
 });
 
 // Change password
@@ -144,7 +145,7 @@ router.get('/chgpwd', function(req, res, next) {
 	}
 
 	// Find document check if current password is already the same
-	var database = databaseManger.getDB();
+	var database = dbManager.getDB();
 	var usrCol = database.collection('USERS');
 	var crypto = require('crypto');
 
@@ -189,7 +190,7 @@ router.get('/unread', function(req, res, next) {
 		return;
 	}
 
-	var database = databaseManger.getDB();
+	var database = dbManager.getDB();
 	var mailCol = database.collection('MAIL');
 
 	mailCol.find({
@@ -257,7 +258,7 @@ router.get('/mail', function(req, res, next) {
 			}
 
 			// update messages
-			var database = databaseManger.getDB();
+			var database = dbManager.getDB();
 			var mailCol = database.collection('MAIL');
 
 			console.log(validatedIDs);
@@ -327,7 +328,7 @@ router.get('/mail', function(req, res, next) {
 			}
 
 			// delete
-			var database = databaseManger.getDB();
+			var database = dbManager.getDB();
 			var mailCol = database.collection('MAIL');
 
 			mailCol.update({
@@ -364,7 +365,7 @@ router.get('/add_email', function(req, res, next) {
 	// Validate the email
 	if(formManager.validateEmail(req.query.email)) {
 		// Ensure this email isn't already present in database
-		var database = databaseManger.getDB();
+		var database = dbManager.getDB();
 		var usrCol = database.collection('USERS');
 
 		usrCol.findOne({
@@ -468,7 +469,7 @@ router.get('/remove_email', function(req, res, next) {
 	// Validate the email
 	if(formManager.validateEmail(req.query.email)) {
 		// Ensure this email isn't already present in database
-		var database = databaseManger.getDB();
+		var database = dbManager.getDB();
 		var usrCol = database.collection('USERS');
 
 		usrCol.findOne({
@@ -517,7 +518,7 @@ router.get('/getmail', function(req, res, next) {
 	}
 
 	// Query database for messages with matching username in targets
-	var database = databaseManger.getDB();
+	var database = dbManager.getDB();
 	var mailCol = database.collection('MAIL');
 
 	mailCol.find({
@@ -627,7 +628,7 @@ router.get('/sendmail', function(req, res, next) {
 	};
 
 	// Insert message
-	var database = databaseManger.getDB();
+	var database = dbManager.getDB();
 	var msgCol = database.collection('MAIL');
 
 	msgCol.insert(PM);

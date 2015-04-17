@@ -22,6 +22,7 @@ redis.auth(secret._SECRET_REDIS);
 /**
   MongoDB as primary database
 */
+var databaseManager = require('./modules/database/database');
 
 // Routes
 var index = require('./routes/index');

@@ -251,7 +251,7 @@
 
 .newEmailContainer {
 	display: block;
-	margin-top: 5px;
+	margin-top: 8px;
 }
 
 .newEmailContainer input {
@@ -325,8 +325,10 @@
 }
 
 #emailContainer .email {
+	display: block;
 	cursor: pointer;
 	pointer: hand;
+	margin-top: 5px;
 }
 
 #removeEmail {
