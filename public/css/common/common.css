@@ -161,7 +161,6 @@ a, a:active, a:visited, a:hover, a:link {
 #headerLogo {
 	display: inline-block;
 	vertical-align: top;
-	width: 50%;
 	height: 50px;
 	line-height: 50px;
 	font-size: 160%;
@@ -182,7 +181,7 @@ a, a:active, a:visited, a:hover, a:link {
 	color: rgb(0, 150, 200);
 	font-size: .85em;
 	font-weight: bold;
-	margin-left: 10px;
+	margin-left: 75px;
 	white-space: nowrap;
 }
 

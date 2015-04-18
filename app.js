@@ -44,11 +44,25 @@ app.use(multer({
   dest: path.join(__dirname, 'public/cdn'),
   putSingleFilesInArray: true,
   limits: {
-    fileSize: 2050, // 2MB file size limit
-    fields: 25 // prevent DOS with infinite fields
+    fileSize: 4000000, // 4MB file size limit
+    fields: 25 // prevent DOS by infinite fields within form
   },
-  rename: function() {
-    return uuid.v1() + '_' + Date.now();
+  changeDest: function(dest, req, res) {
+    // if this was being post to feed, place into post within cdn folder
+    if(req.originalUrl == '/market/post') {
+      return path.join(dest, '/post');
+    } else {
+      // otherwise place into notarget because no location has been specified (cleaned regularly) 
+      return path.join(dest, '/notarget');
+    }
+  },
+  rename: function(fieldname, filename, req, res) {
+    // if this was being posted to feed rename it accordingly
+    if(req.originalUrl == '/market/post') {
+      return '__large__' + uuid.v1() + Date.now();
+    } else {
+      return uuid.v1() + '_' + Date.now(); // unknown destination = random name
+    }
   },
   onFileSizeLimit: function(file) {
     console.log('[-] File exceeded size limit...has been removed');

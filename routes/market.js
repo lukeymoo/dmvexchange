@@ -11,16 +11,22 @@ var ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
 
 router.get('/', function(req, res, next) {
+	// load the feed
 	res.render('market', { title: 'Market', USER: req.session });
 });
 
 router.post('/post', function(req, res, next) {
+	// ensure the user is logged in
 	if(!sessionManager.isLoggedIn(req.session)) {
 		res.redirect('/signin');
 		return;
 	}
 
-	var text = '';
+	// ensure we can assign an ID to the post
+	if(!('USERNAME' in req.session) || !req.session.USERNAME.length) {
+		res.redirect('/signin');
+		return;
+	}
 
 	// ensure we recieved a description variable
 	if(!('d' in req.body) || !req.body.d.length) {
@@ -37,11 +43,11 @@ router.post('/post', function(req, res, next) {
 	// check if we received any files
 	var fieldnames = [];
 	for(var i in req.files) {
-		text += 'key: ' + i + '\n';
 		fieldnames.push(req.files[i][0].fieldname);
 	}
 
 	// if we recieved files
+	var imageLinks = [];
 	if(fieldnames.length) {
 
 		// validate file mime-types
@@ -65,6 +71,9 @@ router.post('/post', function(req, res, next) {
 				return;
 			}
 
+			// log the filename for assignment to post link field
+			imageLinks.push(req.files[fieldnames[i]][0].name);
+
 		}
 
 	}
@@ -73,17 +82,19 @@ router.post('/post', function(req, res, next) {
 	var db = databaseManger.getDB();
 	var feed = db.collection('FEED');
 
+	var post = {
+		from: req.session.USERNAME,
+		from_id: req.session.USER_ID,
+		text: req.body.d,
+		links: imageLinks
+	};
 
-	// temp function
-	for(var i in fieldnames) {
-		fs.unlink(req.files[fieldnames[i]][0].path, function(){});
-	}
+	// insert into feed
+	feed.insert(post);
 
-	// Validate description
-	text += '-- ' + req.body.d;
-
-	res.writeHead({'Content-Type': 'text/plain'});
-	res.end(text);
+	// finish up
+	res.redirect('/market');
+	return;
 });
 
 module.exports = router;

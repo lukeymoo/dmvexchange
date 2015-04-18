@@ -34,7 +34,7 @@ module.exports = {
 						var colExist = {
 							USERS: false,
 							MAIL: false,
-							BAD_REQUESTS: false
+							FEED: false
 						};
 						for(var collection in collections) {
 							if(collections[collection].namespace == 'dmvexchange.USERS') {
@@ -43,8 +43,8 @@ module.exports = {
 							if(collections[collection].namespace == 'dmvexchange.MAIL') {
 								colExist.MAIL = true;
 							}
-							if(collections[collection].namespace == 'dmvexchange.BAD_REQUESTS') {
-								colExist.BAD_REQUESTS = true;
+							if(collections[collection].namespace == 'dmvexchange.FEED') {
+								colExist.FEED = true;
 							}
 						}
 						if(!colExist.USERS) {
@@ -55,10 +55,9 @@ module.exports = {
 							dbObj.createCollection('MAIL', function(){});
 							console.log('[+] MongoDB Created collection `MAIL`');
 						}
-						if(!colExist.BAD_REQUESTS) {
-							// Stores bad request to help identify bots searching for BS
-							dbObj.createCollection('BAD_REQUESTS', function(){});
-							console.log('[+] MongoDB Created collection BAD_REQUESTS');
+						if(!colExist.FEED) {
+							dbObj.createCollection('FEED', function(){});
+							console.log('[+] MongoDB Created collection `FEED`');
 						}
 					}
 				});
