@@ -1,5 +1,5 @@
 #createContainer {
-	width: 37%;
+	width: 50%;
 	margin-left: auto;
 	margin-right: auto;
 	padding: 10px 0px;
@@ -40,7 +40,7 @@
 #inputContainer {
 	display: none;
 	width: 100%;
-	height: 150px;
+	min-height: 150px;
 
 	background-color: #fff;
 	padding: 5px 5px;
@@ -73,8 +73,11 @@
 }
 
 #inputContainer #controls {
-	height: 40px;
+	min-height: 40px;
 	border-top: 1px solid rgb(230, 230, 230);
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
 }
 
 #inputContainer #cancelButton {
@@ -82,7 +85,7 @@
 	display: inline-block;
 
 	margin-top: -3px;
-	margin-left: 352px;
+	margin-left: 485px;
 
 	padding: 0px 6px;
 	text-align: center;
@@ -95,22 +98,25 @@
 	background-color: rgb(230, 230, 230);
 }
 
-#inputContainer #controls #addPhoto {
+#inputContainer #controls .addPhoto {
 	display: inline-block;
 
 	margin-top: 5px;
 	margin-left: 5px;
 
-	width: 21px;
-	height: 22px;
-	background: url('/img/camera_blur.png') no-repeat center center;
+	min-width: 21px;
+	min-height: 22px;
+
+	max-width: 100px;
+	max-height: 100px;
 	
 	cursor: pointer;
 	pointer: hand;
 }
 
-#inputContainer #controls #addPhoto:hover {
-	background: url('/img/camera_focus.png') no-repeat center center;
+#inputContainer #controls .addPhoto img {
+	max-width: 100px;
+	max-height: 100px;
 }
 
 #inputContainer #post {
@@ -141,14 +147,25 @@
 	background-color: rgb(0, 250, 250);
 }
 
+#inputContainer .photoUpload {
+	display: none;
+}
 
+#inputContainer #controls [data-available='false'] {
+	display: none;
+}
 
+.addPhoto #remove {
+	position: absolute;
+	color: white;
+	padding: 5px 10px;
+	background-color: rgb(215, 0, 0);
+	display: none;
+}
 
-
-
-
-
-
+.addPhoto #remove:hover {
+	background-color: rgb(255, 0, 0);
+}
 
 
 

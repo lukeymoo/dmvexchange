@@ -525,7 +525,7 @@ router.get('/getmail', function(req, res, next) {
 				username: req.session.USERNAME.toLowerCase()
 			}
 		}
-	}).limit(250).sort({_id: -1}).toArray(function(err, arrayMail) {
+	}).limit(500).sort({_id: -1}).toArray(function(err, arrayMail) {
 		if(err) {
 			console.log('[-] MongoDB error getting mail :: ' + JSON.stringify(err));
 			res.send({status: 'DX-FAILED', message: 'Server error 500'});

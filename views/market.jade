@@ -28,5 +28,21 @@ block createBlock
 			div(id='cancelButton') &times;
 			textarea
 			div(id='controls')
-				div(id='addPhoto')
+				form(id='photoForm', enctype='multipart/form-data', action='/api/uploadphoto', method='post')
+					input(type='file', class='photoUpload', name='photo', id='file1', data-available='true')
+					input(type='file', class='photoUpload', name='photo', id='file2', data-available='false')
+					input(type='file', class='photoUpload', name='photo', id='file3', data-available='false')
+					input(type='file', class='photoUpload', name='photo', id='file4', data-available='false')
+				div(id='handler1', class='addPhoto', data-available='false', data-image='false')
+					div(id='remove', data-for='handler1') &times;
+					img(src='/img/camera_blur.png')
+				div(id='handler2', class='addPhoto', data-available='false', data-image='false')
+					div(id='remove', data-for='handler2') &times;
+					img(src='/img/camera_blur.png')
+				div(id='handler3', class='addPhoto', data-available='false', data-image='false')
+					div(id='remove', data-for='handler3') &times;
+					img(src='/img/camera_blur.png')
+				div(id='handler4', class='addPhoto', data-available='false', data-image='false')
+					div(id='remove', data-for='handler4') &times;
+					img(src='/img/camera_blur.png')
 				div(id='post') Post
