@@ -8,7 +8,7 @@ var crypto = require('crypto');
 
 var secret = require('../secret/secret');
 
-// Will hold the connection
+// Will hold the connection socket
 var _db;
 
 var url = 'mongodb://' + secret._SECRET_USERNAME + ':' + secret._SECRET_MONGODB + '@72.47.237.205:27017/dmvexchange';
@@ -156,32 +156,6 @@ module.exports = {
 		userCol.insert(user, function(err, doc) {
 			callback(err, doc, tokens);
 		});
-	},
-
-	recordBadRequest: function(req) {
-		var addr = req.ip || false;
-
-		if(!addr) {
-			console.log('[-] Failed to capture bad request');
-			return;
-		}
-
-		var db = _db;
-		var reqCol = db.collection('BAD_REQUESTS');
-
-		// insert the IP and path requested
-		reqCol.update({
-			ip: addr
-		}, { $push: { paths: req.originalUrl }}, {upsert: true});
-		console.log('[+] Bad request has been logged');
-	},
-
-	findMail: function(sessionObj) {
-		var db = _db;
-		var mailCol = db.collection('MAIL');
-
-		mailCol.find({
-		}).sort(-1).limit(60).toArray();
 	},
 
 	getDB: function() {

@@ -1,35 +1,34 @@
 'use strict';
 
-
+// Core imports
 var express = require('express');
 var path = require('path');
+var fs = require('fs');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compression = require('compression');
 var session = require('express-session');
+var multer = require('multer');
 var router = express.Router();
-var secret = require('./modules/secret/secret');
+var uuid = require('node-uuid');
 
-/**
-  Redis handles storage of sessions
-*/
+// Session handler
 var redisStore = require('connect-redis')(session);
 var redis = require('redis').createClient();
-redis.auth(secret._SECRET_REDIS);
 
-/**
-  MongoDB as primary database
-*/
-var databaseManager = require('./modules/database/database');
-
-// Routes
+// Route controllers
 var index = require('./routes/index');
 var api = require('./routes/api');
 var account = require('./routes/account');
 var user = require('./routes/user');
 var market = require('./routes/market');
+
+
+// Custom modules
+var secret = require('./modules/secret/secret');
+var databaseManager = require('./modules/database/database');
 
 var app = express();
 
@@ -40,14 +39,31 @@ process.env.PORT = '3000';
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
+// parse multipart/form-data forms
+app.use(multer({
+  dest: path.join(__dirname, 'public/cdn'),
+  putSingleFilesInArray: true,
+  limits: {
+    fileSize: 2050, // 2MB file size limit
+    fields: 25 // prevent DOS with infinite fields
+  },
+  rename: function() {
+    return uuid.v1() + '_' + Date.now();
+  },
+  onFileSizeLimit: function(file) {
+    console.log('[-] File exceeded size limit...has been removed');
+    fs.unlink(file.path, function(){}); // remove file
+  }
+}));
+
+// parse cookies & basic forms
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// enable sessions using Redis
+// Enable sessions using Redis
+redis.auth(secret._SECRET_REDIS);
 app.use(session({
   store: new redisStore({ host: '127.0.0.1', port: '6379', client: redis }),
   secret: 'keyboard cat',
@@ -62,7 +78,8 @@ app.use(compression({
   level: 9
 }));
 
-app.use(express.static(path.join(__dirname, '/public')));
+// Allow static files to be accessed
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Set Custom X-Powered-By header
 app.use(function(req, res, next) {
@@ -78,21 +95,13 @@ app.use(function(req, res, next) {
   next();
 });
 
-// routes
+// Routes
 app.use(router);
 app.use('/', index);
 app.use('/api', api);
 app.use('/user', user);
 app.use('/market', market);
 app.use('/account', account);
-
-
-
-// Record the IP + Request before letting bad request be catched
-app.use(function(req, res, next) {
-	databaseManager.recordBadRequest(req);
-	next();
-});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

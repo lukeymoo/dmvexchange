@@ -28,11 +28,12 @@ block createBlock
 			div(id='cancelButton') &times;
 			textarea
 			div(id='controls')
-				form(id='photoForm', enctype='multipart/form-data', action='/api/uploadphoto', method='post')
-					input(type='file', class='photoUpload', name='photo', id='file1', data-available='true')
-					input(type='file', class='photoUpload', name='photo', id='file2', data-available='false')
-					input(type='file', class='photoUpload', name='photo', id='file3', data-available='false')
-					input(type='file', class='photoUpload', name='photo', id='file4', data-available='false')
+				form(id='uploadForm', enctype='multipart/form-data', action='/market/post', method='post')
+					textarea(class='photoUpload', name='d', id='description')
+					input(type='file', class='photoUpload', name='photo1', id='file1', data-available='true')
+					input(type='file', class='photoUpload', name='photo2', id='file2', data-available='false')
+					input(type='file', class='photoUpload', name='photo3', id='file3', data-available='false')
+					input(type='file', class='photoUpload', name='photo4', id='file4', data-available='false')
 				div(id='handler1', class='addPhoto', data-available='false', data-image='false')
 					div(id='remove', data-for='handler1') &times;
 					img(src='/img/camera_blur.png')

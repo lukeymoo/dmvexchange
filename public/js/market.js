@@ -6,8 +6,7 @@ var Market = {
 	images: [4]
 };
 
-// Ajax data to server for creation of post
-Market.create = function() {
+Market.send = function(fData, callback) {
 };
 
 // expand input area for creation of listing
@@ -21,6 +20,45 @@ Market.expand = function() {
 
 // Discard and collapse input
 Market.discard = function() {
+
+	var id = 1; // holds i in for which corresponds to handler || file id number
+
+	// Clear textarea
+	$('#inputContainer textarea').val('');
+
+	// reset image variables
+	this.images[0] = false;
+	this.images[1] = false;
+	this.images[2] = false;
+	this.images[3] = false;
+
+	for(var i = 1; i < 5; i++) {
+		id = i;
+
+		// restore handlers
+		$('#handler' + String(id)).find('img').attr('src', '');
+		// hide remove button
+		$('#handler' + String(id)).find('#remove').hide();
+		// restore default handler & image blur
+		$('#handler' + String(id)).attr('data-image', 'false');
+		$('#handler' + String(id)).find('img').attr('src', '/img/camera_blur.png');
+
+		var isAvail = (i == 1) ? 'true' : 'false';
+
+		// remove and restore handler1 to allow other images to slide down
+		var temp = $('#handler' + String(id)).html();
+		var DOM = "<div id='handler" + String(id) + "' class='addPhoto' data-available='" + isAvail + "' data-image='false'></div>";
+		$('#handler' + String(id)).remove();
+		$('#controls').append(DOM);
+		$('#handler' + String(id)).html(temp);
+
+		// restore file inputs
+		$('#file' + String(id)).remove();
+		var DOM = "<input type='file' class='photoUpload' name='photo' id='file" + String(id) + "' data-available='true'>";
+		$('#photoForm').append(DOM);
+	}
+
+	// replace inputcontainer with placeholder
 	$('#inputContainer').hide();
 	$('#createPlaceholder').show();
 
@@ -403,6 +441,33 @@ $(function() {
 	};
 
 	$('#handler1').attr('data-available', 'true');
+
+	// Send post data to the server for validation & postage
+	$('#uploadForm').on('submit', function(e) {
+
+		if($('#inputContainer textarea').val().length < 6
+			|| $('#inputContainer textarea').val().length > 360) {
+			e.preventDefault();
+			spawnMessage('Message text must be 6-360 characters', false);
+			return false;
+		}
+		
+
+		// Set inputcontainer textarea to hidden input field
+		$('#uploadForm #description').val($('#inputContainer textarea').val());
+
+		// Remove empty input fields
+		$('#uploadForm').find('input[type=file]').each(function() {
+			if(!$(this).val().length) {
+				$(this).remove();
+			}
+		});
+	});
+
+	// Allow use of send button
+	$('#inputContainer #post').on('click', function() {
+		$('#uploadForm').submit();
+	});
 
 	// Events for camera buttons
 	$(document).on({

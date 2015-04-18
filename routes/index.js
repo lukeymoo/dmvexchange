@@ -97,6 +97,7 @@ router.post('/auth', function(req, res, next) {
 			req.session.LOGGED_IN = true;
 			req.session.USERNAME = doc.username;
 			req.session.EMAIL = doc.email;
+			req.session.USER_ID = String(doc._id);
 			req.session.LAST_ACTIVITY = Date.now();
 			res.redirect('/');
 			return;
@@ -215,6 +216,7 @@ router.post('/process', function(req, res, next) {
 						req.session.USERNAME = user.u;
 						req.session.EMAIL = user.e;
 						req.session.LAST_ACTIVITY = Date.now();
+						req.session.USER_ID = String(doc._id);
 						res.redirect('/');
 						return;
 					});

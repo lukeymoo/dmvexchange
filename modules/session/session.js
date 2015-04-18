@@ -24,6 +24,7 @@ var isLoggedInQuiet = function(sessionObj) {
 			if(Date.now() - sessionObj.LAST_ACTIVITY > 3600000) {
 				// Log the user out
 				sessionObj.LOGGED_IN = false;
+				delete sessionObj.USER_ID;
 				delete sessionObj.USERNAME;
 				delete sessionObj.EMAIL;
 				delete sessionObj.LAST_ACTIVITY;
@@ -41,6 +42,7 @@ var isTimedOut = function(sessionObj) {
 			if(Date.now() - sessionObj.LAST_ACTIVITY > 3600000) {
 				// Log the user out
 				sessionObj.LOGGED_IN = false;
+				delete sessionObj.USER_ID;
 				delete sessionObj.USERNAME;
 				delete sessionObj.EMAIL;
 				delete sessionObj.LAST_ACTIVITY;
