@@ -85,9 +85,9 @@
 	display: inline-block;
 
 	margin-top: -3px;
-	margin-left: 485px;
+	margin-left: 475px;
 
-	padding: 0px 6px;
+	padding: 2px 8px;
 	text-align: center;
 
 	cursor: pointer;
@@ -125,7 +125,6 @@
 	float: right;
 
 	margin-top: 5px;
-
 	height: 25px;
 	line-height: 25px;
 
@@ -187,8 +186,12 @@
 	margin-top: 25px;
 }
 
-#post {
-	margin-left: 15px;
+#feedContainer .noimage {
+}
+
+#feedContainer #post {
+	margin-left: 25px;
+	margin-bottom: 15px;
 	display: inline-block;
 
 	border: 1px solid rgba(0, 0, 0, 0.15);
@@ -207,7 +210,7 @@
 	vertical-align: top;
 }
 
-#post #image_replacement {
+#feedContainer #post #image_replacement {
 	min-width: 275px;
 	min-height: 200px;
 	border-top-left-radius: 3px;
@@ -217,10 +220,10 @@
 	pointer: hand;
 }
 
-#post #thumbnail {
+#feedContainer #post #thumbnail {
 }
 
-#post #thumbnail, #post #thumbnail img {
+#feedContainer #post #thumbnail, #post #thumbnail img {
 	max-width: 275px;
 	max-height: 275px;
 	border-top-left-radius: 3px;
@@ -230,55 +233,93 @@
 	pointer: hand;
 }
 
-#post #creator_username {
+#feedContainer #post #creator_username {
+	padding-left: 2px;
+	font-weight: bold;
+	font-size: .85em;
 }
 
-#post #creator_id {
+#feedContainer #post #creator_id {
 	display: none;
 }
 
-#post #text {
+#feedContainer #post #text {
 	padding-top: 5px;
 	padding-left: 2px;
 	padding-right: 2px;
 	min-height: 50px;
 }
 
-#post #post_info {
+#feedContainer #post #post_info {
 	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
-#post #post_info, #post #post_misc {
+#feedContainer #post #post_info, #post #post_misc {
 	padding-top: 1px;
 	padding-left: 2px;
 	padding-right: 2px;
-	padding-bottom: 2px;
 }
 
-#post #subscribers:before {
+#feedContainer #post #subscribers:before {
 }
 
-#post #subscribers {
+#feedContainer #post #subscribers {
 	display: none;
 }
 
-#post #comments:before {
+#feedContainer #post #comments:before {
 	content: 'Comments: ';
 	font-size: .8em;
 }
 
-#post #comments {
+#feedContainer #post #comments {
 	display: inline-block;
+	color: rgb(0, 100, 200);
+	font-family: DX-COND;
 }
 
-#post #flags:before {
+#feedContainer #post #flags:before {
 	content: 'Flags: ';
-	font-size: .8em;
+	font-size: .9em;
 }
 
-#post #flags {
+#feedContainer #post #flags {
 	display: inline-block;
 	margin-left: 5px;
+	color: rgb(200, 0, 0);
+	font-family: DX-COND;
+}
+
+#feedContainer #post #date {
+	float: right;
+	padding-top: 4px;
+	vertical-align: bottom;
+	display: inline-block;
+	font-size: .8em;
+	font-weight: bold;
+}
+
+#feedContainer #withImage {
+	width: 620px;
+	padding-right: 10px;
+	float: left;
+}
+
+#feedContainer #withImage #post {
+	width: 275px;
+}
+
+#feedContainer #withoutImage {
+	position: absolute;
+	right: 0px;
+	width: 375px;
+	margin-right: 8px;
+}
+
+#feedContainer #withoutImage #post {
+	width: 100%;
+	margin: 0px;
+	margin-bottom: 10px;
 }
 
 

@@ -50,18 +50,36 @@ block createBlock
 
 block marketFeedBlock
 	div(id='feedContainer')
-		if FEED
-			each POST in FEED
-				if POST.visibility > 0
-					div(id='post')
-						div(id='thumbnail')
-							if POST.image_links[0]
-								img(src='#{POST.image_links[0].large_image}', alt='bad link')
-						div(id='post_info')
-							div(id='creator_username') #{POST.creator_username}
-							div(id='creator_id') #{POST.creator_id}
-							div(id='text') #{POST.text}
-						div(id='post_misc')
-							div(id='subscribers') #{POST.subscribers}
-							div(id='comments') #{POST.comments}
-							div(id='flags') #{POST.flags}
+		div(id='withImage')
+			if FEED
+				each POST in FEED
+					if POST.visibility > 0
+						if POST.image_links.length > 0
+							div(id='post')
+								div(id='thumbnail')
+										img(src='#{POST.image_links[0].large_image}', alt='bad link')
+								div(id='post_info')
+									div(id='creator_username') #{POST.creator_username}
+									div(id='creator_id') #{POST.creator_id}
+									div(id='text') #{POST.text}
+								div(id='post_misc')
+									div(id='subscribers') #{POST.subscribers}
+									div(id='comments') #{POST.comments}
+									div(id='flags') #{POST.flags}
+									div(id='date') #{POST.timestamp}
+		div(id='withoutImage')
+			if FEED
+				each POST in FEED
+					if POST.visibility > 0
+						if POST.image_links.length == 0
+										div(id='post', class='noimage')
+											div(id='thumbnail')
+											div(id='post_info')
+												div(id='creator_username') #{POST.creator_username}
+												div(id='creator_id') #{POST.creator_id}
+												div(id='text') #{POST.text}
+											div(id='post_misc')
+												div(id='subscribers') #{POST.subscribers}
+												div(id='comments') #{POST.comments}
+												div(id='flags') #{POST.flags}
+												div(id='date') #{POST.timestamp}

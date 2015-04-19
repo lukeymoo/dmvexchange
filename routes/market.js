@@ -24,6 +24,16 @@ router.get('/', function(req, res, next) {
 			res.send('Server error occurred...<a href="/">Click here to return</a>');
 			return;
 		}
+
+		if(!feedArr) {
+			feedArr = [];
+		}
+
+		// add timestamps
+		for(var i = 0; i < feedArr.length; i++) {
+			feedArr[i].timestamp = toDate(ObjectID(feedArr[i]._id).getTimestamp());
+		}
+
 		// render page
 		res.render('market', { title: 'Market', USER: req.session, FEED: feedArr});
 	});
@@ -116,5 +126,42 @@ router.post('/post', function(req, res, next) {
 	res.redirect('/market');
 	return;
 });
+
+function toDate(timestamp) {
+	var id = new Date(timestamp);
+	var time = '';
+
+	var period = 'am';
+
+	var monthArr = [];
+	monthArr[0] = 'Jan';
+	monthArr[1] = 'Feb';
+	monthArr[2] = 'Mar';
+	monthArr[3] = 'Apr';
+	monthArr[4] = 'May';
+	monthArr[5] = 'Jun';
+	monthArr[6] = 'Jul';
+	monthArr[7] = 'Aug';
+	monthArr[8] = 'Sept';
+	monthArr[9] = 'Oct';
+	monthArr[10] = 'Nov';
+	monthArr[11] = 'Dec';
+
+	var month = monthArr[id.getMonth()];
+	var day = id.getDate();
+	var hour = id.getHours();
+	if(hour > 12) {
+		period = 'pm';
+		hour -= 12;
+	}
+	var minute = id.getMinutes();
+	if(minute < 10) {
+		minute = '0' + minute;
+	}
+
+	time = month + '. ' + day + '  ' + hour + ':' + minute + ' ' + period;
+
+	return time;
+};
 
 module.exports = router;

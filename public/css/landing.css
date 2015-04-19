@@ -98,3 +98,13 @@
 	border-color: rgb(50, 180, 210);
 	background-color: #40e6ff;
 }
+
+#what {
+	position: absolute;
+	color: #fff;
+	font-size: 4em;
+	font-family: DX-COND;
+	margin-top: 400px;
+	margin-left: 350px;
+}
+
