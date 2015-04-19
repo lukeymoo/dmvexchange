@@ -34,7 +34,8 @@ module.exports = {
 						var colExist = {
 							USERS: false,
 							MAIL: false,
-							FEED: false
+							FEED: false,
+							EARLY_BIRD: false
 						};
 						for(var collection in collections) {
 							if(collections[collection].namespace == 'dmvexchange.USERS') {
@@ -45,6 +46,9 @@ module.exports = {
 							}
 							if(collections[collection].namespace == 'dmvexchange.FEED') {
 								colExist.FEED = true;
+							}
+							if(collections[collection].namespace == 'dmvexchange.EARLY_BIRD') {
+								colExist.EARLY_BIRD = true;
 							}
 						}
 						if(!colExist.USERS) {
@@ -58,6 +62,10 @@ module.exports = {
 						if(!colExist.FEED) {
 							dbObj.createCollection('FEED', function(){});
 							console.log('[+] MongoDB Created collection `FEED`');
+						}
+						if(!colExist.EARLY_BIRD) {
+							dbObj.createCollection('EARLY_BIRD', function(){});
+							console.log('[+] MongoDB Created collection `EARLY_BIRD`');
 						}
 					}
 				});

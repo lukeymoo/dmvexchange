@@ -218,8 +218,6 @@
 }
 
 #post #thumbnail {
-	min-width: 275px;
-	min-height: 200px;
 }
 
 #post #thumbnail, #post #thumbnail img {

@@ -32,6 +32,41 @@ router.get('*', function(req, res, next) {
 	next();
 });
 
+// save landing page emails
+router.get('/save_landing_email', function(req, res, next) {
+	var db = dbManager.getDB();
+	var emailCol = db.collection('EARLY_BIRD');
+
+	// ensure email is sent
+	if(!('email' in req.query) || req.query.email.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'No email specified'});
+		return;
+	}
+
+	if(!formManager.validateEmail(req.query.email)) {
+		res.send({status: 'DX-REJECTED', message: 'Invalid email'});
+		return;
+	}
+
+	// check if exists
+	emailCol.findOne({
+		email: req.query.email.toLowerCase()
+	}, function(err, doc) {
+		if(err) {
+			console.log('[-] MongoDB error while saving landing page lead :: ' + err);
+		}
+		if(doc) {
+				res.send({status: 'DX-OK', message: 'Already signed up! Thanks!'});
+				return;
+		} else {
+			// if not insert it
+			emailCol.insert({email: req.query.email.toLowerCase()});
+			res.send({status: 'DX-OK', message: 'Thanks for signing up!'});
+		}
+	});
+	return;
+});
+
 // Catch account cancellation confirmation
 router.get('/confirm_account_canceled', function(req, res, next) {
 	if(!('ACCOUNT_ID' in req.session) || req.session.ACCOUNT_ID.length == 0) {

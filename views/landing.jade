@@ -1,0 +1,64 @@
+doctype html
+html
+	head
+		title DX &#8212; #{title}
+		link(rel='stylesheet', href='/css/normalize.css')
+		link(rel='stylesheet', href='/css/main.css')
+		link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
+		link(rel='stylesheet', href='/css/common/common.css')
+		link(rel='stylesheet', href='/css/landing.css')
+	body
+		div(id='wrapper')
+			div(id='pageHeader') 
+				div(id='headerLogo')  DMV EXCHANGE 
+			div(id='pageMessage')
+			div(id='cta') Still under construction but we're almost done...
+			div(id='signup')
+				label Sign up to recieve an alert when we finish
+				br
+				input(type='text', id='emailField', placeholder='Enter your email...')
+				br
+				button Sign up
+			div(id='heroContainer')
+				div(id='overlay')
+
+		script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
+		script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js')
+		script(src='/js/common.js')
+		script(src='/js/login.js')
+		script.
+
+			// validate email on button press
+			$('#signup button').on('click', function() {
+				if(validateEmail($('#signup input').val())) {
+					goodStyle($('#signup input'));
+					// submit
+					$.ajax({
+						url: '/api/save_landing_email',
+						data: {
+							email: $('#emailField').val()
+						}
+					}).done(function(res) {
+						console.log(res);
+						if(res.status == 'DX-OK') {
+							spawnMessage(res.message, true);
+							$('#signup input').val('');
+							$('#signup').hide();
+							$('#cta').html('We\'ll be sure to send you a heads up when nearing launch');
+							$('#cta').css('margin-left', '175px');
+						} else {
+							spawnMessage(res.message, false);
+							$('#signup input').val('');
+						}
+					});
+				} else {
+					badStyle($('#signup input'));
+				}
+			});
+
+			// validate email on enter
+			$('#signup input').on('keyup', function(e) {
+				if(e.which == 13) {
+					$('#signup button').click();
+				}
+			});
