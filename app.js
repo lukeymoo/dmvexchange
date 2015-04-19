@@ -50,7 +50,7 @@ app.use(multer({
   changeDest: function(dest, req, res) {
     // if this was being post to feed, place into post within cdn folder
     if(req.originalUrl == '/market/post') {
-      return path.join(dest, '/post');
+      return path.join(dest, '/post_images');
     } else {
       // otherwise place into notarget because no location has been specified (cleaned regularly) 
       return path.join(dest, '/notarget');

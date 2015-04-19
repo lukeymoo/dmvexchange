@@ -11,8 +11,22 @@ var ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
 
 router.get('/', function(req, res, next) {
-	// load the feed
-	res.render('market', { title: 'Market', USER: req.session });
+
+
+	// Fetch some posts
+	var db = databaseManger.getDB();
+	var feed = db.collection('FEED');
+
+	feed.find({
+	}).sort({_id: -1}).limit(20).toArray(function(err, feedArr) {
+		if(err) {
+			console.log('[+] MongoDB error fetching market feed :: ' + err);
+			res.send('Server error occurred...<a href="/">Click here to return</a>');
+			return;
+		}
+		// render page
+		res.render('market', { title: 'Market', USER: req.session, FEED: feedArr});
+	});
 });
 
 router.post('/post', function(req, res, next) {
@@ -72,7 +86,9 @@ router.post('/post', function(req, res, next) {
 			}
 
 			// log the filename for assignment to post link field
-			imageLinks.push(req.files[fieldnames[i]][0].name);
+			imageLinks.push({
+				large_image: '/cdn/post_images/' + req.files[fieldnames[i]][0].name
+			});
 
 		}
 
@@ -83,10 +99,14 @@ router.post('/post', function(req, res, next) {
 	var feed = db.collection('FEED');
 
 	var post = {
-		from: req.session.USERNAME,
-		from_id: req.session.USER_ID,
+		creator_username: req.session.USERNAME,
+		creator_id: req.session.USER_ID,
 		text: req.body.d,
-		links: imageLinks
+		subscribers: 0,
+		visibility: 1,
+		comments: 0,
+		flags: 0,
+		image_links: imageLinks
 	};
 
 	// insert into feed

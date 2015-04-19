@@ -55,7 +55,7 @@ Market.discard = function() {
 		// restore file inputs
 		$('#file' + String(id)).remove();
 		var DOM = "<input type='file' class='photoUpload' name='photo' id='file" + String(id) + "' data-available='true'>";
-		$('#photoForm').append(DOM);
+		$('#uploadForm').append(DOM);
 	}
 
 	// replace inputcontainer with placeholder

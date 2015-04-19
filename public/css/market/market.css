@@ -167,9 +167,121 @@
 	background-color: rgb(255, 0, 0);
 }
 
+/*
+	Market Feed Styles
+	..
+	Structure ==
 
+	_id						-- Hidden
+	creator_username		-- Shown
+	creator_id				-- Hidden
+	text 					-- Shown with ellipsis overflow
+	subscribers				-- Shown
+	comments (count)		-- Shown
+	flags (count)			-- Shown
+	thumbnail				-- Shown
 
+*/
 
+#feedContainer {
+	margin-top: 25px;
+}
+
+#post {
+	margin-left: 15px;
+	display: inline-block;
+
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+
+	background-color: #fff;
+
+	-webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+	box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+
+	cursor: default;
+	pointer: default;
+
+	vertical-align: top;
+}
+
+#post #image_replacement {
+	min-width: 275px;
+	min-height: 200px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#post #thumbnail {
+	min-width: 275px;
+	min-height: 200px;
+}
+
+#post #thumbnail, #post #thumbnail img {
+	max-width: 275px;
+	max-height: 275px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#post #creator_username {
+}
+
+#post #creator_id {
+	display: none;
+}
+
+#post #text {
+	padding-top: 5px;
+	padding-left: 2px;
+	padding-right: 2px;
+	min-height: 50px;
+}
+
+#post #post_info {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#post #post_info, #post #post_misc {
+	padding-top: 1px;
+	padding-left: 2px;
+	padding-right: 2px;
+	padding-bottom: 2px;
+}
+
+#post #subscribers:before {
+}
+
+#post #subscribers {
+	display: none;
+}
+
+#post #comments:before {
+	content: 'Comments: ';
+	font-size: .8em;
+}
+
+#post #comments {
+	display: inline-block;
+}
+
+#post #flags:before {
+	content: 'Flags: ';
+	font-size: .8em;
+}
+
+#post #flags {
+	display: inline-block;
+	margin-left: 5px;
+}
 
 
 
