@@ -30,7 +30,7 @@ router.get('/', function(req, res, next) {
 		bIndex = parseInt(req.query.b);
 	}
 
-	var pageLimit = 3;
+	var pageLimit = 40;
 
 	// fetch sales count
 	feed.count({
@@ -72,6 +72,7 @@ router.get('/', function(req, res, next) {
 						USER: req.session,
 						SELL_FEED: saleArr,
 						BUY_FEED: buyArr,
+						buyCount: buyCount,
 						sellCount: sellCount,
 						sp: sIndex,
 						bp: bIndex,

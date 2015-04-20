@@ -37,22 +37,23 @@ $(function() {
 	});
 	*/
 
-	// hide both views
-	$('#feedContainer #buyContainer').hide();
-	$('#feedContainer #sellContainer').hide();
+	Market.hideAll();
 
 	// determine view from URL
 	if(getParam('v')) {
 		switch(getParam('v')) {
 			case 'sales':
-				$('#feedContainer #sellContainer').show();
+				Market.showSell();
 				break;
 			case 'requests':
-				$('#feedContainer #buyContainer').show();
+				Market.showBuy();
+				break;
+			default:
+				Market.showSell();
 				break;
 		}
 	} else {
-		$('#feedContainer #sellContainer').show();
+		Market.showSell();
 	}
 
 	// handle view tab clicks
@@ -61,17 +62,15 @@ $(function() {
 		switch($(this).attr('data-type')) {
 			case '[FOR_SALE]':
 				if(Market.viewType == '[BUY_OFFER]') {
-					// show/hide
-					$('#feedContainer #buyContainer').hide();
-					$('#feedContainer #sellContainer').show();
+					Market.hideAll();
+					Market.showSell();
 				}
 				Market.viewType = '[SELL_OFFER]';
 				break;
 			case '[REQUESTS]':
 				if(Market.viewType == '[SELL_OFFER]') {
-					// show/hide
-					$('#feedContainer #sellContainer').hide();
-					$('#feedContainer #buyContainer').show();
+					Market.hideAll();
+					Market.showBuy();
 				}
 				Market.viewType = '[BUY_OFFER]';
 				break;
@@ -256,8 +255,29 @@ $(function() {
 
 
 
+Market.showBuy = function() {
+	$('#feedContainer #buyContainer').show();
+	$('#buyPageControls').show();
+	$('#feedContainer #tabs #buy').attr('data-active', 'true');
+	this.viewType = '[BUY_OFFER]';
+};
 
+Market.showSell = function() {
+	$('#feedContainer #sellContainer').show();
+	$('#sellPageControls').show();
+	$('#feedContainer #tabs #sale').attr('data-active', 'true');
+	this.viewType = '[SELL_OFFER]';
+};
 
+Market.hideAll = function() {
+	// hide both views
+	$('#feedContainer #buyContainer').hide();
+	$('#feedContainer #sellContainer').hide();
+
+	// hide both page controls
+	$('#buyPageControls').hide();
+	$('#sellPageControls').hide();
+};
 
 Market.toDate = function(ISODate) {
 	var dateObj = new Date(ISODate);

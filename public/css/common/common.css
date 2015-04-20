@@ -173,6 +173,22 @@ a, a:active, a:visited, a:hover, a:link {
 	color: rgb(0, 90, 150);
 }
 
+#beta:before {
+	content: '*';
+}
+
+#beta {
+	display: inline-block;
+	margin-top: 35px;
+	margin-left: -125px;
+	position: absolute;
+	font-weight: bold;
+	font-size: .75em;
+	font-family: DX-REG;
+	text-transform: uppercase;
+	color: teal;
+}
+
 #headerControls {
 	display: inline-block;
 	vertical-align: top;

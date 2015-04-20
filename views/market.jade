@@ -53,17 +53,25 @@ block createBlock
 				div(id='post', tabindex=8) Post
 
 block marketFeedBlock
-	div(id='pageControls')
-		if sellCount > 3
+	div(id='sellPageControls')
+		if sellCount > 40
 			if sp > 1
-				a(href='/market?s=#{sp - 1}')
-					span(id='previous') Newer posts
+				a(href='/market?s=#{sp - 1}&b=#{bp}&v=sales')
+					span(id='previous') &#8592; Newer posts
 			if sp < sMax
-				a(href='/market?s=#{sp + 1}')
-					span(id='next') Older posts
+				a(href='/market?s=#{sp + 1}&b=#{bp}&v=sales')
+					span(id='next') Older posts &#8594;
+	div(id='buyPageControls')
+		if buyCount > 40
+			if bp > 1
+				a(href='/market?s=#{sp}&b=#{bp - 1}&v=requests')
+					span(id='previous') &#8592; Newer posts
+			if bp < bMax
+				a(href='/market?s=#{sp}&b=#{bp + 1}&v=requests')
+					span(id='next') Older posts &#8594;
 	div(id='feedContainer')
 		div(id='tabs')
-			span(id='sale', class='viewType', data-active='true', data-type='[FOR_SALE]') For sale
+			span(id='sale', class='viewType', data-active='false', data-type='[FOR_SALE]') For sale
 			span(id='buy', class='viewType', data-active='false', data-type='[REQUESTS]') Requests
 		div(id='sellContainer')
 			if SELL_FEED
@@ -79,8 +87,6 @@ block marketFeedBlock
 									span(class='creator_id') #{POST.creator_id}
 								span(class='creator_username') #{POST.creator_username}
 								span(class='text') #{POST.text}
-								span(class='subscriber_icon')
-								span(class='subscribers') #{POST.subscribers}
 								span(class='comment_icon')
 								span(class='comments') #{POST.comments}
 								span(class='flag_icon')
@@ -100,10 +106,6 @@ block marketFeedBlock
 									span(class='creator_id') #{POST.creator_id}
 								span(class='creator_username') #{POST.creator_username}
 								span(class='text') #{POST.text}
-								span(class='subscriber_icon')
-								span(class='subscribers') #{POST.subscribers}
 								span(class='comment_icon')
 								span(class='comments') #{POST.comments}
-								span(class='flag_icon')
-								span(class='flags') #{POST.flags}
 								span(class='timestamp') #{POST.timestamp}
