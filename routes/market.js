@@ -4,7 +4,7 @@ var express = require('express');
 var router = express.Router();
 
 var formManager = require('../modules/form/form');
-var databaseManger = require('../modules/database/database');
+var dbManager = require('../modules/database/database');
 var sessionManager = require('../modules/session/session');
 var ObjectID = require('mongodb').ObjectID;
 
@@ -12,34 +12,67 @@ var fs = require('fs');
 
 router.get('/', function(req, res, next) {
 
-
-	// Fetch some posts
-	var db = databaseManger.getDB();
+	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
 
+	var sIndex = 0;
+	var bIndex = 0;
+
+	// see if we received a valid sale index
+	if(!('si' in req.query) || parseInt(req.query.si) < 0) {
+	} else {
+		sIndex = parseInt(req.query.si);
+	}
+
+	// see if we receieved a valid buy index
+	if(!('bi' in req.query) || parseInt(req.query.bi) < 0) {
+	} else {
+		bIndex = parseInt(req.query.bi);
+	}
+
+	// fetch sales
 	feed.find({
-	}).sort({_id: -1}).limit(20).toArray(function(err, feedArr) {
-		if(err) {
-			console.log('[+] MongoDB error fetching market feed :: ' + err);
-			res.send('Server error occurred...<a href="/">Click here to return</a>');
-			return;
-		}
+		post_type: '[SELL_OFFER]'
+	}).sort({_id: -1}).skip(sIndex).limit(25).toArray(function(err, saleArr) {
+		
+		// fetch buyer posts
+		feed.find({
+			post_type: '[BUY_OFFER]'
+		}).sort({_id: -1}).skip(bIndex).limit(25).toArray(function(err, buyArr) {
 
-		if(!feedArr) {
-			feedArr = [];
-		}
+			// turn ObjectID's into timestamps so browsers can parse dates
+			for(var i = 0; i < saleArr.length; i++) {
+				saleArr[i].timestamp = ObjectID(saleArr[i]._id).getTimestamp();
+			}
+			for(var i = 0; i < buyArr.length; i++) {
+				buyArr[i].timestamp = ObjectID(buyArr[i]._id).getTimestamp();
+			}
 
-		// add timestamps
-		for(var i = 0; i < feedArr.length; i++) {
-			feedArr[i].timestamp = toDate(ObjectID(feedArr[i]._id).getTimestamp());
-		}
-
-		// render page
-		res.render('market', { title: 'Market', USER: req.session, FEED: feedArr});
+			res.render('market', {
+				title: 'Market',
+				USER: req.session,
+				SELL_FEED: saleArr,
+				BUY_FEED: buyArr
+			});
+		});
 	});
 });
 
+
+/*
+	ERROR CODES
+	-------------
+	DONE? (X == ADDED TO ERROR CHECKING)
+	[ ] no_type					=>		No post type specified (missing `t` field variable in form)
+	[ ] invalid_type 			=>		Invalid `t` field (can only be [SALE] || [PURCHASE])
+	[ ] no_description			=>		Missing description
+	[ ] invalid_description		=>		Description length is not between 6-360
+	[ ] sale_no_images			=>		Post type is a sale but it has no images of product...(sketchy)
+	[ ] invalid_mimetype		=> 		Uploaded file has a non-image mimetype...(Prob a virus payload)
+*/
+
 router.post('/post', function(req, res, next) {
+
 	// ensure the user is logged in
 	if(!sessionManager.isLoggedIn(req.session)) {
 		res.redirect('/signin');
@@ -52,6 +85,23 @@ router.post('/post', function(req, res, next) {
 		return;
 	}
 
+	if(!('USER_ID' in req.session) || !req.session.USER_ID.length) {
+		res.redirect('/signin');
+		return;
+	}
+
+	// Ensure we've recieved a post type
+	if(!('t' in req.body) || !req.body.t.length) {
+		res.redirect('/market?err=no_type');
+		return;
+	}
+
+	// Validate the type
+	if(req.body.t != '[BUY_OFFER]' && req.body.t != '[SELL_OFFER]') {
+		res.redirect('/market?err=invalid_type');
+		return;
+	}
+
 	// ensure we recieved a description variable
 	if(!('d' in req.body) || !req.body.d.length) {
 		res.redirect('/market?err=no_description');
@@ -59,7 +109,7 @@ router.post('/post', function(req, res, next) {
 	}
 
 	// validate description
-	if(req.body.d.length < 1 || req.body.d.length > 360) {
+	if(req.body.d.length <= 4 || req.body.d.length >= 361) {
 		res.redirect('/market?err=invalid_description');
 		return;
 	}
@@ -68,6 +118,14 @@ router.post('/post', function(req, res, next) {
 	var fieldnames = [];
 	for(var i in req.files) {
 		fieldnames.push(req.files[i][0].fieldname);
+	}
+
+	// Check if we NEEDED ( Sales ) the images
+	if(req.body.t == '[SELL_OFFER]') {
+		if(fieldnames.length == 0) {
+			res.redirect('/market?err=sale_no_images');
+			return;
+		}
 	}
 
 	// if we recieved files
@@ -97,25 +155,33 @@ router.post('/post', function(req, res, next) {
 
 			// log the filename for assignment to post link field
 			imageLinks.push({
-				large_image: '/cdn/post_images/' + req.files[fieldnames[i]][0].name
+				large: '/cdn/post_images/' + req.files[fieldnames[i]][0].name || ''
 			});
 
+		}
+
+		var hasImages = false;
+
+		if(imageLinks.length > 0) {
+			hasImages = true;
 		}
 
 	}
 
 	// insert post into database
-	var db = databaseManger.getDB();
+	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
 
 	var post = {
 		creator_username: req.session.USERNAME,
 		creator_id: req.session.USER_ID,
+		post_type: req.body.t,
 		text: req.body.d,
 		subscribers: 0,
 		visibility: 1,
 		comments: 0,
 		flags: 0,
+		has_images: hasImages,
 		image_links: imageLinks
 	};
 

@@ -32,6 +32,47 @@ router.get('*', function(req, res, next) {
 	next();
 });
 
+// get market feed
+router.get('/get_feed', function(req, res, next) {
+
+	// ensure we recieved a valid request
+	if(!('t' in req.query) || req.query.t.length == 0) {
+		res.send({status: 'DX-REJECTED', message: 'No request type specified'});
+		return;
+	}
+
+	// ensure we've got an index to start at
+	if(!('i' in req.query) || parseInt(req.query.i) < 0) {
+		res.send({status: 'DX-REJECTED', message: 'No post index specified'});
+		return;
+	}
+
+	// type of request ? ( [BUY_OFFER] || [SELL_OFFER] )
+	if(req.query.t != '[BUY_OFFER]' && req.query.t != '[SELL_OFFER]') {
+		res.send({status: 'DX-REJECTED', message: 'Invalid request type'});
+		return;
+	}
+
+	// prepare for db access
+	var db = dbManager.getDB();
+	var feed = db.collection('FEED');
+
+	feed.find({
+		post_type: req.query.t,
+		visibility: 1
+	}).skip(parseInt(req.query.i)).limit(20).sort({_id: -1}).toArray(function(err, feedArr) {
+		if(err) {
+			console.log('[-] MongoDB error fetching feed :: ' + err);
+			res.send({status: 'DX-FAILED', message: 'Error occurred'});
+			return;
+		}
+
+		feedArr = feedArr || false;
+		res.send({status: 'DX-OK', message: feedArr});
+		return;
+	});
+});
+
 // save landing page emails
 router.get('/save_landing_email', function(req, res, next) {
 	var db = dbManager.getDB();
@@ -48,7 +89,7 @@ router.get('/save_landing_email', function(req, res, next) {
 		return;
 	}
 
-	// check if exists
+	// check if email exists
 	emailCol.findOne({
 		email: req.query.email.toLowerCase()
 	}, function(err, doc) {

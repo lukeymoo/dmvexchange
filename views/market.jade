@@ -25,61 +25,62 @@ block createBlock
 		div(id='createPlaceholder') Create a post...
 			div(id='createCamera')
 		div(id='inputContainer')
+			div(id='postType')
+				span(id='sale', data-type='sale', data-active='true', class='postType', tabindex=1) Sale
+				span(id='purchase', data-type='purchase', data-active='false', class='postType', tabindex=2) Request
 			div(id='cancelButton') &times;
-			textarea
+			textarea(tabindex=3)
 			div(id='controls')
 				form(id='uploadForm', enctype='multipart/form-data', action='/market/post', method='post')
 					textarea(class='photoUpload', name='d', id='description')
+					input(type='text', class='photoUpload', name='t', id='type', value='[SALE]')
 					input(type='file', class='photoUpload', name='photo1', id='file1', data-available='true')
 					input(type='file', class='photoUpload', name='photo2', id='file2', data-available='false')
 					input(type='file', class='photoUpload', name='photo3', id='file3', data-available='false')
 					input(type='file', class='photoUpload', name='photo4', id='file4', data-available='false')
-				div(id='handler1', class='addPhoto', data-available='false', data-image='false')
+				div(id='handler1', class='addPhoto', data-available='false', data-image='false', tabindex=4)
 					div(id='remove', data-for='handler1') &times;
 					img(src='/img/camera_blur.png')
-				div(id='handler2', class='addPhoto', data-available='false', data-image='false')
+				div(id='handler2', class='addPhoto', data-available='false', data-image='false', tabindex=5)
 					div(id='remove', data-for='handler2') &times;
 					img(src='/img/camera_blur.png')
-				div(id='handler3', class='addPhoto', data-available='false', data-image='false')
+				div(id='handler3', class='addPhoto', data-available='false', data-image='false', tabindex=6)
 					div(id='remove', data-for='handler3') &times;
 					img(src='/img/camera_blur.png')
-				div(id='handler4', class='addPhoto', data-available='false', data-image='false')
+				div(id='handler4', class='addPhoto', data-available='false', data-image='false', tabindex=7)
 					div(id='remove', data-for='handler4') &times;
 					img(src='/img/camera_blur.png')
-				div(id='post') Post
+				div(id='post', tabindex=8) Post
 
 block marketFeedBlock
 	div(id='feedContainer')
-		div(id='withImage')
-			if FEED
-				each POST in FEED
+		div(id='tabs')
+			span(id='sale', data-active='true') What people are selling
+			span(id='buy', data-active='false') What people want
+		div(id='sellContainer')
+			if SELL_FEED
+				each POST in SELL_FEED
 					if POST.visibility > 0
-						if POST.image_links.length > 0
-							div(id='post')
-								div(id='thumbnail')
-										img(src='#{POST.image_links[0].large_image}', alt='bad link')
-								div(id='post_info')
-									div(id='creator_username') #{POST.creator_username}
-									div(id='creator_id') #{POST.creator_id}
-									div(id='text') #{POST.text}
-								div(id='post_misc')
-									div(id='subscribers') #{POST.subscribers}
-									div(id='comments') #{POST.comments}
-									div(id='flags') #{POST.flags}
-									div(id='date') #{POST.timestamp}
-		div(id='withoutImage')
-			if FEED
-				each POST in FEED
-					if POST.visibility > 0
-						if POST.image_links.length == 0
-										div(id='post', class='noimage')
-											div(id='thumbnail')
-											div(id='post_info')
-												div(id='creator_username') #{POST.creator_username}
-												div(id='creator_id') #{POST.creator_id}
-												div(id='text') #{POST.text}
-											div(id='post_misc')
-												div(id='subscribers') #{POST.subscribers}
-												div(id='comments') #{POST.comments}
-												div(id='flags') #{POST.flags}
-												div(id='date') #{POST.timestamp}
+						div(class='post', data-type='#{POST.post_type}')
+							if POST.has_images
+								span(class='thumbnail')
+									img(src='#{POST.image_links[0].large}')
+							div(class='post_info')
+								div(class='hidden')
+									span(class='post_id') #{POST._id}
+									span(class='creator_id') #{POST.creator_id}
+								span(class='creator_username') #{POST.creator_username}
+								span(class='text') #{POST.text}
+									| THIUS AIDJASD JNSADJNA SJNAS KDNSA JN
+									| IADnDJ NSJD NSAJDN AJSDNAJS N
+									| IASMD KJASMD ASNDJ NSA JDNASD JNSAD JASND JNDSA JSA NDNJ
+									| NADSJ NJSA NDJSAD NSAJ NAJS NDJSA NJSA NDJSANDKASDOIWMADKS NKJNDS AK
+									| SAIMDSA JIWDA MKSDM JSANDWJEDKASDO M ASKDMKSA M KDASDIWDMN ASMK SDA
+								span(class='subscriber_icon')
+								span(class='subscribers') #{POST.subscribers}
+								span(class='comment_icon')
+								span(class='comments') #{POST.comments}
+								span(class='flag_icon')
+								span(class='flags') #{POST.flags}
+								span(class='timestamp') #{POST.timestamp}
+		div(id='buyContainer')

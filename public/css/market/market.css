@@ -1,4 +1,5 @@
 #createContainer {
+	margin-top: 15px;
 	width: 50%;
 	margin-left: auto;
 	margin-right: auto;
@@ -25,6 +26,8 @@
 
 #createPlaceholder {
 	display: inline-block;
+
+	
 	width: 100%;
 	height: 35px;
 	line-height: 35px;
@@ -39,8 +42,11 @@
 
 #inputContainer {
 	display: none;
+
 	width: 100%;
-	min-height: 150px;
+	min-height: 145px;
+
+	margin-top: 25px;
 
 	background-color: #fff;
 	padding: 5px 5px;
@@ -48,6 +54,33 @@
 	-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
 	-moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
 	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+#inputContainer #postType {
+	position: absolute;
+	margin-top: -28px;
+	margin-left: -5px;
+	font-family: DX-REG;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#inputContainer #postType span {
+	z-index: 1;
+	padding: 6px 30px;
+	background-color: #ddd;
+	opacity: .8;
+}
+
+#inputContainer #postType span[data-active='true'] {
+	opacity: 1;
+	background-color: rgb(0, 200, 225);
+}
+
+#inputContainer #postType span[data-active='false']:hover {
+	opacity: .8;
+	background-color: rgb(245, 245, 245);
 }
 
 #inputContainer textarea {
@@ -63,9 +96,6 @@
 	border: none;
 
 	font-size: .9em;
-
-	cursor: pointer;
-	pointer: hand;
 }
 
 #inputContainer textarea:focus {
@@ -73,7 +103,7 @@
 }
 
 #inputContainer #controls {
-	min-height: 40px;
+	min-height: 30px;
 	border-top: 1px solid rgb(230, 230, 230);
 	-webkit-user-select: none;
 	-moz-user-select: none;
@@ -183,145 +213,115 @@
 */
 
 #feedContainer {
-	margin-top: 25px;
 }
 
-#feedContainer .noimage {
+#feedContainer #tabs {
+	display: block;
 }
 
-#feedContainer #post {
-	margin-left: 25px;
-	margin-bottom: 15px;
-	display: inline-block;
-
-	border: 1px solid rgba(0, 0, 0, 0.15);
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
-
+#feedContainer #tabs span[data-active='true'] {
 	background-color: #fff;
-
-	-webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
-	-moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
-	box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
-
-	cursor: default;
-	pointer: default;
-
-	vertical-align: top;
 }
 
-#feedContainer #post #image_replacement {
-	min-width: 275px;
-	min-height: 200px;
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
-
-	cursor: pointer;
-	pointer: hand;
+#feedContainer #tabs span[data-active='false'] {
 }
 
-#feedContainer #post #thumbnail {
+#feedContainer #sellContainer {
 }
 
-#feedContainer #post #thumbnail, #post #thumbnail img {
+#feedContainer #buyContainer {
+}
+
+.post {
+	display: inline-block;
 	max-width: 275px;
-	max-height: 275px;
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
+	min-height: 275px;
 
-	cursor: pointer;
-	pointer: hand;
+	margin-top: 10px;
+	margin-left: 20px;
+
+	font-family: DX-REG;
+	background-color: #fff;
+	border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-#feedContainer #post #creator_username {
-	padding-left: 2px;
-	font-weight: bold;
-	font-size: .85em;
-}
-
-#feedContainer #post #creator_id {
-	display: none;
-}
-
-#feedContainer #post #text {
-	padding-top: 5px;
-	padding-left: 2px;
-	padding-right: 2px;
-	min-height: 50px;
-}
-
-#feedContainer #post #post_info {
-	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-#feedContainer #post #post_info, #post #post_misc {
-	padding-top: 1px;
-	padding-left: 2px;
-	padding-right: 2px;
-}
-
-#feedContainer #post #subscribers:before {
-}
-
-#feedContainer #post #subscribers {
-	display: none;
-}
-
-#feedContainer #post #comments:before {
-	content: 'Comments: ';
-	font-size: .8em;
-}
-
-#feedContainer #post #comments {
-	display: inline-block;
-	color: rgb(0, 100, 200);
-	font-family: DX-COND;
-}
-
-#feedContainer #post #flags:before {
-	content: 'Flags: ';
-	font-size: .9em;
-}
-
-#feedContainer #post #flags {
-	display: inline-block;
-	margin-left: 5px;
-	color: rgb(200, 0, 0);
-	font-family: DX-COND;
-}
-
-#feedContainer #post #date {
-	float: right;
-	padding-top: 4px;
-	vertical-align: bottom;
-	display: inline-block;
-	font-size: .8em;
-	font-weight: bold;
-}
-
-#feedContainer #withImage {
-	width: 620px;
-	padding-right: 10px;
-	float: left;
-}
-
-#feedContainer #withImage #post {
+.post .thumbnail {
 	width: 275px;
-}
+	height: 275px;
 
-#feedContainer #withoutImage {
-	position: absolute;
-	right: 0px;
-	width: 375px;
-	margin-right: 8px;
-}
-
-#feedContainer #withoutImage #post {
-	width: 100%;
+	padding: 0px;
 	margin: 0px;
-	margin-bottom: 10px;
 }
 
+.post .thumbnail img {
+	width: 275px;
+	height: 275px;
+	padding: 0px;
+	margin: 0px;
+}
 
+.post .post_info {
+	padding: 0px 2px;
+}
 
+.post .post_info .hidden {
+	display: none;
+}
 
+.post .post_info span {
+	display: block;
+}
+
+.post .creator_username {
+	padding-top: 3px;
+	color: rgb(0, 100, 230);
+}
+
+.post .text {
+	padding: 2px 0px;
+	border-top: 1px solid rgba(0, 0, 0, 0.125);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+	max-height: 75px;
+	overflow: hidden;
+}
+
+.post .post_info .subscribers,
+.post .post_info .comments,
+.post .post_info .flags,
+.post .post_info .subscriber_icon,
+.post .post_info .comment_icon,
+.post .post_info .flag_icon,
+.post .post_info .timestamp {
+	display: inline-block;
+	height: 16px;
+	padding: 0px 2px;
+	vertical-align: middle;
+}
+
+.post .post_info .timestamp {
+	float: right;
+}
+
+.post .post_info .subscriber_icon {
+	width: 16px;
+	height: 16px;
+	opacity: .7;
+	background: url('/img/subscriber_icon.jpg') no-repeat center center;
+	background-size: 16px 16px;
+}
+
+.post .post_info .comment_icon {
+	width: 16px;
+	height: 16px;
+	opacity: .7;
+	background: url('/img/chat_bubble.png') no-repeat center center;
+	background-size: 16px 16px;
+}
+
+.post .post_info .flag_icon {
+	width: 16px;
+	height: 16px;
+	opacity: .8;
+	background: url('/img/flag_icon.png') no-repeat center center;
+	background-size: 16px 16px;
+}

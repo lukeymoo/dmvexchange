@@ -3,10 +3,263 @@
 
 var Market = {
 	isOpen: false,
-	images: [4]
+	images: [4],
+	viewIndex: 0,
+	viewType: '[SELL_OFFER]',
+	postType: '[SELL_OFFER]'
 };
 
-Market.send = function(fData, callback) {
+$(function() {
+
+	var photoButton = {
+		blur: '/img/camera_blur.png',
+		focus: '/img/camera_focus.png'
+	};
+
+	$('#handler1').attr('data-available', 'true');
+
+	// convert all ISODates in products to more compact format
+	$('.post').find('.timestamp').each(function() {
+		$(this).html(Market.toDate($(this).html()));
+	});
+
+	/*
+	// Grab feed
+	Market.get(function(res) {
+		if(res.status == 'DX-OK') {
+			// Parse returned posts and update index
+			for(var post in res.message) {
+				$('#feedContainer').append('POST');
+			}
+		} else {
+			spawnMessage(res.message, false);
+		}
+	});
+	*/
+
+	// handle post type tab clicks
+	$(document).on('click', '.postType', function() {
+		// get the type & set the post state to it
+		switch($(this).attr('data-type')) {
+			case '[SELL_OFFER]':
+				Market.postType = '[SELL_OFFER]';
+				break;
+			case '[BUY_OFFER]':
+				Market.postType = '[BUY_OFFER]';
+				break;
+		}
+
+		// set all tabs to false
+		$('.postType').each(function() {
+			$(this).attr('data-active', 'false');
+		});
+
+		// set clicked tab to true
+		$(this).attr('data-active', 'true');
+	});
+
+	// Send post data to the server for validation & postage
+	$('#uploadForm').on('submit', function(e) {
+
+		// Update form type
+		$('#uploadForm #type').val(Market.postType);
+
+		// Ensure they've entered some text
+		if($('#inputContainer textarea').val().length <= 4
+			|| $('#inputContainer textarea').val().length >= 361) {
+			e.preventDefault();
+			spawnMessage('Message text must be 6-360 characters', false);
+			return false;
+		}
+
+		// Ensure [SALES] have at least 1 image file selected
+		if(Market.postType == '[SELL_OFFER]') {
+			// loop through market images ensure at least 1 is non false
+			var amt = 0;
+			for(var i in Market.images) {
+				if(Market.images[i]) {
+					amt++;
+				}
+			}
+			if(amt == 0) {
+				spawnMessage('Sales must have at least 1 image', false);
+				return false;
+			}
+		}
+
+		// Set inputcontainer textarea to hidden input field
+		$('#uploadForm #description').val($('#inputContainer textarea').val());
+
+		// Remove empty input fields
+		$('#uploadForm').find('input[type=file]').each(function() {
+			if(!$(this).val().length) {
+				$(this).remove();
+			}
+		});
+	});
+
+	// Allow use of send button
+	$('#inputContainer #post').on('click', function() {
+		$('#uploadForm').submit();
+	});
+
+	// Events for camera buttons
+	$(document).on({
+		mouseenter: function() {
+			if($(this).attr('data-image') == 'false') {
+				$(this).find('img').attr('src', photoButton.focus);
+			}
+		},
+		mouseleave: function() {
+			if($(this).attr('data-image') == 'false') {
+				$(this).find('img').attr('src', photoButton.blur);
+			}
+		},
+		click: function(e) {
+			// Ensure user didnt click the X button
+			if(e.target.nodeName == 'DIV') {
+				switch($(e.target).attr('data-for')) {
+					case 'handler1':
+						Market.removeImage('file1');
+						break;
+					case 'handler2':
+						Market.removeImage('file2');
+						break;
+					case 'handler3':
+						Market.removeImage('file3');
+						break;
+					case 'handler4':
+						Market.removeImage('file4');
+						break;
+				}
+				return;
+			}
+			// Click corresponding file #
+			switch($(this).attr('id')) {
+				case 'handler1':
+					$('#file1').click(); // go to INPUT HANDLER
+					break;
+				case 'handler2':
+					$('#file2').click();
+					break;
+				case 'handler3':
+					$('#file3').click();
+					break;
+				case 'handler4':
+					$('#file4').click();
+					break;
+			}
+		}
+	}, '.addPhoto');
+
+	// Handle file selection -- INPUT HANDLER
+	$(document).on('change', '.photoUpload', function() {
+		// determine which file input it was
+		Market.validateFile($(this).attr('id'));
+	});
+
+	// initialize images to false
+	for(var i = 0; i < 4; i++) {
+		Market.images[i] = false;
+	}
+
+	// Expand create post on click
+	$(document).on('click', '#createPlaceholder', function() {
+		if(state.LOGGED_IN) {
+			Market.expand();
+		} else {
+			window.location.href = '/signin';
+		}
+
+	});
+
+	// Discard post on click
+	$(document).on('click', '#inputContainer #cancelButton', function() {
+		Market.discard();
+	});
+
+	// Discard post on ESCAPE
+	$(document).on('keydown', function(e) {
+		if(e.which == 27) {
+			if(Market.isOpen) {
+				Market.discard();
+			}
+		}
+	});
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Market.toDate = function(ISODate) {
+	var dateObj = new Date(ISODate);
+	var time = '';
+
+	var period = 'am';
+
+	var monthArr = [];
+	monthArr[0] = 'Jan';
+	monthArr[1] = 'Feb';
+	monthArr[2] = 'Mar';
+	monthArr[3] = 'Apr';
+	monthArr[4] = 'May';
+	monthArr[5] = 'Jun';
+	monthArr[6] = 'Jul';
+	monthArr[7] = 'Aug';
+	monthArr[8] = 'Sept';
+	monthArr[9] = 'Oct';
+	monthArr[10] = 'Nov';
+	monthArr[11] = 'Dec';
+
+	var month = monthArr[dateObj.getMonth()];
+	var day = dateObj.getDate();
+	var hour = dateObj.getHours();
+	if(hour > 12) {
+		period = 'pm';
+		hour -= 12;
+	}
+	var minute = dateObj.getMinutes();
+	if(minute < 10) {
+		minute = '0' + minute;
+	}
+
+	time = month + '. ' + day + '  ' + hour + ':' + minute + ' ' + period;
+
+	return time;
+};
+
+
+// Retrieve feed for current view
+Market.get = function(callback) {
+	$.ajax({
+		url: '/api/get_feed',
+		data: {
+			t: this.viewType,
+			i: this.viewIndex
+		}
+	}).done(function(res) {
+		callback(res);
+	});
 };
 
 // expand input area for creation of listing
@@ -20,6 +273,11 @@ Market.expand = function() {
 
 // Discard and collapse input
 Market.discard = function() {
+
+	// reset post type
+	$('#postType #sale').attr('data-active', 'true');
+	$('#postType #purchase').attr('data-active', 'false');
+	this.postType = '[SELL_OFFER]';
 
 	var id = 1; // holds i in for which corresponds to handler || file id number
 
@@ -102,9 +360,10 @@ Market.validateFile = function(inputID) {
 						break;
 				}
 
-				// did it pass test ?
+				// did it pass test ? if not ensure image data is set to false
 				if(!good) {
 					spawnMessage('Selected file must be an image', false);
+					Market.images[0] = false;
 					return;
 				}
 
@@ -159,6 +418,7 @@ Market.validateFile = function(inputID) {
 				// did it pass test ?
 				if(!good) {
 					spawnMessage('Selected file must be an image', false);
+					Market.images[1] = false;
 					return;
 				}
 
@@ -212,6 +472,7 @@ Market.validateFile = function(inputID) {
 				// did it pass test ?
 				if(!good) {
 					spawnMessage('Selected file must be an image', false);
+					Market.images[2] = false;
 					return;
 				}
 
@@ -265,6 +526,7 @@ Market.validateFile = function(inputID) {
 				// did it pass test ?
 				if(!good) {
 					spawnMessage('Selected file must be an image', false);
+					Market.images[3] = false;
 					return;
 				}
 
@@ -433,124 +695,30 @@ Market.checkExt = function(filename) {
 	}
 };
 
-$(function() {
 
-	var photoButton = {
-		blur: '/img/camera_blur.png',
-		focus: '/img/camera_focus.png'
-	};
 
-	$('#handler1').attr('data-available', 'true');
 
-	// Send post data to the server for validation & postage
-	$('#uploadForm').on('submit', function(e) {
 
-		if($('#inputContainer textarea').val().length < 6
-			|| $('#inputContainer textarea').val().length > 360) {
-			e.preventDefault();
-			spawnMessage('Message text must be 6-360 characters', false);
-			return false;
-		}
-		
 
-		// Set inputcontainer textarea to hidden input field
-		$('#uploadForm #description').val($('#inputContainer textarea').val());
 
-		// Remove empty input fields
-		$('#uploadForm').find('input[type=file]').each(function() {
-			if(!$(this).val().length) {
-				$(this).remove();
-			}
-		});
-	});
 
-	// Allow use of send button
-	$('#inputContainer #post').on('click', function() {
-		$('#uploadForm').submit();
-	});
 
-	// Events for camera buttons
-	$(document).on({
-		mouseenter: function() {
-			if($(this).attr('data-image') == 'false') {
-				$(this).find('img').attr('src', photoButton.focus);
-			}
-		},
-		mouseleave: function() {
-			if($(this).attr('data-image') == 'false') {
-				$(this).find('img').attr('src', photoButton.blur);
-			}
-		},
-		click: function(e) {
-			// Ensure user didnt click the X button
-			if(e.target.nodeName == 'DIV') {
-				switch($(e.target).attr('data-for')) {
-					case 'handler1':
-						Market.removeImage('file1');
-						break;
-					case 'handler2':
-						Market.removeImage('file2');
-						break;
-					case 'handler3':
-						Market.removeImage('file3');
-						break;
-					case 'handler4':
-						Market.removeImage('file4');
-						break;
-				}
-				return;
-			}
-			// Click corresponding file #
-			switch($(this).attr('id')) {
-				case 'handler1':
-					$('#file1').click(); // go to INPUT HANDLER
-					break;
-				case 'handler2':
-					$('#file2').click();
-					break;
-				case 'handler3':
-					$('#file3').click();
-					break;
-				case 'handler4':
-					$('#file4').click();
-					break;
-			}
-		}
-	}, '.addPhoto');
 
-	// Handle file selection -- INPUT HANDLER
-	$(document).on('change', '.photoUpload', function() {
-		// determine which file input it was
-		Market.validateFile($(this).attr('id'));
-	});
 
-	// initialize images to false
-	for(var i = 0; i < 4; i++) {
-		Market.images[i] = false;
-	}
 
-	// Expand create post on click
-	$(document).on('click', '#createPlaceholder', function() {
-		if(state.LOGGED_IN) {
-			Market.expand();
-		} else {
-			window.location.href = '/signin';
-		}
 
-	});
 
-	// Discard post on click
-	$(document).on('click', '#inputContainer #cancelButton', function() {
-		Market.discard();
-	});
 
-	// Discard post on ESCAPE
-	$(document).on('keydown', function(e) {
-		if(e.which == 27) {
-			if(Market.isOpen) {
-				Market.discard();
-			}
-		}
-	});
 
-});
+
+
+
+
+
+
+
+
+
+
+
+
