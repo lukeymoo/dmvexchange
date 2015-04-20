@@ -289,6 +289,10 @@ a, a:active, a:visited, a:hover, a:link {
 	cursor: pointer;
 	pointer: hand;
 
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+
 	-webkit-transition: background-color .075s linear 0s;
 	-moz-transition: background-color .075s linear 0s;
 	transition: background-color .075s linear 0s;

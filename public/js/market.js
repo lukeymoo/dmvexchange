@@ -37,6 +37,54 @@ $(function() {
 	});
 	*/
 
+	// hide both views
+	$('#feedContainer #buyContainer').hide();
+	$('#feedContainer #sellContainer').hide();
+
+	// determine view from URL
+	if(getParam('v')) {
+		switch(getParam('v')) {
+			case 'sales':
+				$('#feedContainer #sellContainer').show();
+				break;
+			case 'requests':
+				$('#feedContainer #buyContainer').show();
+				break;
+		}
+	} else {
+		$('#feedContainer #sellContainer').show();
+	}
+
+	// handle view tab clicks
+	$(document).on('click', '.viewType', function() {
+
+		switch($(this).attr('data-type')) {
+			case '[FOR_SALE]':
+				if(Market.viewType == '[BUY_OFFER]') {
+					// show/hide
+					$('#feedContainer #buyContainer').hide();
+					$('#feedContainer #sellContainer').show();
+				}
+				Market.viewType = '[SELL_OFFER]';
+				break;
+			case '[REQUESTS]':
+				if(Market.viewType == '[SELL_OFFER]') {
+					// show/hide
+					$('#feedContainer #sellContainer').hide();
+					$('#feedContainer #buyContainer').show();
+				}
+				Market.viewType = '[BUY_OFFER]';
+				break;
+		}
+
+		// set all tabs false
+		$('.viewType').each(function() {
+			$(this).attr('data-active', 'false');
+		});
+
+		$(this).attr('data-active', 'true');
+	});
+
 	// handle post type tab clicks
 	$(document).on('click', '.postType', function() {
 		// get the type & set the post state to it
@@ -73,7 +121,7 @@ $(function() {
 		}
 
 		// Ensure [SALES] have at least 1 image file selected
-		if(Market.postType == '[SELL_OFFER]') {
+		if($('#uploadForm #type').val() == '[SELL_OFFER]') {
 			// loop through market images ensure at least 1 is non false
 			var amt = 0;
 			for(var i in Market.images) {

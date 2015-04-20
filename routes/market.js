@@ -15,45 +15,73 @@ router.get('/', function(req, res, next) {
 	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
 
-	var sIndex = 0;
-	var bIndex = 0;
+	var sIndex = 1;
+	var bIndex = 1;
 
 	// see if we received a valid sale index
-	if(!('si' in req.query) || parseInt(req.query.si) < 0) {
+	if(!('s' in req.query) || parseInt(req.query.s) < 1) {
 	} else {
-		sIndex = parseInt(req.query.si);
+		sIndex = parseInt(req.query.s);
 	}
 
 	// see if we receieved a valid buy index
-	if(!('bi' in req.query) || parseInt(req.query.bi) < 0) {
+	if(!('b' in req.query) || parseInt(req.query.b) < 1) {
 	} else {
-		bIndex = parseInt(req.query.bi);
+		bIndex = parseInt(req.query.b);
 	}
 
-	// fetch sales
-	feed.find({
-		post_type: '[SELL_OFFER]'
-	}).sort({_id: -1}).skip(sIndex).limit(25).toArray(function(err, saleArr) {
-		
-		// fetch buyer posts
-		feed.find({
-			post_type: '[BUY_OFFER]'
-		}).sort({_id: -1}).skip(bIndex).limit(25).toArray(function(err, buyArr) {
+	var pageLimit = 3;
 
-			// turn ObjectID's into timestamps so browsers can parse dates
-			for(var i = 0; i < saleArr.length; i++) {
-				saleArr[i].timestamp = ObjectID(saleArr[i]._id).getTimestamp();
-			}
-			for(var i = 0; i < buyArr.length; i++) {
-				buyArr[i].timestamp = ObjectID(buyArr[i]._id).getTimestamp();
-			}
+	// fetch sales count
+	feed.count({
+		post_type: '[SELL_OFFER]',
+		visibility: {
+			$gt: 0
+		}
+	}, function(err, sellCount) {
 
-			res.render('market', {
-				title: 'Market',
-				USER: req.session,
-				SELL_FEED: saleArr,
-				BUY_FEED: buyArr
+		//fetch buy count
+		feed.count({
+			post_type: '[BUY_OFFER]',
+			visibility: {
+				$gt: 0
+			}
+		}, function(err, buyCount) {
+
+
+			// fetch sales
+			feed.find({
+				post_type: '[SELL_OFFER]'
+			}).sort({$natural: -1}).skip((sIndex - 1) * pageLimit).limit(pageLimit).toArray(function(err, saleArr) {
+				
+				// fetch buyer posts
+				feed.find({
+					post_type: '[BUY_OFFER]'
+				}).sort({$natural: -1}).skip((bIndex - 1) * pageLimit).limit(pageLimit).toArray(function(err, buyArr) {
+
+					// turn ObjectID's into timestamps so browsers can parse dates
+					for(var i = 0; i < saleArr.length; i++) {
+						saleArr[i].timestamp = ObjectID(saleArr[i]._id).getTimestamp();
+					}
+					for(var i = 0; i < buyArr.length; i++) {
+						buyArr[i].timestamp = ObjectID(buyArr[i]._id).getTimestamp();
+					}
+
+					res.render('market', {
+						title: 'Market',
+						USER: req.session,
+						SELL_FEED: saleArr,
+						BUY_FEED: buyArr,
+						sellCount: sellCount,
+						sp: sIndex,
+						bp: bIndex,
+						sMax: sellCount/pageLimit,
+						bMax: buyCount/pageLimit
+					});
+				});
 			});
+
+
 		});
 	});
 });

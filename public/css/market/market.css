@@ -212,24 +212,97 @@
 
 */
 
+#pageControls {
+	float: right;
+	margin-top: 7px;
+	margin-right: 10px;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+#pageControls span {
+	display: inline-block;
+	padding: 10px 25px;
+
+	color: black;
+	background-color: rgb(190, 190, 190);
+
+	border-radius: 3px;
+}
+
+#pageControls span:hover {
+	background-color: rgb(210, 210, 210);
+}
+
+#pageControls #next {
+	margin-left: 25px;
+}
+
 #feedContainer {
+	margin-top: 25px;
 }
 
 #feedContainer #tabs {
 	display: block;
+	margin-bottom: 8px;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+#feedContainer #tabs span {
+	padding: 10px 75px;
+	cursor: pointer;
+	pointer: hand;
+
+	border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 #feedContainer #tabs span[data-active='true'] {
-	background-color: #fff;
+	background-color: rgb(0, 200, 225);
 }
 
 #feedContainer #tabs span[data-active='false'] {
+	background-color: #ddd;
+	opacity: .8;
+}
+
+#feedContainer #tabs span[data-active='false']:hover {
+	opacity: 1;
+	background-color: rgb(240, 240, 240);
 }
 
 #feedContainer #sellContainer {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+
+	padding-top: 25px;
+	padding-left: 35px;
+	padding-bottom: 100px;
+	
+	background-color: rgb(225, 225, 225);
+	box-shadow: 0px -1px 1px rgba(0, 0, 0, 0.2);
+	
+	z-index: 1;
 }
 
 #feedContainer #buyContainer {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+
+	padding-top: 25px;
+	padding-left: 35px;
+	padding-bottom: 100px;
+	
+	background-color: rgb(225, 225, 225);
+	box-shadow: 0px -1px 1px rgba(0, 0, 0, 0.2);
+	
+	z-index: 1;
 }
 
 .post {
@@ -237,12 +310,16 @@
 	max-width: 275px;
 	min-height: 275px;
 
-	margin-top: 10px;
-	margin-left: 20px;
+	margin-top: 15px;
+	margin-left: 25px;
 
 	font-family: DX-REG;
 	background-color: #fff;
 	border: 1px solid rgba(0, 0, 0, 0.15);
+
+	-webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+	box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
 }
 
 .post .thumbnail {
@@ -281,7 +358,7 @@
 	padding: 2px 0px;
 	border-top: 1px solid rgba(0, 0, 0, 0.125);
 	border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-	max-height: 75px;
+	height: 75px;
 	overflow: hidden;
 }
 
@@ -324,4 +401,9 @@
 	opacity: .8;
 	background: url('/img/flag_icon.png') no-repeat center center;
 	background-size: 16px 16px;
+}
+
+.request {
+	min-height: initial;
+	vertical-align: top;
 }
