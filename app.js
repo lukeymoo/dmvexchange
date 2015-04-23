@@ -50,7 +50,7 @@ app.use(multer({
   changeDest: function(dest, req, res) {
     // if this was being post to feed, place into post within cdn folder
     if(req.originalUrl == '/market/post') {
-      return path.join(dest, '/post_images');
+      return path.join(dest, '/product');
     } else {
       // otherwise place into notarget because no location has been specified (cleaned regularly) 
       return path.join(dest, '/notarget');
@@ -59,7 +59,7 @@ app.use(multer({
   rename: function(fieldname, filename, req, res) {
     // if this was being posted to feed rename it accordingly
     if(req.originalUrl == '/market/post') {
-      return '__large__' + uuid.v1() + Date.now();
+      return '__DEFAULT__' + uuid.v1() + Date.now();
     } else {
       return uuid.v1() + '_' + Date.now(); // unknown destination = random name
     }

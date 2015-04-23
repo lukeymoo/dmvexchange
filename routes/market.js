@@ -8,7 +8,14 @@ var dbManager = require('../modules/database/database');
 var sessionManager = require('../modules/session/session');
 var ObjectID = require('mongodb').ObjectID;
 
+
+var magicModule = require('mmmagic');
+var Magic = magicModule.Magic;
+var gm = require('gm');
 var fs = require('fs');
+var path = require('path');
+var Q = require('q');
+var async = require('async');
 
 router.get('/', function(req, res, next) {
 
@@ -91,7 +98,7 @@ router.get('/', function(req, res, next) {
 /*
 	ERROR CODES
 	-------------
-	DONE? (X == ADDED TO ERROR CHECKING)
+	DONE?
 	[ ] no_type					=>		No post type specified (missing `t` field variable in form)
 	[ ] invalid_type 			=>		Invalid `t` field (can only be [SALE] || [PURCHASE])
 	[ ] no_description			=>		Missing description
@@ -126,7 +133,7 @@ router.post('/post', function(req, res, next) {
 	}
 
 	// Validate the type
-	if(req.body.t != '[BUY_OFFER]' && req.body.t != '[SELL_OFFER]') {
+	if(req.body.t != 'general' && req.body.t != 'sale') {
 		res.redirect('/market?err=invalid_type');
 		return;
 	}
@@ -138,89 +145,117 @@ router.post('/post', function(req, res, next) {
 	}
 
 	// validate description
-	if(req.body.d.length <= 4 || req.body.d.length >= 361) {
+	if(req.body.d.length < 1 || req.body.d.length >= 361) {
 		res.redirect('/market?err=invalid_description');
 		return;
 	}
 
-	// check if we received any files
-	var fieldnames = [];
-	for(var i in req.files) {
-		fieldnames.push(req.files[i][0].fieldname);
-	}
+	//check if any photos were uploaded
+	var photo = {
+		one: 	(req.files['photo1']) ? req.files['photo1'][0] : false,
+		two: 	(req.files['photo2']) ? req.files['photo2'][0] : false,
+		three: 	(req.files['photo3']) ? req.files['photo3'][0] : false,
+		four: 	(req.files['photo4']) ? req.files['photo3'][0] : false
+	};
+	
+	// holds the post variables for insertion into database
+	var post = {
+		poster_id: req.session.USER_ID,
+		poster_username: req.session.USERNAME,
+		post_text: req.body.d,
+		visibility: 1,
+		images: []
+	};
 
-	// Check if we NEEDED ( Sales ) the images
-	if(req.body.t == '[SELL_OFFER]') {
-		if(fieldnames.length == 0) {
-			res.redirect('/market?err=sale_no_images');
-			return;
-		}
-	}
+	// Valdiate 
+	var neededIterations = 0;
+	for(var img in photo) {
 
-	// if we recieved files
-	var imageLinks = [];
-	if(fieldnames.length) {
-
-		// validate file mime-types
-		for(var i in fieldnames) {
+		if(photo[img]) {
 			
-			var mime = req.files[fieldnames[i]][0].mimetype;
-			var validMime = true;
-			switch(mime) {
-				case 'image/png':
-				case 'image/jpg': // i think jpg -> image/jpeg so this may be un-needed
-				case 'image/jpeg':
-				case 'image/bmp':
-				case 'image/gif':
-					break;
-				default:
-					validMime = false;
-					break;
-			}
-			if(!validMime) {
-				res.redirect('/market?err=invalid_mimetype');
-				return;
-			}
+			neededIterations ++;
+			var small_path = photo[img].path.replace('__LARGE__', '__SMALL__');
+			var small_name = photo[img].name.replace('__LARGE__', '__SMALL__');
 
-			// log the filename for assignment to post link field
-			imageLinks.push({
-				large: '/cdn/post_images/' + req.files[fieldnames[i]][0].name || ''
+			// create smaller version of image
+			gm(photo[img].path)
+			.resize(350)
+			.write(small_path, function(err) {
+				if(err) {
+					console.log('Error while minimizing image :: ' + err);
+				}
+			});
+
+			post.images.push({
+				large: '/cdn/product/' + photo[img].name,
+				small: '/cdn/product/' + small_name
 			});
 
 		}
-
-		var hasImages = false;
-
-		if(imageLinks.length > 0) {
-			hasImages = true;
-		}
-
 	}
 
-	// insert post into database
-	var db = dbManager.getDB();
-	var feed = db.collection('FEED');
+	// now iterate through image and validate mime-type
+	var iteration = 0;
+	for(var img in photo) {
+		if(photo[img]) {
 
-	var post = {
-		creator_username: req.session.USERNAME,
-		creator_id: req.session.USER_ID,
-		post_type: req.body.t,
-		text: req.body.d,
-		subscribers: 0,
-		visibility: 1,
-		comments: 0,
-		flags: 0,
-		has_images: hasImages,
-		image_links: imageLinks
-	};
+			var magic = new Magic(magicModule.MAGIC_MIME_TYPE);
+			magic.detectFile(photo[img].path, function(err, mime) {
+				iteration ++;
+				if(err) {
+					console.log('Error checking mime type :: ' + err);
+				} else {
+					switch(mime) {
+						case 'image/png':
+						case 'image/jpeg':
+						case 'image/jpg':
+						case 'image/gif':
+						case 'image/bmp':
+							insertPost(res, post, iteration, neededIterations);
+							break;
+						default:
+							res.redirect('/market?err=invalid_mimetype');
+							return;
+							break;
+					}
+				}
+			});
 
-	// insert into feed
-	feed.insert(post);
-
-	// finish up
-	res.redirect('/market');
-	return;
+		}
+	}
 });
+
+
+
+
+
+
+
+function insertPost(res, postObj, iteration, neededIterations) {
+	if(iteration >= neededIterations) {
+		var db = dbManager.getDB();
+		var feed = db.collection('FEED');
+		feed.insert(postObj);
+		res.redirect('/market');
+	}
+	return;
+}
+
+function checkMime(filepath) {
+	var deferred = Q.defer();
+
+	var magic = new Magic(magicModule.MAGIC_MIME_TYPE);
+	magic.detectFile(filepath, function(err, mime) {
+		if(err) {
+			deferred.reject(err);
+		}
+		var param = [filepath, mime];
+		deferred.resolve(param);
+	});
+
+	return deferred.promise;
+}
+
 
 function toDate(timestamp) {
 	var id = new Date(timestamp);

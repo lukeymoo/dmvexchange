@@ -22,35 +22,28 @@ block headerMenu
 
 block createBlock
 	div(id='createContainer')
+		img(id='validator')
 		div(id='createPlaceholder') Create a post...
 			div(id='createCamera')
 		div(id='inputContainer')
 			div(id='postType')
-				span(id='sale', data-type='[SELL_OFFER]', data-active='true', class='postType', tabindex=1) Sale
-				span(id='purchase', data-type='[BUY_OFFER]', data-active='false', class='postType', tabindex=2) Request
+				span(id='sale', data-type='sale', data-active='true', class='postType', tabindex=1) Sale
+				span(id='purchase', data-type='general', data-active='false', class='postType', tabindex=2) General
 			div(id='cancelButton') &times;
 			textarea(tabindex=3)
 			div(id='controls')
 				form(id='uploadForm', enctype='multipart/form-data', action='/market/post', method='post')
 					textarea(class='photoUpload', name='d', id='description')
-					input(type='text', class='photoUpload', name='t', id='type', value='[SALE]')
-					input(type='file', class='photoUpload', name='photo1', id='file1', data-available='true')
-					input(type='file', class='photoUpload', name='photo2', id='file2', data-available='false')
-					input(type='file', class='photoUpload', name='photo3', id='file3', data-available='false')
-					input(type='file', class='photoUpload', name='photo4', id='file4', data-available='false')
-				div(id='handler1', class='addPhoto', data-available='false', data-image='false', tabindex=4)
-					div(id='remove', data-for='handler1') &times;
-					img(src='/img/camera_blur.png')
-				div(id='handler2', class='addPhoto', data-available='false', data-image='false', tabindex=5)
-					div(id='remove', data-for='handler2') &times;
-					img(src='/img/camera_blur.png')
-				div(id='handler3', class='addPhoto', data-available='false', data-image='false', tabindex=6)
-					div(id='remove', data-for='handler3') &times;
-					img(src='/img/camera_blur.png')
-				div(id='handler4', class='addPhoto', data-available='false', data-image='false', tabindex=7)
-					div(id='remove', data-for='handler4') &times;
-					img(src='/img/camera_blur.png')
-				div(id='post', tabindex=8) Post
+					input(type='text', class='photoUpload', name='t', id='type', value='sale')
+					input(type='file', class='photoUpload image', name='photo1', id='file1')
+					input(type='file', class='photoUpload image', name='photo2', id='file2')
+					input(type='file', class='photoUpload image', name='photo3', id='file3')
+					input(type='file', class='photoUpload image', name='photo4', id='file4')
+				img(id='handler1', src='', class='photoHandler', data-active='false', data-for='#file1')
+				img(id='handler2', src='', class='photoHandler', data-active='false', data-for='#file2')
+				img(id='handler3', src='', class='photoHandler', data-active='false', data-for='#file3')
+				img(id='handler4', src='', class='photoHandler', data-active='false', data-for='#file4')
+				div(id='post') Post
 
 block marketFeedBlock
 	div(id='sellPageControls')
@@ -80,7 +73,7 @@ block marketFeedBlock
 						div(class='post', data-type='#{POST.post_type}')
 							if POST.has_images
 								span(class='thumbnail')
-									img(src='#{POST.image_links[0].large}')
+									img(src='#{POST.image_links[0].small}')
 							div(class='post_info')
 								div(class='hidden')
 									span(class='post_id') #{POST._id}
@@ -99,7 +92,7 @@ block marketFeedBlock
 						div(class='post request', data-type='#{POST.post_type}')
 							if POST.has_images
 								span(class='thumbnail')
-									img(src='#{POST.image_links[0].large}')
+									img(src='#{POST.image_links[0].small}')
 							div(class='post_info')
 								div(class='hidden')
 									span(class='post_id') #{POST._id}

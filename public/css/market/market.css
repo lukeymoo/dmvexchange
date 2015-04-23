@@ -128,7 +128,11 @@
 	background-color: rgb(230, 230, 230);
 }
 
-#inputContainer #controls .addPhoto {
+#validator {
+	display: none;
+}
+
+#inputContainer #controls .photoHandler {
 	display: inline-block;
 
 	margin-top: 5px;
@@ -142,11 +146,6 @@
 	
 	cursor: pointer;
 	pointer: hand;
-}
-
-#inputContainer #controls .addPhoto img {
-	max-width: 100px;
-	max-height: 100px;
 }
 
 #inputContainer #post {
@@ -279,6 +278,7 @@
 #feedContainer #tabs {
 	display: block;
 	margin-bottom: 8px;
+	margin-left: 5px;
 
 	-webkit-user-select: none;
 	-moz-user-select: none;
@@ -291,6 +291,13 @@
 	pointer: hand;
 
 	border: 1px solid rgba(0, 0, 0, 0.1);
+
+	border-top-left-radius: 45px;
+	border-top-right-radius: 45px;
+
+	font-family: DX-REG;
+	font-weight: bold;
+	font-size: .9em;
 }
 
 #feedContainer #tabs span[data-active='true'] {
@@ -339,7 +346,7 @@
 
 .post {
 	display: inline-block;
-	max-width: 275px;
+	width: 279px;
 	min-height: 275px;
 
 	margin-top: 15px;
@@ -348,23 +355,26 @@
 	font-family: DX-REG;
 	background-color: #fff;
 	border: 1px solid rgba(0, 0, 0, 0.15);
+	padding: 0px;
 
 	-webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
 	-moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
 	box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+
+	vertical-align: top;
 }
 
 .post .thumbnail {
-	width: 275px;
-	height: 275px;
+	max-width: 275px;
+	max-height: 275px;
 
 	padding: 0px;
 	margin: 0px;
 }
 
 .post .thumbnail img {
-	width: 275px;
-	height: 275px;
+	max-width: 275px;
+	max-height: 275px;
 	padding: 0px;
 	margin: 0px;
 }
