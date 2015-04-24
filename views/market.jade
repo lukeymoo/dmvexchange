@@ -39,66 +39,35 @@ block createBlock
 					input(type='file', class='photoUpload image', name='photo2', id='file2')
 					input(type='file', class='photoUpload image', name='photo3', id='file3')
 					input(type='file', class='photoUpload image', name='photo4', id='file4')
-				img(id='handler1', src='', class='photoHandler', data-active='false', data-for='#file1')
-				img(id='handler2', src='', class='photoHandler', data-active='false', data-for='#file2')
-				img(id='handler3', src='', class='photoHandler', data-active='false', data-for='#file3')
-				img(id='handler4', src='', class='photoHandler', data-active='false', data-for='#file4')
+				div(id='controls1', class='photoControls', data-active='false')
+					span(class='remove', id='testing', data-for='#handler1') &times;
+					img(id='handler1', src='', class='photoHandler', data-active='false', data-for='#file1')
+
+				div(id='controls2', class='photoControls', data-active='false')
+					span(class='remove', data-for='#handler2') &times;
+					img(id='handler2', src='', class='photoHandler', data-active='false', data-for='#file2')
+			
+				div(id='controls3', class='photoControls', data-active='false')
+					span(class='remove', data-for='#handler3') &times;
+					img(id='handler3', src='', class='photoHandler', data-active='false', data-for='#file3')
+			
+				div(id='controls4', class='photoControls', data-active='false')
+					span(class='remove', data-for='#handler4') &times;
+					img(id='handler4', src='', class='photoHandler', data-active='false', data-for='#file4')
+			
 				div(id='post') Post
 
 block marketFeedBlock
-	div(id='sellPageControls')
-		if sellCount > 40
-			if sp > 1
-				a(href='/market?s=#{sp - 1}&b=#{bp}&v=sales')
-					span(id='previous') &#8592; Newer posts
-			if sp < sMax
-				a(href='/market?s=#{sp + 1}&b=#{bp}&v=sales')
-					span(id='next') Older posts &#8594;
-	div(id='buyPageControls')
-		if buyCount > 40
-			if bp > 1
-				a(href='/market?s=#{sp}&b=#{bp - 1}&v=requests')
-					span(id='previous') &#8592; Newer posts
-			if bp < bMax
-				a(href='/market?s=#{sp}&b=#{bp + 1}&v=requests')
-					span(id='next') Older posts &#8594;
-	div(id='feedContainer')
-		div(id='tabs')
-			span(id='sale', class='viewType', data-active='false', data-type='[FOR_SALE]') For sale
-			span(id='buy', class='viewType', data-active='false', data-type='[REQUESTS]') Requests
-		div(id='sellContainer')
-			if SELL_FEED
-				each POST in SELL_FEED
-					if POST.visibility > 0
-						div(class='post', data-type='#{POST.post_type}')
-							if POST.has_images
-								span(class='thumbnail')
-									img(src='#{POST.image_links[0].small}')
-							div(class='post_info')
-								div(class='hidden')
-									span(class='post_id') #{POST._id}
-									span(class='creator_id') #{POST.creator_id}
-								span(class='creator_username') #{POST.creator_username}
-								span(class='text') #{POST.text}
-								span(class='comment_icon')
-								span(class='comments') #{POST.comments}
-								span(class='flag_icon')
-								span(class='flags') #{POST.flags}
-								span(class='timestamp') #{POST.timestamp}
-		div(id='buyContainer')
-			if BUY_FEED
-				each POST in BUY_FEED
-					if POST.visibility > 0
-						div(class='post request', data-type='#{POST.post_type}')
-							if POST.has_images
-								span(class='thumbnail')
-									img(src='#{POST.image_links[0].small}')
-							div(class='post_info')
-								div(class='hidden')
-									span(class='post_id') #{POST._id}
-									span(class='creator_id') #{POST.creator_id}
-								span(class='creator_username') #{POST.creator_username}
-								span(class='text') #{POST.text}
-								span(class='comment_icon')
-								span(class='comments') #{POST.comments}
-								span(class='timestamp') #{POST.timestamp}
+	div(id='leftPanel')
+		div(id='searchContainer')
+			input(id='text', type='text', placeholder='Search...')
+			button Search
+		div(id='viewContainer')
+			label Views
+			span(id='all', class='view') All
+			span(id='general', class='view') General
+			span(id='sale', class='view') For Sale
+	div(id='rightPanel')
+		div(id='promotionContainer')
+			div(class='promotion')
+				img(src='/img/landing_bg.jpg')

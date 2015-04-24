@@ -1,6 +1,6 @@
 #createContainer {
 	margin-top: 15px;
-	width: 50%;
+	width: 48%;
 	margin-left: auto;
 	margin-right: auto;
 	padding: 10px 0px;
@@ -32,12 +32,16 @@
 	height: 35px;
 	line-height: 35px;
 	padding: 0px 5px;
-	border: 1px solid rgb(200, 200, 200);
+	border: 1px solid rgb(220, 220, 220);
 	color: rgb(110, 110, 110);
-	background-color: rgb(250, 250, 250);
+	background-color: white;
 
 	cursor: pointer;
 	pointer: hand;
+
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
+	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
 }
 
 #inputContainer {
@@ -51,9 +55,9 @@
 	background-color: #fff;
 	padding: 5px 5px;
 
-	-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-	-moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
+	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
 }
 
 #inputContainer #postType {
@@ -71,6 +75,11 @@
 	padding: 6px 30px;
 	background-color: #ddd;
 	opacity: .8;
+}
+
+#inputContainer #postType span:focus,
+#inputContainer #postType span:active {
+	outline: none;
 }
 
 #inputContainer #postType span[data-active='true'] {
@@ -115,7 +124,7 @@
 	display: inline-block;
 
 	margin-top: -3px;
-	margin-left: 475px;
+	margin-left: 460px;
 
 	padding: 2px 8px;
 	text-align: center;
@@ -148,12 +157,49 @@
 	pointer: hand;
 }
 
+#inputContainer #controls .photoHandler[data-active='false'] {
+	border: 3px dotted rgba(0, 0, 0, 0.25);
+	border-radius: 3px;
+	padding: 25px;
+}
+
+#inputContainer #controls .photoHandler[data-active='false']:hover {
+	border: 3px dotted rgba(0, 0, 0, 0.35);
+}
+
+#inputContainer #controls .photoControls {
+	display: inline-block;
+}
+
+#inputContainer #controls .photoControls .remove {
+	position: absolute;
+	z-index: 2;
+	margin-top: 5px;
+	margin-left: 86px;
+	color: white;
+	opacity: 0;
+
+	font-size: 1.75em;
+	height: 18px;
+	line-height: 18px;
+
+	padding: 0px 2px;
+
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#inputContainer #controls .photoControls .remove:hover {
+	opacity: 1;
+}
+
 #inputContainer #post {
 	display: inline-block;
 
 	float: right;
 
-	margin-top: 5px;
+	margin-top: 55px;
 	height: 25px;
 	line-height: 25px;
 
@@ -195,258 +241,137 @@
 	background-color: rgb(255, 0, 0);
 }
 
-/*
-	Market Feed Styles
-	..
-	Structure ==
+#leftPanel {
+	position: absolute;
 
-	_id						-- Hidden
-	creator_username		-- Shown
-	creator_id				-- Hidden
-	text 					-- Shown with ellipsis overflow
-	subscribers				-- Shown
-	comments (count)		-- Shown
-	flags (count)			-- Shown
-	thumbnail				-- Shown
+	top: 75px;
+	margin-left: 5px;
+	
+	width: 240px;
+	height: 80vh;
 
-*/
+	font-family: DX-REG;
+	background-color: white;
+	border: 1px solid rgb(220, 220, 220);
 
-#sellPageControls {
-	float: right;
-	margin-top: 7px;
-	margin-right: 10px;
-
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	user-select: none;
+	-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.0575);
+	-moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.0575);
+	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.0575);
 }
 
-#sellPageControls span {
+#leftPanel #searchContainer {
+	display: block;
+	padding: 10px;
+}
+
+#leftPanel #searchContainer #text,
+#leftPanel #searchContainer button {
 	display: inline-block;
-	padding: 10px 25px;
+	margin: 0px;
 
-	color: black;
-	background-color: rgb(190, 190, 190);
+	height: 32px;
+	line-height: 32px;
 
-	border-radius: 3px;
+	border: 1px solid rgb(220, 220, 220);
+
+	vertical-align: top;
 }
 
-#sellPageControls span:hover {
-	background-color: rgb(210, 210, 210);
+#leftPanel #searchContainer #text {
+	border-right: none;
 }
 
-#sellPageControls #next {
-	margin-left: 25px;
+#leftPanel #searchContainer button {
+
+	border: none;
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
+
+	background-color: rgba(0, 200, 225, 0.4);
+
+	-webkit-transition: background-color .065s linear 0s;
+	-moz-transition: background-color .065s linear 0s;
+	transition: background-color .065s linear 0s;
 }
 
-
-
-#buyPageControls {
-	float: right;
-	margin-top: 7px;
-	margin-right: 10px;
-
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	user-select: none;
+#leftPanel #searchContainer button:hover {
+	background-color: rgba(0, 200, 225, .8);
 }
 
-#buyPageControls span {
-	display: inline-block;
-	padding: 10px 25px;
-
-	color: black;
-	background-color: rgb(190, 190, 190);
-
-	border-radius: 3px;
+#leftPanel #searchContainer #text:focus,
+#leftPanel #searchContainer button:focus {
+	outline: none;
 }
 
-#buyPageControls span:hover {
-	background-color: rgb(210, 210, 210);
+#leftPanel #searchContainer #text {
+	width: 155px;
+	padding-left: 5px;
 }
 
-#buyPageControls #next {
-	margin-left: 25px;
-}
-
-
-
-#feedContainer {
+#leftPanel #viewContainer {
 	margin-top: 25px;
 }
 
-#feedContainer #tabs {
-	display: block;
-	margin-bottom: 8px;
-	margin-left: 5px;
-
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	user-select: none;
+#leftPanel label {
+	margin-left: 10px;
+	width: 150px;
+	padding: 0px 15px;
+	border-bottom: 1px solid rgb(225, 225, 225);
 }
 
-#feedContainer #tabs span {
-	padding: 10px 75px;
+#leftPanel .view {
+	display: block;
+
+	padding: 15px 0px;
+
+	text-align: center;
+
+	-webkit-transition: background-color .065s linear 0s;
+	-moz-transition: background-color .065s linear 0s;
+	transition: background-color .065s linear 0s;
+
 	cursor: pointer;
 	pointer: hand;
+}
 
-	border: 1px solid rgba(0, 0, 0, 0.1);
+#leftPanel .view:hover {
+	background-color: rgba(0, 200, 200, 0.2);
+	
+	box-shadow: 0px 0px 5px rgba(0, 225, 200, 0.3);
+}
 
-	border-top-left-radius: 45px;
-	border-top-right-radius: 45px;
+#rightPanel {
+	position: absolute;
+
+	top: 75px;
+	right: 0px;
+	margin-right: 5px;
+	
+	width: 240px;
+	height: 80vh;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 20px;
 
 	font-family: DX-REG;
-	font-weight: bold;
-	font-size: .9em;
+
+	background-color: white;
 }
 
-#feedContainer #tabs span[data-active='true'] {
-	background-color: rgb(0, 200, 225);
+#rightPanel #promotionContainer {
 }
 
-#feedContainer #tabs span[data-active='false'] {
-	background-color: #ddd;
-	opacity: .8;
+#rightPanel #promotionContainer .promotion {
+
+	width: 200px;
+	height: 200px;
+
+	-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.0575);
+	-moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.0575);
+	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.0575);
 }
 
-#feedContainer #tabs span[data-active='false']:hover {
-	opacity: 1;
-	background-color: rgb(240, 240, 240);
-}
-
-#feedContainer #sellContainer {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-
-	padding-top: 25px;
-	padding-left: 35px;
-	padding-bottom: 100px;
-	
-	background-color: rgb(225, 225, 225);
-	box-shadow: 0px -1px 1px rgba(0, 0, 0, 0.2);
-	
-	z-index: 1;
-}
-
-#feedContainer #buyContainer {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-
-	padding-top: 25px;
-	padding-left: 35px;
-	padding-bottom: 100px;
-	
-	background-color: rgb(225, 225, 225);
-	box-shadow: 0px -1px 1px rgba(0, 0, 0, 0.2);
-	
-	z-index: 1;
-}
-
-.post {
-	display: inline-block;
-	width: 279px;
-	min-height: 275px;
-
-	margin-top: 15px;
-	margin-left: 25px;
-
-	font-family: DX-REG;
-	background-color: #fff;
-	border: 1px solid rgba(0, 0, 0, 0.15);
-	padding: 0px;
-
-	-webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
-	-moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
-	box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
-
-	vertical-align: top;
-}
-
-.post .thumbnail {
-	max-width: 275px;
-	max-height: 275px;
-
-	padding: 0px;
-	margin: 0px;
-}
-
-.post .thumbnail img {
-	max-width: 275px;
-	max-height: 275px;
-	padding: 0px;
-	margin: 0px;
-}
-
-.post .post_info {
-	padding: 0px 2px;
-}
-
-.post .post_info .hidden {
-	display: none;
-}
-
-.post .post_info span {
-	display: block;
-}
-
-.post .creator_username {
-	padding-top: 3px;
-	color: rgb(0, 100, 230);
-}
-
-.post .text {
-	padding: 2px 0px;
-	border-top: 1px solid rgba(0, 0, 0, 0.125);
-	border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-	height: 75px;
-	overflow: hidden;
-}
-
-.post .post_info .subscribers,
-.post .post_info .comments,
-.post .post_info .flags,
-.post .post_info .subscriber_icon,
-.post .post_info .comment_icon,
-.post .post_info .flag_icon,
-.post .post_info .timestamp {
-	display: inline-block;
-	height: 16px;
-	padding: 0px 2px;
-	vertical-align: middle;
-}
-
-.post .post_info .timestamp {
-	float: right;
-}
-
-.post .post_info .subscriber_icon {
-	width: 16px;
-	height: 16px;
-	opacity: .7;
-	background: url('/img/subscriber_icon.jpg') no-repeat center center;
-	background-size: 16px 16px;
-}
-
-.post .post_info .comment_icon {
-	width: 16px;
-	height: 16px;
-	opacity: .7;
-	background: url('/img/chat_bubble.png') no-repeat center center;
-	background-size: 16px 16px;
-}
-
-.post .post_info .flag_icon {
-	width: 16px;
-	height: 16px;
-	opacity: .8;
-	background: url('/img/flag_icon.png') no-repeat center center;
-	background-size: 16px 16px;
-}
-
-.request {
-	width: 275px;
-	min-height: initial;
-	vertical-align: top;
+#rightPanel #promotionContainer .promotion img {
+	width: 200px;
+	height: 200px;
 }

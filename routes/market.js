@@ -18,6 +18,7 @@ var Q = require('q');
 var async = require('async');
 
 router.get('/', function(req, res, next) {
+	sessionManager.isLoggedIn(req.session);
 
 	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
@@ -167,27 +168,40 @@ router.post('/post', function(req, res, next) {
 		images: []
 	};
 
-	// Valdiate 
+	// validate
 	var neededIterations = 0;
 	for(var img in photo) {
 
 		if(photo[img]) {
 			
 			neededIterations ++;
-			var small_path = photo[img].path.replace('__LARGE__', '__SMALL__');
-			var small_name = photo[img].name.replace('__LARGE__', '__SMALL__');
 
-			// create smaller version of image
+			var large_path = photo[img].path.replace('__DEFAULT__', '__LARGE__');
+			var large_name = photo[img].name.replace('__DEFAULT__', '__LARGE__');
+
+			var small_path = photo[img].path.replace('__DEFAULT__', '__SMALL__');
+			var small_name = photo[img].name.replace('__DEFAULT__', '__SMALL__');
+
+			// Create large image
+			gm(photo[img].path)
+			.resize(800)
+			.write(large_path, function(err) {
+				if(err) {
+					console.log('Error while creating large image :: ' + err);
+				}
+			});
+
+			// Create small image
 			gm(photo[img].path)
 			.resize(350)
 			.write(small_path, function(err) {
 				if(err) {
-					console.log('Error while minimizing image :: ' + err);
+					console.log('Error while creating small image :: ' + err);
 				}
 			});
 
 			post.images.push({
-				large: '/cdn/product/' + photo[img].name,
+				large: '/cdn/product/' + large_name,
 				small: '/cdn/product/' + small_name
 			});
 
@@ -211,7 +225,7 @@ router.post('/post', function(req, res, next) {
 						case 'image/jpg':
 						case 'image/gif':
 						case 'image/bmp':
-							insertPost(res, post, iteration, neededIterations);
+							insertPost(photo, res, post, iteration, neededIterations);
 							break;
 						default:
 							res.redirect('/market?err=invalid_mimetype');
@@ -225,13 +239,19 @@ router.post('/post', function(req, res, next) {
 	}
 });
 
+// IGNORE GET FOR /market/post
+router.get('/post', function(req, res, next) {
+	res.redirect('/market');
+	return;
+});
 
 
 
 
 
 
-function insertPost(res, postObj, iteration, neededIterations) {
+
+function insertPost(photo, res, postObj, iteration, neededIterations) {
 	if(iteration >= neededIterations) {
 		var db = dbManager.getDB();
 		var feed = db.collection('FEED');

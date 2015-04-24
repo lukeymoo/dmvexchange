@@ -94,9 +94,24 @@ $(function() {
 		}
 	});
 
+	// handler controls
+	$('.photoControls').on({
+		mouseenter: function() {
+			if($(this).find('.photoHandler').attr('data-active') == 'true') {
+				$(this).find('.remove').css('opacity', '1');
+			}
+		},
+		mouseleave: function() {
+			if($(this).find('.photoHandler').attr('data-active') == 'true') {
+				$(this).find('.remove').css('opacity', '0');
+			}
+		}
+	});
+
 	// photoHandler event handler
 	$('.photoHandler').on({
 		mouseenter: function() {
+			// show hover img
 			if($(this).attr('data-active') == 'false') {
 				$(this).attr('src', '/img/camera_focus.png');
 			}
@@ -109,7 +124,27 @@ $(function() {
 		click: function() {
 			$($(this).attr('data-for')).click();
 		}
-	})
+	});
+
+	// Remove image handler
+	$(document).on({
+		click: function() {
+			// get obj using this.data-for and replace it
+			// clear input
+			var handlerID = '#handler' + $(this).parent().attr('id').replace('controls', '');
+			var inputID = '#file' + $(this).parent().attr('id').replace('controls', '');
+			console.log($(inputID));
+			var inputField = $(inputID)[0].outerHTML;
+			// replace input element
+			$(inputID).remove();
+			$('#uploadForm').append(inputField);
+
+			// default handler
+			$(handlerID).attr('src', '/img/camera_blur.png');
+			$(handlerID).attr('data-active', 'false');
+			Market.handlers();
+		}
+	}, '.photoControls .remove');
 
 	// handle view tab clicks
 	$(document).on('click', '.viewType', function() {
@@ -184,6 +219,7 @@ $(function() {
 		}
 	});
 
+
 });
 
 
@@ -197,6 +233,9 @@ $(function() {
 
 
 Market.handlers = function() {
+	// remove all image remove buttons
+	$(document).find('.remove').remove();
+
 	// count visible inactive handlers
 	// allow only 1 to be visible at a time
 	var count = 0;
@@ -204,6 +243,7 @@ Market.handlers = function() {
 		// hide them all
 		$(this).hide();
 	});
+
 	$('.photoHandler').each(function() {
 		// if its inactive see if we've already activated 1
 		if($(this).attr('data-active') == 'false') {
@@ -214,6 +254,8 @@ Market.handlers = function() {
 		}
 		// if its active - show it
 		if($(this).attr('data-active') == 'true') {
+			// give it a remove button
+			$(this).parent().prepend("<span class='remove'>&times;</span>");
 			$(this).show();
 		}
 	});
@@ -228,6 +270,7 @@ Market.validateUpload = function(file, inputID) {
 		var parent = $(inputID).parent();
 		$(inputID).remove();
 		$(parent).append(DOM);
+		console.log('#handler' + inputID.split('file')[1]);
 		$('#handler' + inputID.split('file')[1]).attr('src', '/img/camera_blur.png');
 		$('#handler' + inputID.split('file')[1]).attr('data-active', 'false');
 		this.handlers();
@@ -391,12 +434,40 @@ Market.discard = function() {
 	// clear all description in form
 	$('#uploadForm #description').val('');
 
-	// clear files
-	$('.image').each(function() {
+	// clear files ( input fields )
+	$('.photoUpload').each(function() {
 		var DOM = $(this)[0].outerHTML;
 		var parent = $(this).parent();
 		$(this).remove();
 		$(parent).append(DOM);
+	});
+
+	var count = 0;
+	$('.photoHandler').each(function() {
+		// hide em all
+		$(this).hide();
+
+		// make em all inactive and default src
+		$(this).attr('src', '/img/camera_blur.png');
+		$(this).attr('data-active', 'false');
+	});
+
+	// remove all image remove buttons
+	$(document).find('.remove').remove();
+
+	// clear handlers
+	$('.photoHandler').each(function() {
+		// if its inactive see if we've already activated 1
+		if($(this).attr('data-active') == 'false') {
+			if(count == 0) {
+				$(this).show();
+				count++;
+			}
+		}
+		// if its active - show it
+		if($(this).attr('data-active') == 'true') {
+			$(this).show();
+		}
 	});
 
 	this.isOpen = false;
