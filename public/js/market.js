@@ -193,10 +193,13 @@ $(function() {
 
 		// set clicked tab to true
 		$(this).attr('data-active', 'true');
+
+		// give focus back to textarea
+		$('#inputContainer textarea').focus();
 	});
 
 	// Expand create post on click
-	$(document).on('click', '#createPlaceholder', function() {
+	$(document).on('click', '#inputContainer', function() {
 		if(state.LOGGED_IN) {
 			Market.expand();
 		} else {
@@ -419,17 +422,29 @@ Market.get = function(callback) {
 
 // expand input area for creation of listing
 Market.expand = function() {
-	$('#createPlaceholder').hide();
-	$('#inputContainer').show();
-	$('#inputContainer textarea').focus();
+	setTimeout(function(){
+		$('#inputContainer').addClass('showInputContainer');
+		$('#inputContainer textarea').focus();
+	}, 100);
 
 	this.isOpen = true;
 };
 
 Market.discard = function() {
-	$('#inputContainer').hide();
+
+	if($('#inputContainer').hasClass('createPost')) {
+		$('#inputContainer').removeClass('createPost');
+	}
+	if(!$('#inputContainer').hasClass('createPost-reverse')) {
+		$('#inputContainer').addClass('createPost-reverse');
+	}
+	
+	setTimeout(function(){
+		$('#inputContainer').hide();
+		$('#createPlaceholder').show();
+	}, 1000);
+
 	$('#inputContainer textarea').val('');
-	$('#createPlaceholder').show();
 
 	// clear all description in form
 	$('#uploadForm #description').val('');

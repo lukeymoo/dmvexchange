@@ -23,14 +23,12 @@ block headerMenu
 block createBlock
 	div(id='createContainer')
 		img(id='validator')
-		div(id='createPlaceholder') Create a post...
-			div(id='createCamera')
 		div(id='inputContainer')
 			div(id='postType')
 				span(id='sale', data-type='sale', data-active='true', class='postType', tabindex=1) Sale
 				span(id='purchase', data-type='general', data-active='false', class='postType', tabindex=2) General
 			div(id='cancelButton') &times;
-			textarea(tabindex=3)
+			textarea(placeholder='Create post...', tabindex=3)
 			div(id='controls')
 				form(id='uploadForm', enctype='multipart/form-data', action='/market/post', method='post')
 					textarea(class='photoUpload', name='d', id='description')
@@ -60,14 +58,20 @@ block createBlock
 block marketFeedBlock
 	div(id='leftPanel')
 		div(id='searchContainer')
-			input(id='text', type='text', placeholder='Search...')
+			input(id='text', type='text', placeholder='Search posts...')
 			button Search
+		label(id='viewsLabel') Views
 		div(id='viewContainer')
-			label Views
-			span(id='all', class='view') All
-			span(id='general', class='view') General
-			span(id='sale', class='view') For Sale
+			span(id='all', class='view', data-selected='true') All
+			span(id='sale', class='view', data-selected='false') For Sale
+			span(id='general', class='view', data-selected='false') General
+		label(id='controlsLabel') Controls
+		div(id='controlsContainer')			
+			span(class='control') My Store
+			span(class='control') My Posts
+			span(class='control') Settings
 	div(id='rightPanel')
 		div(id='promotionContainer')
 			div(class='promotion')
-				img(src='/img/landing_bg.jpg')
+				//
+					img
