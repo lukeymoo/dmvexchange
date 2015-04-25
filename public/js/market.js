@@ -3,10 +3,18 @@
 
 var Market = {
 	isOpen: false,
-	viewIndex: 0,
-	viewType: 'sale',
-	postType: 'sale'
+	postType: 'sale',
+	viewType: 'sale'
 };
+
+/*
+	----------------
+	- Things to do -
+	----------------
+	1. Ajax product fetching
+	2. Create product filters ( for views )
+	3. Allow ability to create custom filters
+*/
 
 $(function() {
 
@@ -14,6 +22,19 @@ $(function() {
 		blur: '/img/camera_blur.png',
 		focus: '/img/camera_focus.png'
 	};
+
+	// switch view filters
+	$('#viewContainer .view').on('click', function() {
+		// make em all non-selected
+		$('#viewContainer .view').each(function() {
+			$(this).attr('data-selected', 'false');
+		});
+
+		// set this one to selected
+		$(this).attr('data-selected', 'true');
+
+		// Filter products
+	});
 
 	Market.handlers();
 
@@ -199,18 +220,23 @@ $(function() {
 	});
 
 	// Expand create post on click
-	$(document).on('click', '#inputContainer', function() {
-		if(state.LOGGED_IN) {
-			Market.expand();
+	$(document).on('click', '#inputContainer', function(e) {
+		console.log(e.target);
+		if($(e.target).attr('id') == 'cancelButton') {
 		} else {
-			window.location.href = '/signin';
+			if(state.LOGGED_IN) {
+				Market.expand();
+			} else {
+				window.location.href = '/signin';
+			}
 		}
-
 	});
 
 	// Discard post on click
 	$(document).on('click', '#inputContainer #cancelButton', function() {
-		Market.discard();
+		if(Market.isOpen) {
+			Market.discard();
+		}
 	});
 
 	// Discard post on ESCAPE
@@ -232,7 +258,18 @@ $(function() {
 
 
 
-
+// Retrieve feed for current view
+Market.get = function(callback) {
+	$.ajax({
+		url: '/api/get_feed',
+		data: {
+			t: this.viewType,
+			i: this.viewIndex
+		}
+	}).done(function(res) {
+		callback(res);
+	});
+};
 
 
 Market.handlers = function() {
@@ -406,43 +443,30 @@ Market.toDate = function(ISODate) {
 	return time;
 };
 
-
-// Retrieve feed for current view
-Market.get = function(callback) {
-	$.ajax({
-		url: '/api/get_feed',
-		data: {
-			t: this.viewType,
-			i: this.viewIndex
-		}
-	}).done(function(res) {
-		callback(res);
-	});
-};
-
 // expand input area for creation of listing
 Market.expand = function() {
-	setTimeout(function(){
+	if($('#inputContainer').hasClass('showInputContainer-reverse')) {
+		$('#inputContainer').removeClass('showInputContainer-reverse');
+	}
+	if(!$('#inputContainer').hasClass('showInputContainer')) {
 		$('#inputContainer').addClass('showInputContainer');
-		$('#inputContainer textarea').focus();
-	}, 100);
+	}
+	$('#inputContainer textarea').focus();
 
 	this.isOpen = true;
 };
 
 Market.discard = function() {
 
-	if($('#inputContainer').hasClass('createPost')) {
-		$('#inputContainer').removeClass('createPost');
+	// remove focus from textarea
+	$('#inputContainer textarea').blur();
+
+	if($('#inputContainer').hasClass('showInputContainer')) {
+		$('#inputContainer').removeClass('showInputContainer');
 	}
-	if(!$('#inputContainer').hasClass('createPost-reverse')) {
-		$('#inputContainer').addClass('createPost-reverse');
+	if(!$('#inputContainer').hasClass('showInputContainer-reverse')) {
+		$('#inputContainer').addClass('showInputContainer-reverse');
 	}
-	
-	setTimeout(function(){
-		$('#inputContainer').hide();
-		$('#createPlaceholder').show();
-	}, 1000);
 
 	$('#inputContainer textarea').val('');
 

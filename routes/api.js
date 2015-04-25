@@ -35,41 +35,32 @@ router.get('*', function(req, res, next) {
 // get market feed
 router.get('/get_feed', function(req, res, next) {
 
-	// ensure we recieved a valid request
-	if(!('t' in req.query) || req.query.t.length == 0) {
-		res.send({status: 'DX-REJECTED', message: 'No request type specified'});
-		return;
-	}
+	// Set sale filter index && general filter index
+	var si = ('si' in req.query && parseInt(req.query.si) > 0) ? req.query.si : 0;
+	var gi = ('gi' in req.query && parseInt(req.query.gi) > 0) ? req.query.gi : 0;
 
-	// ensure we've got an index to start at
-	if(!('i' in req.query) || parseInt(req.query.i) < 0) {
-		res.send({status: 'DX-REJECTED', message: 'No post index specified'});
-		return;
-	}
-
-	// type of request ? ( [BUY_OFFER] || [SELL_OFFER] )
-	if(req.query.t != '[BUY_OFFER]' && req.query.t != '[SELL_OFFER]') {
-		res.send({status: 'DX-REJECTED', message: 'Invalid request type'});
-		return;
-	}
-
-	// prepare for db access
+	// get feed data for each
 	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
 
+	var iteration = 0;
+
 	feed.find({
-		post_type: req.query.t,
-		visibility: 1
-	}).skip(parseInt(req.query.i)).limit(20).sort({_id: -1}).toArray(function(err, feedArr) {
+	}).toArray(function(err, saleArr) {
 		if(err) {
-			console.log('[-] MongoDB error fetching feed :: ' + err);
-			res.send({status: 'DX-FAILED', message: 'Error occurred'});
+			console.log('[-] MongoDB failed to fetch sale feeds :: ' + err);
+			res.send({status: 'DX-FAILED', message: 'Error occurred fetching data...'});
 			return;
 		}
+	});
 
-		feedArr = feedArr || false;
-		res.send({status: 'DX-OK', message: feedArr});
-		return;
+	feed.find({
+	}).toArray(function(err, generalArr) {
+		if(err) {
+			console.log('[-] MongoDB failed to fetch general feed :: ' + err);
+			res.send({status: 'DX-FAILED', message: 'Error occurred fetching data...'});
+			return;
+		}
 	});
 });
 
@@ -711,3 +702,36 @@ router.get('/sendmail', function(req, res, next) {
 
 
 module.exports = router;
+
+
+
+
+// feedObj contains 2 arrays saleArr & generalArr
+function returnFeed(res, feedObj, iteration) {
+	if(iteration == 2) {
+		res.send({status: 'DX-OK', message: feedArr});
+	}
+	return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
