@@ -19,80 +19,7 @@ var async = require('async');
 
 router.get('/', function(req, res, next) {
 	sessionManager.isLoggedIn(req.session);
-
-	var db = dbManager.getDB();
-	var feed = db.collection('FEED');
-
-	var sIndex = 1;
-	var bIndex = 1;
-
-	// see if we received a valid sale index
-	if(!('s' in req.query) || parseInt(req.query.s) < 1) {
-	} else {
-		sIndex = parseInt(req.query.s);
-	}
-
-	// see if we receieved a valid buy index
-	if(!('b' in req.query) || parseInt(req.query.b) < 1) {
-	} else {
-		bIndex = parseInt(req.query.b);
-	}
-
-	var pageLimit = 40;
-
-	// fetch sales count
-	feed.count({
-		post_type: '[SELL_OFFER]',
-		visibility: {
-			$gt: 0
-		}
-	}, function(err, sellCount) {
-
-		//fetch buy count
-		feed.count({
-			post_type: '[BUY_OFFER]',
-			visibility: {
-				$gt: 0
-			}
-		}, function(err, buyCount) {
-
-
-			// fetch sales
-			feed.find({
-				post_type: '[SELL_OFFER]'
-			}).sort({$natural: -1}).skip((sIndex - 1) * pageLimit).limit(pageLimit).toArray(function(err, saleArr) {
-				
-				// fetch buyer posts
-				feed.find({
-					post_type: '[BUY_OFFER]'
-				}).sort({$natural: -1}).skip((bIndex - 1) * pageLimit).limit(pageLimit).toArray(function(err, buyArr) {
-
-					// turn ObjectID's into timestamps so browsers can parse dates
-					for(var i = 0; i < saleArr.length; i++) {
-						saleArr[i].timestamp = ObjectID(saleArr[i]._id).getTimestamp();
-					}
-					for(var i = 0; i < buyArr.length; i++) {
-						buyArr[i].timestamp = ObjectID(buyArr[i]._id).getTimestamp();
-					}
-
-					res.render('market', {
-						title: 'Market',
-						USER: req.session,
-						SELL_FEED: saleArr,
-						BUY_FEED: buyArr,
-						buyCount: buyCount,
-						sellCount: sellCount,
-						sp: sIndex,
-						bp: bIndex,
-						sMax: sellCount/pageLimit,
-						bMax: buyCount/pageLimit
-					});
-				});
-			});
-
-
-		});
-	});
+	res.render('market', { title: 'Market', USER: req.session });
 });
 
 
@@ -163,7 +90,9 @@ router.post('/post', function(req, res, next) {
 	var post = {
 		poster_id: req.session.USER_ID,
 		poster_username: req.session.USERNAME,
+		post_type: req.body.t,
 		post_text: req.body.d,
+		comment_count: 0,
 		visibility: 1,
 		images: []
 	};
@@ -206,6 +135,14 @@ router.post('/post', function(req, res, next) {
 			});
 
 		}
+	}
+
+	if(neededIterations == 0) {
+		var db = dbManager.getDB();
+		var feed = db.collection('FEED');
+		feed.insert(post);
+		res.redirect('/market');
+		return;
 	}
 
 	// now iterate through image and validate mime-type

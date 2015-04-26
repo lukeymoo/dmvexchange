@@ -24,6 +24,7 @@ block createBlock
 	div(id='createContainer')
 		img(id='validator')
 		div(id='inputContainer')
+			span(id='placeholderCamera')
 			div(id='postType')
 				span(id='sale', data-type='sale', data-active='true', class='postType', tabindex=1) Sale
 				span(id='purchase', data-type='general', data-active='false', class='postType', tabindex=2) General
@@ -73,14 +74,25 @@ block marketFeedBlock
 
 
 	div(id='centerFeed')
-		//
 			div(class='post')
-				div(class='thumbnail')
-					img(src='/img/landing_bg.jpg', alt='hello')
-				span(class='creatorID') kamsdksand123kamsd0oasd
-				span(class='creatorUsername') lukeymoo
-				span(class='description').
+				div(class='post_general')
+					div(class='thumbnail')
+						img(src='/img/landing_bg.jpg', alt='hello')
+					span(class='creatorID') kamsdksand123kamsd0oasd
+					span(class='creatorUsername') lukeymoo
+					span(class='description').
+						iamaksmdksamdkamsdk sakdsamkdmsad skdnksamd
 				div(class='commentContainer')
-					span(class='commentCount') 22
-					img(src='/img/chat_bubble.png', class='commentIcon')
+					div(class='comment')
+						div(class='info')
+							span(class='username') Jodoe
+							span(class='date') 5 minutes ago
+						span(class='text') This is a comment
+						div(class='likeContainer')
+						span(class='thumb') 
+						span(class='thumbCount') 0
+					input(class='commentInput', type='text', placeholder='Leave a comment...')
+					//
+						span(class='commentCount') 22
+						img(src='/img/chat_bubble.png', class='commentIcon')
 

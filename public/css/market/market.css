@@ -1,8 +1,7 @@
 #createContainer {
 	margin-top: 15px;
-	width: 48%;
-	margin-left: auto;
-	margin-right: auto;
+	width: 490px;
+	margin-left: 265px;
 	padding: 10px 0px;
 }
 
@@ -22,26 +21,6 @@
 
 #createCamera:hover {
 	background: url('/img/camera_focus.png') no-repeat center center
-}
-
-#createPlaceholder {
-	display: inline-block;
-
-	
-	width: 100%;
-	height: 35px;
-	line-height: 35px;
-	padding: 0px 5px;
-	border: 1px solid rgb(220, 220, 220);
-	color: rgb(110, 110, 110);
-	background-color: white;
-
-	cursor: pointer;
-	pointer: hand;
-
-	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
-	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
-	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.0575);
 }
 
 #leftPanel {
@@ -329,6 +308,22 @@
 	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.075);
 }
 
+#inputContainer #placeholderCamera {
+	position: absolute;
+	z-index: 50;
+	width: 20px;
+	height: 20px;
+	margin-top: 5px;
+	margin-left: 455px;
+	background: url('/img/camera_blur.png') no-repeat center center;
+	cursor: pointer;
+	pointer: hand;
+}
+
+#inputContainer #placeholderCamera:hover {
+	background: url('/img/camera_focus.png') no-repeat center center;
+}
+
 #inputContainer #postType {
 	position: absolute;
 	z-index: 0;
@@ -527,7 +522,7 @@
 
 #centerFeed {
 	position: absolute;
-	left: 268px;
+	left: 265px;
 	width: 490px;
 	padding-top: 10px;
 }
@@ -536,17 +531,31 @@
 
 	display: inline-block;
 
-	width: 488px;
+	width: 490px;
+
+	margin-bottom: 20px;
 
 	border: 1px solid rgba(0, 0, 0, 0.15);
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
 
 	background-color: #fff;
 
-	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.125);
-	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.125);
-	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.125);
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.175);
+	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.175);
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.175);
+}
+
+#centerFeed .post .post_general {
+	padding: 10px;
+}
+
+#centerFeed .post .post_id {
+	display: none;
+}
+
+#centerFeed .post .post_type {
+	display: none;
 }
 
 #centerFeed .post .thumbnail {
@@ -554,8 +563,6 @@
 	border: none;
 	margin: 0px;
 	padding: 0px;
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
 
 	cursor: pointer;
 	pointer: hand;
@@ -564,8 +571,6 @@
 #centerFeed .post .thumbnail img {
 	margin: 0px;
 	padding: 0px;
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
 }
 
 #centerFeed .post .creatorID {
@@ -575,37 +580,85 @@
 #centerFeed .post .creatorUsername {
 	display: block;
 
-	padding-left: 5px;
-	padding-right: 5px;
-
-	color: rgb(0, 125, 225);
+	
+	color: rgb(0, 100, 200);
+	font-size: 1.0125dem;
+	font-family: DX-LIGHT;
 
 	cursor: default;
 	pointer: default;
 }
 
+#centerFeed .post .post_date {
+	display: block;
+	font-size: .8em;
+	margin-top: -3px;
+}
+
 #centerFeed .post .description {
 	display: block;
 
-	padding: 5px;
-
-	margin-left: 5px;
-	margin-right: 5px;
-
 	max-height: 100px;
 	overflow: hidden;
-
-	border-bottom: 1px solid rgba(0, 0, 0, 0.175);
+	padding: 5px;
+	border: 1px solid rgba(0, 0, 0, 0.125);
+	border-radius: 3px;
 }
 
 #centerFeed .post .commentContainer {
-	margin-left: 5px;
+	font-family: DX-REG;
+	font-size: 1.05em;
+	background-color: rgba(100, 200, 250, 0.175);
+	padding: 10px;
 }
 
-#centerFeed .post .commentIcon {
-	width: 19px;
-	height: 19px;
-	margin-bottom: 1px;
-	opacity: .6;
+#centerFeed .post .commentContainer * {
+	vertical-align: top;
+}
+
+#centerFeed .post .comment {
+}
+
+#centerFeed .post .comment .info {
+	display: block;
+}
+
+#centerFeed .post .comment .username {
+	display: block;
+	color: blue;
+	margin-top: -2px;
+}
+
+#centerFeed .post .comment .date {
+	display: block;
+	font-size: .8em;
+	margin-top: -5px;
+}
+
+#centerFeed .post .comment .text {
+	display: block;
+}
+
+#centerFeed .post .commentInput:focus,
+#centerFeed .post .commentInput:active {
+	outline: none;
+}
+
+#centerFeed .post .comment .thumb {
+	display: inline-block;
+	width: 17px;
+	height: 17px;
+	background: url('/img/thumb_up.png') no-repeat center center; 
+}
+
+#centerFeed .post .commentInput {
+	font-family: DX-REG;
+	
+	width: 100%;
+	height: 28px;
+
+	border: 1px solid rgba(0, 0, 0, 0.15);
+
+	padding-left: 5px;
 }
 

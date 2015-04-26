@@ -38,6 +38,7 @@ router.get('/get_feed', function(req, res, next) {
 	// Set sale filter index && general filter index
 	var si = ('si' in req.query && parseInt(req.query.si) > 0) ? req.query.si : 0;
 	var gi = ('gi' in req.query && parseInt(req.query.gi) > 0) ? req.query.gi : 0;
+	var minID = ('minID' in req.query && req.query.minID.length == 24) ? req.query.minID : 0;
 
 	// get feed data for each
 	var db = dbManager.getDB();
@@ -45,23 +46,60 @@ router.get('/get_feed', function(req, res, next) {
 
 	var iteration = 0;
 
+	var feedObj = {};
+
+	// find by id sort descending, grab following 50 posts
+	if(minID == 0) {
+		feed.find({
+		}).sort({_id: 1}).limit(50).toArray(function(err, feed) {
+			res.send({ status: 'DX-OK', message: feed });
+			return;
+		});
+	} else {
+		feed.find({
+			_id: {
+				$gt: ObjectID(minID)
+			}
+		}).skip(1).sort({_id: 1}).limit(50).toArray(function(err, feed) {
+			res.send({ status: 'DX-OK', message: feed });
+			return;
+		});
+	}
+
+	/*
 	feed.find({
+	}).toArray(function(err, noSort) {
+		iteration++;
+		feedObj.noSort = noSort;
+		returnFeed(res, feedObj, iteration);
+	});
+
+	feed.find({
+		post_type: 'sale'
 	}).toArray(function(err, saleArr) {
 		if(err) {
 			console.log('[-] MongoDB failed to fetch sale feeds :: ' + err);
 			res.send({status: 'DX-FAILED', message: 'Error occurred fetching data...'});
 			return;
 		}
+		iteration++;
+		feedObj.sale = saleArr;
+		returnFeed(res, feedObj, iteration);
 	});
 
 	feed.find({
+		post_type: 'general'
 	}).toArray(function(err, generalArr) {
 		if(err) {
 			console.log('[-] MongoDB failed to fetch general feed :: ' + err);
 			res.send({status: 'DX-FAILED', message: 'Error occurred fetching data...'});
 			return;
 		}
+		iteration++;
+		feedObj.general = generalArr;
+		returnFeed(res, feedObj, iteration);
 	});
+	*/
 });
 
 // save landing page emails
@@ -706,10 +744,11 @@ module.exports = router;
 
 
 
-// feedObj contains 2 arrays saleArr & generalArr
+// feedObj == Obj with 'sale' & 'general' properties which contain
+// feed in array format
 function returnFeed(res, feedObj, iteration) {
-	if(iteration == 2) {
-		res.send({status: 'DX-OK', message: feedArr});
+	if(iteration == 3) {
+		res.send({status: 'DX-OK', message: feedObj});
 	}
 	return;
 }

@@ -47,6 +47,12 @@ router.get('/signup', function(req, res, next) {
 	res.render('index', { title: 'Sign up', USER: req.session });
 });
 
+// redirect GET requests to auth
+router.get('/auth', function(req, res, next) {
+	res.redirect('/');
+	return;
+});
+
 /** POST Process login form **/
 router.post('/auth', function(req, res, next) {
 	// Redirect already authenticated users
