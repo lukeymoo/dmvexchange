@@ -595,13 +595,25 @@
 	margin-top: -3px;
 }
 
+#centerFeed .post .post_options {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	margin-left: 450px;
+	background: url('/img/gear.png') no-repeat center center;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
 #centerFeed .post .description {
 	display: block;
 
-	max-height: 100px;
 	overflow: hidden;
+	margin-top: 5px;
+	margin-bottom: 5px;
 	padding: 5px;
-	border: 1px solid rgba(0, 0, 0, 0.125);
+	border: 1px solid rgba(0, 0, 0, 0.075);
 	border-radius: 3px;
 }
 

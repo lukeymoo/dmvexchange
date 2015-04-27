@@ -31,9 +31,14 @@ $(function() {
 		// update description field
 		$('#uploadForm #description').val($('#inputContainer textarea').val());
 		// validate description
-		if($('#uploadForm #description').val().length < 1 || $('#uploadForm #description').val().length > 360) {
+		if($('#uploadForm #description').val().length < 4) {
 			e.preventDefault();
-			spawnMessage('Post must be 1-360 characters', false);
+			spawnMessage('Post must be at least 4 characters', false);
+			return false;
+		}
+		if($('#uploadForm #description').val().length > 20000) {
+			e.preventDefault();
+			spawnMessage('Post length must not exceed 20,000 characters', false);
 			return false;
 		}
 		// update post type
@@ -199,6 +204,11 @@ Market.expand = function() {
 
 Market.discard = function() {
 
+	// show the placeholder camera
+	setTimeout(function() {
+		$('#inputContainer #placeholderCamera').show();
+	}, 475);
+
 	// remove focus from textarea
 	$('#inputContainer textarea').blur();
 
@@ -251,9 +261,6 @@ Market.discard = function() {
 	});
 
 	this.isOpen = false;
-
-	// show the placeholder camera
-	$('#inputContainer #placeholderCamera').show();
 };
 
 Market.handlers = function() {

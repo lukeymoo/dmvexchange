@@ -30,7 +30,7 @@ router.get('/', function(req, res, next) {
 	[ ] no_type					=>		No post type specified (missing `t` field variable in form)
 	[ ] invalid_type 			=>		Invalid `t` field (can only be [SALE] || [PURCHASE])
 	[ ] no_description			=>		Missing description
-	[ ] invalid_description		=>		Description length is not between 6-360
+	[ ] invalid_description		=>		Description length is not between 6-450
 	[ ] sale_no_images			=>		Post type is a sale but it has no images of product...(sketchy)
 	[ ] invalid_mimetype		=> 		Uploaded file has a non-image mimetype...(Prob a virus payload)
 */
@@ -73,7 +73,7 @@ router.post('/post', function(req, res, next) {
 	}
 
 	// validate description
-	if(req.body.d.length < 1 || req.body.d.length >= 361) {
+	if(req.body.d.length < 4 || req.body.d.length > 20000) {
 		res.redirect('/market?err=invalid_description');
 		return;
 	}
