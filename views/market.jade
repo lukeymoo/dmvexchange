@@ -29,7 +29,7 @@ block createBlock
 				span(id='sale', data-type='sale', data-active='true', class='postType', tabindex=1) Sale
 				span(id='purchase', data-type='general', data-active='false', class='postType', tabindex=2) General
 				span(id='cancelButton') Cancel
-			textarea(placeholder='Create post...', tabindex=3)
+			textarea(placeholder='Create post...', tabindex=3, id='placeholderInput')
 			div(id='controls')
 				form(id='uploadForm', enctype='multipart/form-data', action='/market/post', method='post')
 					textarea(class='photoUpload', name='d', id='description')

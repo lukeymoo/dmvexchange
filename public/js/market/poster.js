@@ -6,6 +6,8 @@ $(function() {
 		focus: '/img/camera_focus.png',
 	};
 
+	var start_scroll_height = parseInt($('#inputContainer #placeholderInput')[0].scrollHeight);
+
 	Market.handlers();
 
 	// set handler images

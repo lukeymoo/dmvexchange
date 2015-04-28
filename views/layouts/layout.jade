@@ -2,24 +2,24 @@ doctype html
 html
 	head
 		title DX &#8212; #{title}
-		link(rel='stylesheet', href='/css/normalize.css')
-		link(rel='stylesheet', href='/css/main.css')
+		link(rel='stylesheet', href='/css/normalize.css?v=1')
+		link(rel='stylesheet', href='/css/main.css?v=1')
 		link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
-		link(rel='stylesheet', href='/css/common/common.css')
+		link(rel='stylesheet', href='/css/common/common.css?v=1')
 		if title == 'Account'
-			link(rel='stylesheet', href='/css/account/account.css')
+			link(rel='stylesheet', href='/css/account/account.css?v=1')
 		if title == 'Umm'
-			link(rel='stylesheet', href='/css/account/account.css')
+			link(rel='stylesheet', href='/css/account/account.css?v=1')
 		if title == 'Activated'
-				link(rel='stylesheet', href='/css/account/account.css')
+				link(rel='stylesheet', href='/css/account/account.css?v=1')
 		if title == 'Sorry'
-				link(rel='stylesheet', href='/css/account/account.css')
+				link(rel='stylesheet', href='/css/account/account.css?v=1')
 		if title == 'Mail'
-			link(rel='stylesheet', href='/css/mail/mail.css')
+			link(rel='stylesheet', href='/css/mail/mail.css?v=1')
 		if title == 'Profile'
-			link(rel='stylesheet', href='/css/user/user.css')
+			link(rel='stylesheet', href='/css/user/user.css?v=1')
 		if title == 'Tips'
-			link(rel='stylesheet', href='/css/tips/tips.css')
+			link(rel='stylesheet', href='/css/tips/tips.css?v=1')
 	body
 		div(id='wrapper')
 			div(id='pageHeader')
@@ -74,21 +74,21 @@ html
 
 		script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
 		script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js')
-		script(src='/js/common.js')
+		script(src='/js/common.js?v=1')
 		if title == 'Account'
-			script(src='/js/account.js')
+			script(src='/js/account.js?v=1')
 		if title == 'Sign in'
-			script(src='/js/login.js')
+			script(src='/js/login.js?v=1')
 		if title == 'Sign up'
-			script(src='/js/register.js')
+			script(src='/js/register.js?v=1')
 		if title == 'Mail'
-			script(src='/js/mail/messenger.js')
-			script(src='/js/mail/controls.js')
-			script(src='/js/mail/main.js')
-			script(src='/js/mail/viewer.js')
+			script(src='/js/mail/messenger.js?v=1')
+			script(src='/js/mail/controls.js?v=1')
+			script(src='/js/mail/main.js?v=1')
+			script(src='/js/mail/viewer.js?v=1')
 		if title == 'Tips'
-			script(src='/js/tips.js')
+			script(src='/js/tips.js?v=1')
 		if title == 'Activated'
-			script(src='/js/token.js')
+			script(src='/js/token.js?v=1')
 		if title == 'Sorry'
-			script(src='/js/token.js')
+			script(src='/js/token.js?v=1')

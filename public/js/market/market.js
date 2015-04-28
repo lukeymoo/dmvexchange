@@ -63,6 +63,35 @@ $(function() {
 		}
 	});
 
+	// close options menu when click is outside element
+	$(document).on('click', function(e) {
+
+		// close other menus
+		$(document).find('.post .post_options').each(function() {
+			if(!$(e.target).is($(this))) {
+				if($(this).attr('data-state') == 'opened') {
+					$(this).parents('.post').find('.post_options_menu').hide();
+					$(this).attr('data-state', 'closed');
+				}
+			}
+		});
+
+	});
+
+	// handle post option button clicks
+	$(document).on('click', '.post .post_options', function() {
+		if($(this).parents('.post').find('.post_options').attr('data-state') == 'opened') {
+			$(this).parents('.post').find('.post_options_menu').hide();
+			$(this).parents('.post').find('.post_options').attr('data-state', 'closed');
+			return;
+		}
+		if($(this).parents('.post').find('.post_options').attr('data-state') == 'closed') {
+			$(this).parents('.post').find('.post_options_menu').show();
+			$(this).parents('.post').find('.post_options').attr('data-state', 'opened');
+			return;
+		}
+	});
+
 	// switch view filters
 	$('#viewContainer .view').on('click', function() {
 		// make em all non-selected
@@ -76,7 +105,22 @@ $(function() {
 		// Filter products
 	});
 
-	// convert all ISODates in products to more compact format
+	// allow edit of post on click
+	$(document).on('click', '.post_options_menu .edit_post', function() {
+
+		$(this).parents('.post').find('.description').attr('contenteditable', 'true');
+		place_cursor_end($(this).parents('.post').find('.description').get(0));
+		var DOM = 
+		"<span class='submit_edit'>Confirm</span>" +
+		"<span class='cancel_edit'>Cancel</span>";
+		$(DOM).insertAfter($(this).parents('.post').find('.description'));
+	});
+
+	// submit edit changes on enter
+	$(document).on('keyup', '.post .submit_edit', function(e) {
+	});
+
+	// update post since every 15 seconds
 	setInterval(function() {
 		$('.post').find('.post_date').each(function() {
 			$(this).html(time_since(new Date($(this).attr('value'))));
@@ -96,6 +140,26 @@ $(function() {
 
 
 
+
+
+
+function place_cursor_end(cursor) {
+    cursor.focus();
+    if (typeof window.getSelection != "undefined"
+            && typeof document.createRange != "undefined") {
+        var range = document.createRange();
+        range.selectNodeContents(cursor);
+        range.collapse(false);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } else if (typeof document.body.createTextRange != "undefined") {
+        var textRange = document.body.createTextRange();
+        textRange.moveToElementText(cursor);
+        textRange.collapse(false);
+        textRange.select();
+    }
+}
 
 
 
@@ -189,7 +253,12 @@ function post_from_json(json) {
 		"</span>" + 
 		"<div class='post_general'>";
 			if(json.is_owner) {
-				DOM += "<span class='post_options'></span>";
+				DOM +=
+				"<span class='post_options' data-state='closed'></span>" +
+				"<ul class='post_options_menu'>" +
+					"<li class='edit_post'>Edit</li>" +
+					"<li class='remove_post'>Remove</li>" +
+				"</ul>";
 			}
 			DOM += "<span class='creatorUsername'>" +
 				json.poster_username + 
@@ -222,41 +291,36 @@ function time_since(date) {
 
 	var time = Math.floor((new Date() - date) / 1000);
 
-	var date_type = (time == 1) ? 'second' : 'seconds';
+	//var date_type = (time == 1) ? 'second' : 'seconds';
+	var date_type = 's';
 
 	// seconds -> minutes
 	if(time > 60) {
 		time = Math.floor(time / 60);
-		date_type = (time == 1) ? 'minute' : 'minutes';
+		//date_type = (time == 1) ? 'minute' : 'minutes';
+		date_type = 'm';
 
 		// minutes -> hours
 		if(time > 60) {
 			time = Math.floor(time / 60);
-			date_type = (time == 1) ? 'hour' : 'hours' ;
+			//date_type = (time == 1) ? 'hour' : 'hours' ;
+			date_type = 'h';
 
-			// hours -> days
+			// beyond 24 h return to regular date time format
 			if(time > 24) {
 				time = Math.floor(time / 24);
-				date_type = (time == 1) ? 'day' : 'days';
+				//date_type = (time == 1) ? 'day' : 'days';
+				date_type = '';
 
 				// days -> weeks
-				if(time > 7) {
-					time = Math.floor(time / 7);
-					date_type = (time == 1) ? 'week' : 'weeks';
-
-					// after 2 weeks return the normal date format
-					if(time > 2) {
-						time = date;
-						date_type = '';
-					}
-				}
+				// divided by 7
 			}
 		}
 	}
 
 
 
-	return (date_type == '') ? time : 'Posted ' + time + ' ' + date_type + ' ago';
+	return (date_type == '') ? string_to_date(date) : time + date_type + ' ago';
 }
 
 function date_from_objectid(object_id) {
