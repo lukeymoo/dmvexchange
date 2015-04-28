@@ -32,8 +32,34 @@ $(function() {
 
 			// Display messages
 			Market.display();
+
+			// Description VIEW MORE buttons
+			// After 700 characters
+			$('#centerFeed').find('.post').each(function() {
+				if($(this).find('.description').html().length > 700) {
+					parse_viewchanger($(this).find('.description'));
+				}
+			});
 		} else {
 			spawnMessage(res.message, false);
+		}
+	});
+
+	// handle view more/less clicks
+	$(document).on('click', '.view_change', function() {
+
+		if($(this).attr('data-state') == 'less') {
+			$(this).html('View less');
+			expand_view($(this).parents('.post').find('.description'));
+			$(this).attr('data-state', 'more');
+			return;
+		}
+
+		if($(this).attr('data-state') == 'more') {
+			$(this).html('View more');
+			compact_view($(this).parents('.post').find('.description'));
+			$(this).attr('data-state', 'less');
+			return;
 		}
 	});
 
@@ -129,6 +155,29 @@ Market.parse_messages = function(json_response) {
 	}
 
 };
+
+
+
+
+
+function parse_viewchanger(description_obj) {
+	compact_view(description_obj);
+	var DOM = '<div class="view_change" data-state="less">View more</div>'
+	$(DOM).insertAfter(description_obj)
+	return;
+}
+
+function expand_view(description_obj) {
+	$(description_obj).css('overflow', 'initial');
+	$(description_obj).css('max-height', 'initial');
+	return;
+}
+
+function compact_view(description_obj) {
+	$(description_obj).css('overflow', 'hidden');
+	$(description_obj).css('max-height', '140px');
+	return;
+}
 
 function post_from_json(json) {
 	var DOM = 

@@ -36,9 +36,9 @@ $(function() {
 			spawnMessage('Post must be at least 4 characters', false);
 			return false;
 		}
-		if($('#uploadForm #description').val().length > 20000) {
+		if($('#uploadForm #description').val().length > 2500) {
 			e.preventDefault();
-			spawnMessage('Post length must not exceed 20,000 characters', false);
+			spawnMessage('Post length must not exceed 2,500 characters', false);
 			return false;
 		}
 		// update post type

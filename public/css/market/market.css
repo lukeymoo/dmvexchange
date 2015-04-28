@@ -597,24 +597,66 @@
 
 #centerFeed .post .post_options {
 	position: absolute;
-	width: 20px;
-	height: 20px;
-	margin-left: 450px;
+	padding: 10px 13px;
+	margin-left: 445px;
 	background: url('/img/gear.png') no-repeat center center;
 
 	cursor: pointer;
 	pointer: hand;
 }
 
+#centerFeed .post .post_options:hover {
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
 #centerFeed .post .description {
 	display: block;
 
-	overflow: hidden;
 	margin-top: 5px;
 	margin-bottom: 5px;
 	padding: 5px;
 	border: 1px solid rgba(0, 0, 0, 0.075);
 	border-radius: 3px;
+	
+	-webkit-word-break: break-word;
+	-moz-word-break: break-word;
+	word-break: break-word;
+
+	webkit-hyphens: auto;
+	-moz-hyphens: auto;
+	-ms-hyphens: auto;
+	hyphens: auto;
+}
+
+#centerFeed .post .view_change {
+	display: block;
+
+	font-family: DX-REG;
+	font-weight: bold;
+
+	border: 1px solid rgba(0, 175, 200, 0.75);
+	border-radius: 3px;
+
+	width: 100%;
+
+	margin-right: 15px;
+	margin-bottom: 5px;
+
+	height: 33px;
+	line-height: 33px;
+
+	text-align: center;
+
+	-webkit-transition: background-color .075s linear 0s;
+	-moz-transition: background-color .075s linear 0s;
+	transition: background-color .075s linear 0s;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#centerFeed .post .view_change:hover {
+	background-color: rgba(0, 175, 200, 0.6);
 }
 
 #centerFeed .post .commentContainer {

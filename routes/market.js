@@ -73,7 +73,7 @@ router.post('/post', function(req, res, next) {
 	}
 
 	// validate description
-	if(req.body.d.length < 4 || req.body.d.length > 20000) {
+	if(req.body.d.length < 4 || req.body.d.length > 2500) {
 		res.redirect('/market?err=invalid_description');
 		return;
 	}
@@ -83,7 +83,7 @@ router.post('/post', function(req, res, next) {
 		one: 	(req.files['photo1']) ? req.files['photo1'][0] : false,
 		two: 	(req.files['photo2']) ? req.files['photo2'][0] : false,
 		three: 	(req.files['photo3']) ? req.files['photo3'][0] : false,
-		four: 	(req.files['photo4']) ? req.files['photo3'][0] : false
+		four: 	(req.files['photo4']) ? req.files['photo4'][0] : false
 	};
 	
 	// holds the post variables for insertion into database
