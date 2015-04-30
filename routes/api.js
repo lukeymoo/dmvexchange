@@ -32,6 +32,70 @@ router.get('*', function(req, res, next) {
 	next();
 });
 
+router.get('/save_post_edit', function(req, res, next) {
+	// Ensure logged in
+	if(!sessionManager.isLoggedIn(req.session)) {
+		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
+		return;
+	}
+
+	// ensure they've got a complete id
+	if(!('USERNAME' in req.session) || !req.session.USERNAME.length) {
+		res.send({status: 'DX-REJECTED', message: 'Could not resolve ID, try re-logging in'});
+		return;
+	}
+
+	if(!('USER_ID' in req.session) || !req.session.USER_ID.length) {
+		res.send({status: 'DX-REJECTED', message: 'Could not resolve ID, try re-logging in'});
+		return;
+	}
+
+	// ensure recieved post_id
+	if(!('post_id' in req.query) || req.query.post_id.length != 24) {
+		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
+		return;
+	}
+
+	// ensure received new description
+	if(!('text') in req.query || !req.query.text.length) {
+		res.send({status: 'DX-REJECTED', message:'No description specified'});
+		return;
+	}
+
+	// validate description
+	if(req.query.text.length < 4) {
+		res.send({status: 'DX-REJECTED', message: 'Description must be at least 4 characters'});
+		return;
+	}
+	if(req.query.text.length > 2500) {
+		res.send({status: 'DX-REJECTED', message: 'Description must not exceed 2,500 characters'});
+		return;
+	}
+
+	// update description
+	var db = dbManager.getDB();
+	var feed = db.collection('FEED');
+
+	feed.update({
+		_id: ObjectID(req.query.post_id), // POST ID
+		poster_username: req.session.USERNAME.toLowerCase(),
+		poster_id: req.session.USER_ID
+	}, { $set: { post_text: req.query.text } }, function(err, result) {
+		if(err) {
+			console.log('[-] MongoDB error while updating post');
+			res.send({status: 'DX-FAILED', message: 'Error occurred updating post'});
+			return;
+		}
+		if(result) {
+			res.send({status: 'DX-OK', message: result});
+			return;
+		} else {
+			res.send({status: 'DX-REJECTED', message: 'Post not found'});
+			return;
+		}
+	});
+});
+
 // get market feed
 router.get('/get_feed', function(req, res, next) {
 
@@ -51,7 +115,7 @@ router.get('/get_feed', function(req, res, next) {
 	// find by id sort descending, grab following 50 posts
 	if(minID == 0) {
 		feed.find({
-		}).sort({_id: 1}).limit(50).toArray(function(err, feed) {
+		}).sort({$natural: -1}).limit(10).toArray(function(err, feed) {
 			res.send({ status: 'DX-OK', message: feed });
 			return;
 		});
@@ -60,7 +124,7 @@ router.get('/get_feed', function(req, res, next) {
 			_id: {
 				$gt: ObjectID(minID)
 			}
-		}).skip(1).sort({_id: 1}).limit(50).toArray(function(err, feed) {
+		}).skip(1).sort({natural: -1}).limit(10).toArray(function(err, feed) {
 			res.send({ status: 'DX-OK', message: feed });
 			return;
 		});

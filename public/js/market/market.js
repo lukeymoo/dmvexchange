@@ -9,6 +9,8 @@ var Market = {
 	feed: []
 };
 
+var initial_description = '';
+
 /*
 	----------------
 	- Things to do -
@@ -108,16 +110,49 @@ $(function() {
 	// allow edit of post on click
 	$(document).on('click', '.post_options_menu .edit_post', function() {
 
+		// save initial description
+		initial_description = $(this).parents('.post').find('.description').html();
+
 		$(this).parents('.post').find('.description').attr('contenteditable', 'true');
 		place_cursor_end($(this).parents('.post').find('.description').get(0));
 		var DOM = 
-		"<span class='submit_edit'>Confirm</span>" +
-		"<span class='cancel_edit'>Cancel</span>";
+		"<div class='edit_controls'>" +
+			"<span class='submit_edit'>Confirm</span>" +
+			"<span class='cancel_edit'>Cancel</span>" +
+		"</div>";
 		$(DOM).insertAfter($(this).parents('.post').find('.description'));
 	});
 
-	// submit edit changes on enter
-	$(document).on('keyup', '.post .submit_edit', function(e) {
+	// submit edit button
+	$(document).on('click', '.post .submit_edit', function() {
+
+		var context = $(this);
+		// hide edit controls
+		$(this).parent('.edit_controls').hide();
+		
+		// query server to save changes
+		var post_id = $(this).parents('.post').find('.post_id').html();
+		var post_desc = $(this).parents('.post').find('.description').html();
+
+		Market.save_edit(post_id, post_desc, function(res) {
+			if(res.status == 'DX-OK') {
+				if(res.message.nModified > 0) {
+					spawnMessage('Post updated!', true);
+					console.log($(context).parent());
+					$(context).parents('.post').find('.description').attr('contenteditable', 'false');
+					$(context).parent('.edit_controls').remove();
+				}
+			}
+		});
+	});
+
+	// cancel edit button
+	$(document).on('click', '.post .cancel_edit', function() {
+		// restore initial description
+		$(this).parents('.post').find('.description').html(initial_description);
+		$(this).parents('.post').find('.description').attr('contenteditable', 'false');
+		$(this).parent('.edit_controls').remove();
+
 	});
 
 	// update post since every 15 seconds
@@ -128,9 +163,6 @@ $(function() {
 	}, 15000);
 
 });
-
-
-
 
 
 
@@ -161,17 +193,11 @@ function place_cursor_end(cursor) {
     }
 }
 
-
-
-
-
-
-
 // Display all posts inside of the feed array
 Market.display = function() {
 	var collection = this.feed;
 	for(var message in collection) {
-		$('#centerFeed').prepend(post_from_json(collection[message]));
+		$('#centerFeed').append(post_from_json(collection[message]));
 	}
 };
 
@@ -183,6 +209,18 @@ Market.get = function(callback) {
 			si: this.saleIndex,
 			gi: this.generalIndex,
 			minID: this.minimumPostID
+		}
+	}).done(function(res) {
+		callback(res);
+	});
+};
+
+Market.save_edit = function(post_id, desc, callback) {
+	$.ajax({
+		url: '/api/save_post_edit',
+		data: {
+			post_id: post_id,
+			text: desc
 		}
 	}).done(function(res) {
 		callback(res);

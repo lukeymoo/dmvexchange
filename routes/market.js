@@ -113,7 +113,7 @@ router.post('/post', function(req, res, next) {
 
 			// Create large image
 			gm(photo[img].path)
-			.resize(800)
+			.resize(960)
 			.write(large_path, function(err) {
 				if(err) {
 					console.log('Error while creating large image :: ' + err);
@@ -122,7 +122,7 @@ router.post('/post', function(req, res, next) {
 
 			// Create small image
 			gm(photo[img].path)
-			.resize(350)
+			.resize(400)
 			.write(small_path, function(err) {
 				if(err) {
 					console.log('Error while creating small image :: ' + err);
