@@ -21,17 +21,6 @@ var smtp = require('../modules/smtp/smtp');
 
 router.get('/', function(req, res, next) {
 	sessionManager.isLoggedIn(req.session);
-
-	// testing
-	smtp.report_error('Test error', function(err, result) {
-		if(err) {
-			console.log(err);
-		}
-		if(result) {
-			console.log(result);
-		}
-	});
-
 	res.render('market', { title: 'Market', USER: req.session });
 });
 
@@ -129,7 +118,7 @@ router.post('/post', function(req, res, next) {
 			.resize(960)
 			.write(large_path, function(err) {
 				if(err) {
-					console.log('Error while creating large image :: ' + err);
+					smtp.report_error('Error while creating large image :: ' + err,function(){});
 				}
 			});
 
@@ -138,7 +127,7 @@ router.post('/post', function(req, res, next) {
 			.resize(400)
 			.write(small_path, function(err) {
 				if(err) {
-					console.log('Error while creating small image :: ' + err);
+					smtp.report_error('Error while creating small image :: ' + err,function(){});
 				}
 			});
 

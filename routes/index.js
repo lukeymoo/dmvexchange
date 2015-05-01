@@ -94,7 +94,7 @@ router.post('/auth', function(req, res, next) {
 
 	databaseManager.findByLogin(user, function(err, doc) {
 		if(err) {
-			console.log('[-] MongoDB Error while authenticating :: ' + err);
+			smtp.report_error('[-] MongoDB Error while authenticating :: ' + err, function(){});
 			res.send('Error occurred while authenticating, <a href="/signin">please try again.</a>');
 			return;
 		}
