@@ -616,6 +616,52 @@ a, a:active, a:visited, a:hover, a:link {
 	margin-bottom: 10px;
 }
 
+#notification_container {
+	position: fixed;
+	z-index: 100;
+	top: 55px;
+	right: 10px;
+}
+
+#notification_container .notification {
+	width: 225px;
+	min-height: 75px;
+
+	padding-top: 10px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	margin-bottom: 5px;
+
+	border-radius: 3px;
+	color: rgb(200, 200, 200);
+	background-color: rgba(0, 0, 0, 0.75);
+
+	-webkit-box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
+	-moz-box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
+	box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
+}
+
+#notification_container .notification .close_button {
+	float: right;
+	font-size: 1.75em;
+	padding: 2px;
+	height: 20px;
+	line-height: 20px;
+	margin-top: -8px;
+	margin-right: 5px;
+	cursor: pointer;
+	pointer: hand;
+}
+
+#notification_container .notification .close_button:hover {
+	color: rgb(100, 100, 100);
+}
+
+#notification_container .notification .text {
+	font-family: DX-REG;
+	padding-right: 5px;
+}
+
 .showLoginErrors {
 	-webkit-animation: showLoginErrors .25s forwards 0s 1 normal;
 	-moz-animation: showLoginErrors .25s forwards 0s 1 normal;

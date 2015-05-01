@@ -49,7 +49,7 @@ router.get('/signup', function(req, res, next) {
 
 // redirect GET requests to auth
 router.get('/auth', function(req, res, next) {
-	res.redirect('/');
+	res.redirect('/signin');
 	return;
 });
 

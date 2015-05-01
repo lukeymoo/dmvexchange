@@ -18,9 +18,24 @@ var send = function(messageObj, callback) {
 
 };
 
+var report_error = function(message, callback) {
+
+	transport.sendMail({
+		from: 'DMV Exchange <auto-reporter@dmv-exchange.com>',
+		to: '<report@dmv-exchange.com>',
+		subject: 'Error Report Generator',
+		text: message
+	}, function(err, result) {
+		callback(err, result);
+		return;
+	});
+
+};
+
 
 module.exports = {
 
-	send: send
+	send: send,
+	report_error: report_error
 
 };

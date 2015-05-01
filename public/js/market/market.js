@@ -43,7 +43,7 @@ $(function() {
 				}
 			});
 		} else {
-			spawnMessage(res.message, false);
+			window_message(res.message);
 		}
 	});
 
@@ -137,7 +137,7 @@ $(function() {
 		Market.save_edit(post_id, post_desc, function(res) {
 			if(res.status == 'DX-OK') {
 				if(res.message.nModified > 0) {
-					spawnMessage('Post updated!', true);
+					window_message('Post updated!');
 					console.log($(context).parent());
 					$(context).parents('.post').find('.description').attr('contenteditable', 'false');
 					$(context).parent('.edit_controls').remove();
@@ -318,7 +318,8 @@ function post_from_json(json) {
 	DOM +=
 	"</div>" +
 		"<div class='commentContainer'>" +
-			"<input class='commentInput' type='text' placeholder='Leave a comment...'>" +
+			"<span class='commentImage'></span>" +
+			"<div contenteditable='true' class='commentInput' type='text'></div>" +
 		"</div>" +
 	"</div>";
 	

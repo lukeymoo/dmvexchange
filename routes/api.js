@@ -7,6 +7,7 @@ var router = express.Router();
 var formManager = require('../modules/form/form');
 var dbManager = require('../modules/database/database');
 var sessionManager = require('../modules/session/session');
+var authManager = require('../modules/authentication');
 var ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
 
@@ -26,29 +27,37 @@ var uuid = require('node-uuid');
 
 router.get('*', function(req, res, next) {
 	if(!req.xhr && req.session.USERNAME != 'lukeymoo') {
-		res.send({status: 'DX-REJECTED', message: 'Access denied'});
+		res.send({status: 'DX-REJECTED', message: 'Cannot use browser to view'});
 		return;
 	}
 	next();
 });
 
+router.get('/post_comment', function(req, res, next) {
+
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
+	
+	// Ensure a post ID was given
+	if(!('post_id' in req.query) || !req.query.post_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No post specified'});
+		return;
+	}
+
+	// Ensure comment text was given
+	if(!('text' in req.query) || !req.query.text.length) {
+		res.send({status: 'DX-REJECTED', message: 'Cannot post empty comments'});
+		return;
+	}
+	// Validate the comment
+	res.send({status: 'DX-OK', message: 'Oh shit, this hasn\'t been programmed yet!'});
+	return;
+});
+
 router.get('/save_post_edit', function(req, res, next) {
-	// Ensure logged in
-	if(!sessionManager.isLoggedIn(req.session)) {
-		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
-		return;
-	}
 
-	// ensure they've got a complete id
-	if(!('USERNAME' in req.session) || !req.session.USERNAME.length) {
-		res.send({status: 'DX-REJECTED', message: 'Could not resolve ID, try re-logging in'});
-		return;
-	}
-
-	if(!('USER_ID' in req.session) || !req.session.USER_ID.length) {
-		res.send({status: 'DX-REJECTED', message: 'Could not resolve ID, try re-logging in'});
-		return;
-	}
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	// ensure recieved post_id
 	if(!('post_id' in req.query) || req.query.post_id.length != 24) {
@@ -129,41 +138,6 @@ router.get('/get_feed', function(req, res, next) {
 			return;
 		});
 	}
-
-	/*
-	feed.find({
-	}).toArray(function(err, noSort) {
-		iteration++;
-		feedObj.noSort = noSort;
-		returnFeed(res, feedObj, iteration);
-	});
-
-	feed.find({
-		post_type: 'sale'
-	}).toArray(function(err, saleArr) {
-		if(err) {
-			console.log('[-] MongoDB failed to fetch sale feeds :: ' + err);
-			res.send({status: 'DX-FAILED', message: 'Error occurred fetching data...'});
-			return;
-		}
-		iteration++;
-		feedObj.sale = saleArr;
-		returnFeed(res, feedObj, iteration);
-	});
-
-	feed.find({
-		post_type: 'general'
-	}).toArray(function(err, generalArr) {
-		if(err) {
-			console.log('[-] MongoDB failed to fetch general feed :: ' + err);
-			res.send({status: 'DX-FAILED', message: 'Error occurred fetching data...'});
-			return;
-		}
-		iteration++;
-		feedObj.general = generalArr;
-		returnFeed(res, feedObj, iteration);
-	});
-	*/
 });
 
 // save landing page emails
@@ -264,22 +238,8 @@ router.get('/session', function(req, res, next) {
 // Change password
 router.get('/chgpwd', function(req, res, next) {
 
-	// Ensure the user is logged in
-	if(!req.session.LOGGED_IN) {
-		res.send({status: 'DX-REJECTED', message: 'Must be logged in!'});
-		return;
-	}
-
-	// Ensure the user has an identity
-	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
-		res.send({status: 'DX-REJECTED', message: 'Failed to retrieve identity, please try logging in again'});
-		return;
-	}
-	if(!('EMAIL' in req.session) || req.session.EMAIL.length == 0) {
-		res.send({status: 'DX-REJECTED', message: 'Failed to retrieve identity, please try logging in again'});
-		return;
-	}
-
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	// Ensure we recieved the old password, the new password and a confirmation re-entry
 	if(!('oldP' in req.query) || req.query.oldP.length == 0) {
@@ -353,11 +313,8 @@ router.get('/chgpwd', function(req, res, next) {
 /** Mail API calls **/
 // Get unread message count
 router.get('/unread', function(req, res, next) {
-	// Ensure logged in
-	if(!('LOGGED_IN' in req.session) || !req.session.LOGGED_IN) {
-		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
-		return;
-	}
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	var database = dbManager.getDB();
 	var mailCol = database.collection('MAIL');
@@ -385,17 +342,8 @@ router.get('/unread', function(req, res, next) {
 
 router.get('/mail', function(req, res, next) {
 
-	// Ensure they're logged in
-	if(!req.session.LOGGED_IN) {
-		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
-		return;
-	}
-
-	// Ensure they have an identity ( Username & Email in session )
-	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
-		res.send({status: 'DX-REJECTED', message: 'Could not resolve identity please try re-logging in'});
-		return;
-	}
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	// Ensure they've sent a request
 	if(!('request' in req.query) || req.query.request.length == 0) {
@@ -517,11 +465,8 @@ router.get('/mail', function(req, res, next) {
 
 // Account Settings page add new email
 router.get('/add_email', function(req, res, next) {
-	// Ensure they're logged in
-	if(!sessionManager.isLoggedIn(req.session)) {
-		res.send({status: 'DX-REJECTED', message: 'Not logged in, please log in again'});
-		return;
-	}
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	// Ensure they've sent the email
 	if(!('email' in req.query) || req.query.email.length == 0) {
@@ -621,11 +566,8 @@ router.get('/add_email', function(req, res, next) {
 
 // Account Settings page add new email
 router.get('/remove_email', function(req, res, next) {
-	// Ensure they're logged in
-	if(!sessionManager.isLoggedIn(req.session)) {
-		res.send({status: 'DX-REJECTED', message: 'Not logged in, please log in again'});
-		return;
-	}
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	// Ensure they've sent the email
 	if(!('email' in req.query) || req.query.email.length == 0) {
@@ -672,17 +614,9 @@ router.get('/remove_email', function(req, res, next) {
 
 // Get PM's
 router.get('/getmail', function(req, res, next) {
-	// Ensure they're logged in
-	if(!sessionManager.isLoggedIn(req.session)) {
-		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
-		return;
-	}
 
-	// Ensure they've got an ID
-	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
-		res.send({status: 'DX-REJECTED', message: 'Failed to resolve ID please try re-logging in'});
-		return;
-	}
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	// Query database for messages with matching username in targets
 	var database = dbManager.getDB();
@@ -720,17 +654,8 @@ router.get('/getmail', function(req, res, next) {
 // Send PM's
 router.get('/sendmail', function(req, res, next) {
 
-	// Ensure they're logged in
-	if(!sessionManager.isLoggedIn(req.session)) {
-		res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
-		return;
-	}
-
-	// Ensure they've got an ID
-	if(!('USERNAME' in req.session) || req.session.USERNAME.length == 0) {
-		res.send({status: 'DX-REJECTED', message: 'Failed to resolve ID please try re-logging in'});
-		return;
-	}
+	// Handle all authentication and respond if necessary
+	authManager.json_is_authenticated(req);
 
 	var s = ''; // subject
 	var m = ''; // message text
@@ -804,9 +729,6 @@ router.get('/sendmail', function(req, res, next) {
 
 
 module.exports = router;
-
-
-
 
 // feedObj == Obj with 'sale' & 'general' properties which contain
 // feed in array format

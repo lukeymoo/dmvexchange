@@ -6,6 +6,12 @@ var page = '';
 
 $(function() {
 
+	// remove window message on close button
+	$(document).on('click', '.notification .close_button', function() {
+		close_window_message($(this).parent());
+	});
+
+
 	// Get page
 	page = getPage();
 
@@ -70,15 +76,43 @@ $(function() {
 	$('#pageHeader #menuButton').on('click', function() {
 		toggleMenu();
 	});
-
-	// bind page message click to remove it faster
-	$(document).on('click', '#pageMessage', function() {
-		$('#pageMessage').removeClass('showPageMessage');
-		$('#pageMessage').css('max-height', '0px');
-		$('#pageMessage').html('');
-	});
-
 });
+
+
+
+
+
+
+
+
+
+
+function window_message(message) {
+	var id = new Date().getTime();
+	var DOM =
+	"<div data-id='" + id + "' class='notification'>" +
+		"<span class='text'>" + message + "</span>" +
+		"<span class='close_button'>&times;</span>" +
+	"</div>";
+
+	// timeout fadeout and remove
+	setTimeout(function() {
+		if($('div[data-id=' + id + ']')) {
+			$('div[data-id=' + id + ']').fadeOut(function() {
+				$(this).remove();
+			});
+		}
+	}, 7000);
+	$('#notification_container').prepend(DOM);
+	return;
+}
+
+function close_window_message(obj) {
+	$(obj).fadeOut(function() {
+		$(this).remove();
+	});
+	return;
+}
 
 function goodStyle(obj) {
 	$(obj).css('border', '2px solid rgb(200, 200, 200)');
@@ -129,30 +163,6 @@ function getParam(sParam) {
 			return sParameterName[1];
 		}
 	}
-}
-
-function spawnMessage(string, type) {
-
-	if(type) {
-		$('#pageMessage').css('color', 'black');
-		$('#pageMessage').css('background-color', 'rgb(0, 175, 200)');
-	} else {
-		$('#pageMessage').css('color', 'white');
-		$('#pageMessage').css('background-color', 'rgb(175, 0, 0)');
-	}
-
-	$('#pageMessage').html(string);
-
-	if($('#pageMessage').hasClass('showPageMessage')) {
-		$('#pageMessage').removeClass('showPageMessage');
-	}
-
-	setTimeout(function() {
-		if(!$('#pageMessage').hasClass('showPageMessage')) {
-			$('#pageMessage').addClass('showPageMessage');
-		}
-	}, 50);
-	return;
 }
 
 function getPage() {

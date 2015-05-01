@@ -48,7 +48,7 @@ $(function() {
 		switch(getParam('err')) {
 			case 'invalid_login':
 				$('#loginForm #username').val(getParam('u'));
-				spawnMessage('Invalid login credentials');
+				window_message('Invalid login credentials');
 				break;
 		}
 	}

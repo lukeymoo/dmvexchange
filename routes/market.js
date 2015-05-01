@@ -17,8 +17,21 @@ var path = require('path');
 var Q = require('q');
 var async = require('async');
 
+var smtp = require('../modules/smtp/smtp');
+
 router.get('/', function(req, res, next) {
 	sessionManager.isLoggedIn(req.session);
+
+	// testing
+	smtp.report_error('Test error', function(err, result) {
+		if(err) {
+			console.log(err);
+		}
+		if(result) {
+			console.log(result);
+		}
+	});
+
 	res.render('market', { title: 'Market', USER: req.session });
 });
 
