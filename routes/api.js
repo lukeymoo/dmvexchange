@@ -33,10 +33,39 @@ router.get('*', function(req, res, next) {
 	next();
 });
 
+router.get('/get_post_comments', function(req, res, next) {
+	// ensure we recieved a post_id
+	if(!('post_id' in req.query) || !req.query.post_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No post id specified'});
+		return;
+	}
+
+	// fetch comments for specified post
+	var db = dbManager.getDB();
+	var feed = db.collection('FEED');
+	feed.findOne({
+		_id: ObjectID(req.query.post_id)
+	}, function(err, doc) {
+		if(err) {
+			smtp.report_error('Error occurred fetching comments :: ' + err, function(){});
+			return;
+		}
+		var comment_array = doc.comments;
+		res.send({status: 'DX-OK', message: comment_array});
+		return;
+	});
+});
+
 router.get('/post_comment', function(req, res, next) {
 
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	authManager.json_is_authenticated(req, res);
+
+	// Limit posts per timeframe ( 2 seconds => 30 comments per minute )
+	if(!authManager.can_comment(req, res)) {
+		res.send({status: 'DX-REJECTED', message: 'Must wait 2 seconds before posting another comment'});
+		return;
+	}
 	
 	// Ensure a post ID was given
 	if(!('post_id' in req.query) || !req.query.post_id.length) {
@@ -49,9 +78,34 @@ router.get('/post_comment', function(req, res, next) {
 		res.send({status: 'DX-REJECTED', message: 'Cannot post empty comments'});
 		return;
 	}
+	var new_comment = {
+		_id: new ObjectID(),
+		poster_username: req.session.USERNAME,
+		poster_id: req.session.USER_ID,
+		text: req.query.text
+	};
 	// Validate the comment
-	res.send({status: 'DX-OK', message: 'Oh shit, this hasn\'t been programmed yet!'});
-	return;
+	if(validate_comment(req.query.text)) {		
+		// update post pushing this comment to array
+		var db = dbManager.getDB();
+		var feed = db.collection('FEED');
+		feed.update({
+			_id: ObjectID(req.query.post_id),
+			poster_username: req.session.USERNAME,
+			poster_id: req.session.USER_ID			
+		}, { $push: { comments: new_comment }, $inc: { comment_count: 1 } }, function(err, result) {
+			if(err) {
+				smtp.report_error('MongoDB Error occurred while posting comment :: ' + err, function(){});
+				res.send({status: 'DX-FAILED', message: 'Error occurred while posting comment'});
+				return;
+			}
+			authManager.inc_comment(req);
+			var blank = { nModified: 0 };
+			result = result || blank;
+			res.send({status: 'DX-OK', message: result})
+			return;
+		});
+	}
 });
 
 router.get('/save_post_edit', function(req, res, next) {
@@ -740,7 +794,9 @@ function returnFeed(res, feedObj, iteration) {
 	return;
 }
 
-
+function validate_comment(string) {
+	return (string.length >= 2 && string.length <= 500) ? true : false;
+}
 
 
 

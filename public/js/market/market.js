@@ -136,7 +136,7 @@ $(function() {
 
 		Market.save_edit(post_id, post_desc, function(res) {
 			if(res.status == 'DX-OK') {
-				if(res.message.nModified > 0) {
+				if(res.message > 0) {
 					window_message('Post updated!');
 					console.log($(context).parent());
 					$(context).parents('.post').find('.description').attr('contenteditable', 'false');
@@ -315,9 +315,32 @@ function post_from_json(json) {
 		"</div>";
 	}
 
+	var comments = '';
+	for(var comment in json.comments) {
+		comments +=
+		"<div class='comment'>" +
+			"<div class='comment_info'>" +
+				"<span class='comment_id'>" + json.comments[comment]._id + "</span>" +
+				"<span class='comment_user_id'>" + json.comments[comment].poster_id + "</span>";
+				if(json.comments[comment].poster_username == state.USERNAME) {
+					comments +=
+					"<span class='comment_options' data-state='closed'></span>" +
+					"<ul class='comment_options_menu'>" +
+						"<li class='edit_comment'>Edit</li>" +
+						"<li class='remove_comment'>Remove</li>" +
+					"</ul>";
+				}
+				comments += "<span class='username'>" + json.comments[comment].poster_username + "</span>" +
+				"<span data-iso='" + date_from_objectid(json.comments[comment]._id) + "' class='comment_date'>" + time_since(date_from_objectid(json.comments[comment]._id)) + "</span>" +
+			"</div>" +
+			"<span class='comment_text'>" + json.comments[comment].text + "</span>" +
+		"</div>";
+	}
+
 	DOM +=
 	"</div>" +
 		"<div class='commentContainer'>" +
+			comments +
 			"<span class='commentImage'></span>" +
 			"<div contenteditable='true' class='commentInput' type='text'></div>" +
 		"</div>" +
@@ -327,6 +350,7 @@ function post_from_json(json) {
 }
 
 function time_since(date) {
+	date = (date instanceof Date) ? date : new Date(date);
 
 	var time = Math.floor((new Date() - date) / 1000);
 

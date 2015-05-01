@@ -643,6 +643,24 @@
 	background-color: rgb(125, 250, 250);
 }
 
+#centerFeed .post .comment_options {
+	position: absolute;
+	text-align: center;
+	margin-top: 2px;
+	margin-left: 442px;
+	background: url('/img/gear.png') no-repeat center center;
+
+	width: 25px;
+	height: 18px;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#centerFeed .post .comment_options_menu {
+	display: none;
+}
+
 #centerFeed .post .description {
 	display: block;
 
@@ -763,10 +781,19 @@
 }
 
 #centerFeed .post .comment {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-#centerFeed .post .comment .info {
+#centerFeed .post .comment .comment_info {
 	display: block;
+}
+
+#centerFeed .post .comment .comment_id {
+	display: none;
+}
+
+#centerFeed .post .comment .comment_user_id {
+	display: none;
 }
 
 #centerFeed .post .comment .username {
@@ -775,13 +802,13 @@
 	margin-top: -2px;
 }
 
-#centerFeed .post .comment .date {
+#centerFeed .post .comment .comment_date {
 	display: block;
 	font-size: .8em;
 	margin-top: -5px;
 }
 
-#centerFeed .post .comment .text {
+#centerFeed .post .comment .comment_text {
 	display: block;
 }
 

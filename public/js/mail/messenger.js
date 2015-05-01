@@ -15,6 +15,15 @@ var Messenger = {
 	messageText: ''
 };
 
+Messenger.quick_reply = function(to, subject) {
+	Viewer.hide();
+	this.showForm();
+	$('#composeForm #messageTo').val(to);
+	this.addRecipient();
+	$('#composeForm #messageSubject').val(subject);
+	$('#composeForm #messageText').focus();
+};
+
 Messenger.send = function(callback) {
 	var status = true;
 
