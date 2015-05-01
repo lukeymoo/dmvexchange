@@ -87,12 +87,29 @@ $(function() {
 
 
 
-function window_message(message) {
+function window_message(message, type) {
+
+	type = type || 'low'; // normal alert level
+	
 	var id = new Date().getTime();
+	var classes = 'notification';
+
+	switch(type) {
+		case 'low':
+			classes += ' defcon1';
+			break;
+		case 'medium':
+			classes += ' defcon3';
+			break;
+		case 'high':
+			classes += ' defcon5';
+			break;
+	}
+
 	var DOM =
-	"<div data-id='" + id + "' class='notification'>" +
-		"<span class='text'>" + message + "</span>" +
+	"<div data-id='" + id + "' class='" + classes + "'>" +
 		"<span class='close_button'>&times;</span>" +
+		"<span class='text'>" + message + "</span>" +
 	"</div>";
 
 	// timeout fadeout and remove

@@ -625,20 +625,33 @@ a, a:active, a:visited, a:hover, a:link {
 
 #notification_container .notification {
 	width: 225px;
-	min-height: 75px;
+	min-height: 85px;
 
-	padding-top: 10px;
+	padding-top: 15px;
 	padding-left: 10px;
 	padding-bottom: 10px;
 	margin-bottom: 5px;
 
 	border-radius: 3px;
-	color: rgb(200, 200, 200);
-	background-color: rgba(0, 0, 0, 0.75);
 
 	-webkit-box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
 	-moz-box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
 	box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
+}
+
+#notification_container .defcon1 {
+	color: rgb(200, 200, 200);
+	background-color: rgba(0, 0, 0, 0.75);
+}
+
+#notification_container .defcon3 {
+	color: black;
+	background-color: rgba(255, 50, 0, 0.7);
+}
+
+#notification_container .defcon5 {
+	color: white;
+	background-color: rgb(190, 0, 0);
 }
 
 #notification_container .notification .close_button {

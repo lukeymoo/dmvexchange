@@ -32,6 +32,7 @@ $(function() {
 				// validate comment
 				// submit comment to server
 				var comment = {
+					id: $(this).parents('.post').find('.post_id').html(),
 					text: $(this).html()
 				};
 				if(validate_comment(comment.text)) {
@@ -39,11 +40,11 @@ $(function() {
 						if(res.status == 'DX-OK') {
 							window_message(res.message);
 						} else {
-							window_message(res.message);
+							window_message(res.message, 'high');
 						}
 					});
 				} else {
-					window_message('Comment must be 2-500 characters');
+					window_message('Comment must be 2-500 characters', 'medium');
 				}
 			}
 		}
@@ -55,6 +56,7 @@ function post_comment(commentObj, callback) {
 	$.ajax({
 		url: '/api/post_comment',
 		data: {
+			post_id: commentObj.id,
 			text: commentObj.text
 		},
 		error: function(err) {
