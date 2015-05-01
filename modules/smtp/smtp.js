@@ -22,7 +22,7 @@ var report_error = function(message, callback) {
 
 	transport.sendMail({
 		from: 'DMV Exchange <auto-reporter@dmv-exchange.com>',
-		to: '<report@dmv-exchange.com>',
+		to: '<contact@dmv-exchange.com>',
 		subject: 'Error Report Generator',
 		text: message
 	}, function(err, result) {
