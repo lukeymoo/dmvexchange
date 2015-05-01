@@ -29,7 +29,7 @@ router.get('/', function(req, res, next) {
 		username: req.session.USERNAME
 	}, { _id: 0, other_emails: 1 }, function(err, doc) {
 		if(err) {
-			console.log('[-] MongoDB error getting other emails');
+			smtp.report_error('[-] MongoDB Error getting other emails :: ' + err,function(){});
 		}
 		if(doc) {
 			emails = doc.other_emails;

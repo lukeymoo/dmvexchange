@@ -91,7 +91,7 @@ router.get('/save_post_edit', function(req, res, next) {
 		poster_id: req.session.USER_ID
 	}, { $set: { post_text: req.query.text } }, function(err, result) {
 		if(err) {
-			console.log('[-] MongoDB error while updating post');
+			smtp.report_error('[-] MongoDB error while updating post' + err, function(){});
 			res.send({status: 'DX-FAILED', message: 'Error occurred updating post'});
 			return;
 		}
@@ -161,7 +161,7 @@ router.get('/save_landing_email', function(req, res, next) {
 		email: req.query.email.toLowerCase()
 	}, function(err, doc) {
 		if(err) {
-			console.log('[-] MongoDB error while saving landing page lead :: ' + err);
+			smtp.report_error('[-] MongoDB error while saving landing page lead :: ' + err, function(){});
 		}
 		if(doc) {
 				res.send({status: 'DX-OK', message: 'Already signed up! Thanks!'});
@@ -286,7 +286,7 @@ router.get('/chgpwd', function(req, res, next) {
 	}, function(err, doc) {
 		if(err) {
 			res.send({status: 'DX-FAILED', message: 'Error occurred'});
-			console.log('[-] MongoDB Error while updating password :: ' + err);
+			smtp.report_error('[-] MongoDB error while updating password :: ' + err, function(){});
 			return;
 		}
 		// Correct old password
@@ -329,6 +329,7 @@ router.get('/unread', function(req, res, next) {
 		}
 	}).toArray(function(err, arr) {
 			if(err) {
+				smtp.report_error('[-] Failed to retrieve unread message count :: ' + err, function(){});
 				res.send({status: 'DX-FAILED', message: 'Server error retreiving unread message count'});
 				return;
 			}
@@ -487,7 +488,7 @@ router.get('/add_email', function(req, res, next) {
 			]
 		}, function(err, doc) {
 			if(err) {
-				console.log('[-] MongoDB error while adding new email');
+				smtp.report_error('[-] MongoDB error while adding new email :: ' + err, function(){});
 				res.send({status: 'DX-FAILED', message: 'Error while adding email, please try again.'});
 				return;
 			}
@@ -586,7 +587,7 @@ router.get('/remove_email', function(req, res, next) {
 			other_emails: req.query.email
 		}, function(err, doc) {
 			if(err) {
-				console.log('[-] MongoDB error while removing email :: ' + err);
+				smtp.report_error('[-] MongoDB error while removing email :: ' + err, function(){});
 				res.send({status: 'DX-FAILED', message: 'Error occurred while removing email, please refresh page and try again'});
 				return;
 			}
@@ -630,7 +631,7 @@ router.get('/getmail', function(req, res, next) {
 		}
 	}).limit(500).sort({_id: -1}).toArray(function(err, arrayMail) {
 		if(err) {
-			console.log('[-] MongoDB error getting mail :: ' + JSON.stringify(err));
+			smtp.report_error('[-] MongoDB error getting mail :: ' + JSON.stringify(err), function(){});
 			res.send({status: 'DX-FAILED', message: 'Server error 500'});
 			return;
 		} else {

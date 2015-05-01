@@ -156,7 +156,7 @@ router.post('/post', function(req, res, next) {
 			magic.detectFile(photo[img].path, function(err, mime) {
 				iteration ++;
 				if(err) {
-					console.log('Error checking mime type :: ' + err);
+					smtp.report_error('Error checking mime type :: ' + err,function(){});
 				} else {
 					switch(mime) {
 						case 'image/png':

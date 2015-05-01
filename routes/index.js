@@ -198,7 +198,7 @@ router.post('/process', function(req, res, next) {
 			};
 			databaseManager.saveAccount(user, function(err, doc, tokens) {
 				if(err) {
-					console.log('[-] MongoDB Error while creating account :: ' + err);
+					smtp.report_error('[-] MongoDB Error while creating account :: ' + err,function(){});
 					res.send('Error occurred while creating account, <a href="/signup">please try again.</a>');
 					return;
 				}
