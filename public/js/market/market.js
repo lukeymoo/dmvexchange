@@ -110,6 +110,11 @@ $(function() {
 	// allow edit of post on click
 	$(document).on('click', '.post_options_menu .edit_post', function() {
 
+		// click the view more button first if it exists
+		if($(this).parents('.post').find('.view_change')) {
+			$(this).parents('.post').find('.view_change').click();
+		}
+
 		// save initial description
 		initial_description = $(this).parents('.post').find('.description').html();
 
@@ -126,21 +131,22 @@ $(function() {
 	// submit edit button
 	$(document).on('click', '.post .submit_edit', function() {
 
-		var context = $(this);
+		var desc_elem = $(this).parents('.post').find('.description');
+		var controls_elem = $(this).parent('.edit_controls');
 		// hide edit controls
-		$(this).parent('.edit_controls').hide();
+		//$(this).parent('.edit_controls').hide();
 		
 		// query server to save changes
 		var post_id = $(this).parents('.post').find('.post_id').html();
 		var post_desc = $(this).parents('.post').find('.description').html();
 
 		Market.save_edit(post_id, post_desc, function(res) {
+			console.log(res);
 			if(res.status == 'DX-OK') {
-				if(res.message > 0) {
+				if(parseInt(res.message.nModified) > 0) {
 					window_message('Post updated!');
-					console.log($(context).parent());
-					$(context).parents('.post').find('.description').attr('contenteditable', 'false');
-					$(context).parent('.edit_controls').remove();
+					$(desc_elem).attr('contenteditable', 'false');
+					$(controls_elem).remove();
 				}
 			}
 		});
@@ -152,15 +158,14 @@ $(function() {
 		$(this).parents('.post').find('.description').html(initial_description);
 		$(this).parents('.post').find('.description').attr('contenteditable', 'false');
 		$(this).parent('.edit_controls').remove();
-
 	});
 
-	// update post since every 15 seconds
+	// update post's time_since's every 29 seconds
 	setInterval(function() {
 		$('.post').find('.post_date').each(function() {
 			$(this).html(time_since(new Date($(this).attr('value'))));
 		});
-	}, 15000);
+	}, 29000);
 
 });
 
@@ -305,8 +310,7 @@ function post_from_json(json) {
 				time_since(date_from_objectid(json._id)) +
 			"</span>" +
 			"<span class='description'>" +
-				json.post_text + 
-			"</span>";
+			document.createTextNode(json.post_text).data + "</span>";
 
 	if(json.images.length) {
 		DOM += 
@@ -333,8 +337,11 @@ function post_from_json(json) {
 				comments += "<span class='username'>" + json.comments[comment].poster_username + "</span>" +
 				"<span data-iso='" + date_from_objectid(json.comments[comment]._id) + "' class='comment_date'>" + time_since(date_from_objectid(json.comments[comment]._id)) + "</span>" +
 			"</div>" +
-			"<span class='comment_text'>" + json.comments[comment].text + "</span>" +
-		"</div>";
+			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.comments[comment].text).data + "</span>";
+			if(json.comments[comment].edited) {
+				comments += "<span class='is_edited'>&#8627; Edited</span>";
+			}
+		comments += "</div>";
 	}
 
 	DOM +=
@@ -422,7 +429,8 @@ function string_to_date(iso_date) {
 		minute = '0' + minute;
 	}
 
-	time = month + '. ' + day + '  ' + hour + ':' + minute + ' ' + period;
+	//time = month + ' ' + day + '   ' + hour + ':' + minute + ' ' + period;
+	time = month + ' ' + day;
 
 	return time;
 }

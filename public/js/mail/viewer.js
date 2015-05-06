@@ -93,9 +93,12 @@ Viewer.show = function(id) {
 					$('#viewerControls #trash').html('Delete forever');
 
 					if(Viewer.from == '[ DMV EXCHANGE ]') {
-						$('#viewerControls #reply').hide();
+						//$('#viewerControls #reply').hide();
+						$('#viewerControls #reply').remove();
 					} else {
-						$('#viewerControls #reply').show();
+						//$('#viewerControls #reply').show();
+						var DOM = "<div id='reply'>Reply</div>";
+						$('#viewerControls').append(DOM);
 					}
 
 					for(var t = 0; t < Main.parsedTrash[i].recipients.length; t++) {

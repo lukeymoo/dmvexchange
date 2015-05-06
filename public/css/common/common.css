@@ -478,7 +478,8 @@ a, a:active, a:visited, a:hover, a:link {
 #registerFormContainer {
 	font-family: DX-REG;
 	position: absolute;
-	top: 100px;
+	top: 65px;
+	margin-bottom: 75px;
 	left: 26.6%;
 	border: 1px solid rgb(50, 150, 200);
 	background-color: #fff;

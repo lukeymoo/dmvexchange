@@ -345,8 +345,8 @@
 	position: absolute;
 	margin-left: 215px;
 	padding: 2px 15px;
-	color: white;
-	background-color: rgb(200, 0, 0);
+	color: rgb(230, 230, 230);
+	background-color: rgb(190, 0, 0);
 }
 
 #inputContainer #cancelButton:hover {
@@ -518,11 +518,50 @@
 
 
 
+.dialog_box {
+	position: fixed;
+	top: 27vh;
+	left: 30vw;
+	background-color: #fff;
+	width: 400px;
+}
 
+.dialog_box .dialog_text {
+	display: block;
+	text-align: center;
+	height: 100px;
+	line-height: 100px;
+}
+
+.dialog_box .dialog_controls {
+	display: block;
+	background-color: #ddd;
+	padding: 0px 5px;
+}
+
+.dialog_box .cancel_dialog,
+.dialog_box .confirm_dialog {
+	width: 100px;
+	height: 50px;
+	text-align: center;
+	padding: 7px 15px;
+	border-radius: 3px;
+}
+
+.dialog_box .cancel_dialog {
+	color: rgb(230, 230, 230);
+	background-color: rgb(190, 0, 0);
+}
+
+.dialog_box .confirm_dialog {
+	color: black;
+	background-color: rgb(0, 190, 210);
+	margin-left: 225px;
+}
 
 #centerFeed {
-	position: absolute;
-	left: 265px;
+	position: relative;
+	margin-left: 265px;
 	width: 490px;
 	padding-top: 10px;
 }
@@ -643,24 +682,6 @@
 	background-color: rgb(125, 250, 250);
 }
 
-#centerFeed .post .comment_options {
-	position: absolute;
-	text-align: center;
-	margin-top: 2px;
-	margin-left: 442px;
-	background: url('/img/gear.png') no-repeat center center;
-
-	width: 25px;
-	height: 18px;
-
-	cursor: pointer;
-	pointer: hand;
-}
-
-#centerFeed .post .comment_options_menu {
-	display: none;
-}
-
 #centerFeed .post .description {
 	display: block;
 
@@ -678,6 +699,79 @@
 	-moz-hyphens: auto;
 	-ms-hyphens: auto;
 	hyphens: auto;
+}
+
+#centerFeed .post .description[contenteditable='true'],
+#centerFeed .post .comment .comment_text[contenteditable='true'] {
+	border: 3px dotted rgba(0, 0, 0, 0.175);
+	border-spacing: 15px;
+	border-radius: 3px;
+}
+
+#centerFeed .post .description:focus,
+#centerFeed .post .comment .comment_text:focus {
+	outline: none;
+}
+
+#centerFeed .post .comment_edit_controls {
+	margin-top: 10px;
+}
+
+#centerFeed .post .comment_submit_edit {
+	display: inline-block;
+
+	font-family: DX-REG;
+	font-weight: bold;
+
+	border: 1px solid rgba(0, 175, 200, 0.75);
+	border-radius: 3px;
+
+	width: 100px;
+	float: right;
+
+	background-color: rgba(0, 175, 200, 0.6);
+
+	margin-bottom: 5px;
+
+	height: 33px;
+	line-height: 33px;
+
+	text-align: center;
+
+	-webkit-transition: background-color .075s linear 0s;
+	-moz-transition: background-color .075s linear 0s;
+	transition: background-color .075s linear 0s;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#centerFeed .post .comment_cancel_edit {
+	display: inline-block;
+
+	font-family: DX-REG;
+	font-weight: bold;
+
+	border: 1px solid rgba(180, 0, 0, 0.65);
+	border-radius: 3px;
+
+	width: 100px;
+
+	background-color: rgba(190, 0, 0, 0.8);
+	
+	margin-bottom: 5px;
+
+	height: 33px;
+	line-height: 33px;
+
+	text-align: center;
+
+	-webkit-transition: background-color .075s linear 0s;
+	-moz-transition: background-color .075s linear 0s;
+	transition: background-color .075s linear 0s;
+
+	cursor: pointer;
+	pointer: hand;
 }
 
 #centerFeed .post .submit_edit {
@@ -772,13 +866,51 @@
 #centerFeed .post .commentContainer {
 	font-family: DX-REG;
 	font-size: 1.05em;
-	background-color: rgba(100, 200, 250, 0.175);
+	background-color: rgb(245, 245, 245);
 	padding: 10px;
+}
+
+#centerFeed .post .comment_options {
+	position: absolute;
+	text-align: center;
+	margin-top: 2px;
+	margin-left: 442px;
+	background: url('/img/gear.png') no-repeat center center;
+
+	width: 25px;
+	height: 18px;
+
+	cursor: pointer;
+	pointer: hand;
+}
+
+#centerFeed .post .comment_options_menu {
+	display: none;
+	position: absolute;
+	z-index: 10;
+	background-color: #fff;
+	padding: 0px;
+	list-style: none;
+	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+	border-radius: 3px;
+	margin-top: 20px;
+	margin-left: 400px;
+}
+
+#centerFeed .post .comment_options_menu li {
+	text-align: center;
+	padding: 5px 15px;
+	cursor: pointer;
+	pointer: hand;
+}
+
+#centerFeed .post .comment_options_menu li:hover {
+	background-color: rgb(230, 230, 230);
 }
 
 #centerFeed .post .commentContainer * {
 	vertical-align: top;
-}
+} 
 
 #centerFeed .post .comment {
 	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -796,10 +928,18 @@
 	display: none;
 }
 
+#centerFeed .post .comment .is_edited {
+	color: rgb(100, 100, 100);
+}
+
 #centerFeed .post .comment .username {
 	display: block;
-	color: blue;
+	color: rgb(0, 150, 250);
 	margin-top: -2px;
+}
+
+.comment_date:before {
+	content: 'Posted ';
 }
 
 #centerFeed .post .comment .comment_date {
@@ -810,6 +950,8 @@
 
 #centerFeed .post .comment .comment_text {
 	display: block;
+	padding-left: 2px;
+	padding-right: 2px;
 }
 
 #centerFeed .post .commentInput:focus,

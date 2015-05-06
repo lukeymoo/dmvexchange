@@ -33,6 +33,48 @@ router.get('*', function(req, res, next) {
 	next();
 });
 
+router.get('/save_comment_edit', function(req, res, next) {
+	// Ensure logged in
+	authManager.json_is_authenticated(req, res);
+
+	// Ensure we received a post_id, comment_id and text for
+	// new comment
+	if(!('post_id' in req.query) || !req.query.post_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
+		return;
+	}
+	if(!('comment_id' in req.query) || !req.query.comment_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No comment ID specified'});
+		return;
+	}
+	if(!('text' in req.query) || !req.query.text.length) {
+		res.send({status: 'DX-REJECTED', message: 'No text given to replace comment with'});
+		return;
+	}
+	// Validate text
+	if(!validate_comment(req.query.text)) {
+		res.send({status: 'DX-REJECTED', message: 'Comments must be 2-500 characters'});
+		return;
+	}
+	// find post_id and comment id
+	var db = dbManager.getDB();
+	var feed = db.collection('FEED');
+	feed.update({
+		_id: ObjectID(req.query.post_id),
+		comments: {
+			$elemMatch: { _id: ObjectID(req.query.comment_id) }
+		}
+	}, { $set: { "comments.$.text": req.query.text, "comments.$.edited": true } }, function(err, result) {
+		if(err) {
+			smtp.report_error('Error occurred editing comment text :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error'});
+			return;
+		}
+		res.send({status: 'DX-OK', message: result});
+		return;
+	});
+});
+
 router.get('/get_post_comments', function(req, res, next) {
 	// ensure we recieved a post_id
 	if(!('post_id' in req.query) || !req.query.post_id.length) {
@@ -178,7 +220,7 @@ router.get('/get_feed', function(req, res, next) {
 	// find by id sort descending, grab following 50 posts
 	if(minID == 0) {
 		feed.find({
-		}).sort({$natural: -1}).limit(10).toArray(function(err, feed) {
+		}).sort({_id: -1}).limit(10).toArray(function(err, feed) {
 			res.send({ status: 'DX-OK', message: feed });
 			return;
 		});
@@ -187,7 +229,7 @@ router.get('/get_feed', function(req, res, next) {
 			_id: {
 				$gt: ObjectID(minID)
 			}
-		}).skip(1).sort({natural: -1}).limit(10).toArray(function(err, feed) {
+		}).skip(1).sort({_id: -1}).limit(10).toArray(function(err, feed) {
 			res.send({ status: 'DX-OK', message: feed });
 			return;
 		});

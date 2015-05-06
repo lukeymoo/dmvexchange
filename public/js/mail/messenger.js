@@ -97,8 +97,11 @@ Messenger.addRecipient = function() {
 	}
 
 	if(!ignore) {
-		// Add input to recipients collection
-		this.messageRecipients.push(this.getRecipientInput());
+		// validate the recipient name then add to collection
+		if(this.validateRecipient(this.getRecipientInput())) {
+			// Add input to recipients collection
+			this.messageRecipients.push(this.getRecipientInput());
+		}
 
 		// Parse DOM with appropriate style
 		var DOM = this.parseRecipientInput(this.getRecipientInput());
@@ -127,7 +130,7 @@ Messenger.removeRecipient = function() {
 
 Messenger.clearRecipients = function() {
 	this.messageRecipients = [];
-
+	this.resizeChips();
 	$('#chipsContainer').empty();
 };
 
@@ -201,7 +204,12 @@ Messenger.badStyle = function(obj) {
 
 // Set recipients to display block if too wide
 Messenger.resizeChips = function() {
-	if($('#chipsContainer').width() >= 335) {
+	// calculate width
+	var calculated_width = 0;
+	$('#chipsContainer').find('span').each(function() {
+		calculated_width += $(this).outerWidth();
+	});
+	if(calculated_width >= 335) {
 		$('#chipsContainer').css('float', 'initial');
 		$('#chipsContainer').css('display', 'block');
 	} else {
@@ -217,7 +225,21 @@ Messenger.discard = function() {
 	$('#messageText').val('');
 };
 
-
+Messenger.removeChip = function(chipText) {
+	$('#chipsContainer').find('span').each(function() {
+		if($(this).html() == chipText) {
+			// search collection for name and remove it
+			for(var r = 0; r < Messenger.messageRecipients.length; r++) {
+				if(Messenger.messageRecipients[r] == chipText) {
+					Messenger.messageRecipients.splice(r, 1);
+				}
+			}
+			$(this).remove();
+		}
+	});
+	// resize chips
+	this.resizeChips();
+};
 
 
 
@@ -230,7 +252,11 @@ $(function() {
 	});
 
 	// Give focus to input on chipsClick
-	$('#chipsContainer').on('click', function() {
+	$('#chipsContainer').on('click', function(e) {
+		// if bad chip remove it and give focus to input
+		if($(e.target).is('.badChip') || $(e.target).is('.goodChip')) {
+			Messenger.removeChip($(e.target).html());
+		}
 		$('#messageTo').focus();
 	});
 

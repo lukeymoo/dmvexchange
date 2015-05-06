@@ -189,7 +189,7 @@
 #mailWrapper #backgroundBlur {
 	display: none;
 	position: absolute;
-	z-index: 1000;
+	z-index: 1004;
 	top: 0px;
 	left: 0px;
 	width: 100vw;
@@ -294,7 +294,7 @@
 #markGoneContainer {
 	display: none;
 	position: absolute;
-	z-index: 1001;
+	z-index: 1005;
 	top: 75px;
 	margin-left: 175px;
 	width: 675px;
@@ -340,9 +340,9 @@
 }
 
 #composeForm {
-	z-index: 100;
 	display: none;
 	position: absolute;
+	z-index: 1000;
 	width: 475px;
 	height: 475px;
 	right: 25px;
@@ -438,6 +438,8 @@
 	line-height: 25px;
 	border-width: 1px;
 	border-style: solid;
+	cursor: pointer;
+	pointer: hand;
 }
 
 .goodChip {
@@ -463,14 +465,6 @@
 	border: none;
 	background-color: transparent;
 }
-
-
-
-
-
-
-
-
 
 #composeForm #subjectLabel {
 	position: absolute;
