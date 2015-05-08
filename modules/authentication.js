@@ -16,18 +16,18 @@ var modules = {
 		// is the user logged in
 		if(!sessionManager.isLoggedIn(req.session)) {
 			res.send({status: 'DX-REJECTED', message: 'Must be logged in'});
-			return;
+			return false;
 		}
 		// Ensure we can resolve an ID
 		if(!('USERNAME' in req.session) || !req.session.USERNAME.length) {
 			res.send({status: 'DX-REJECTED', message: 'Could not resole ID please try re-logging in'});
-			return;
+			return false;
 		}
 		if(!('USER_ID' in req.session) || !req.session.USER_ID.length) {
 			res.send({status: 'DX-REJECTED', message: 'Could not resole ID please try re-logging in'});
-			return;
+			return false;
 		}
-
+		return true;
 	},
 	// Determines if a user has reached comment limit/resets it if time
 	// block has passed

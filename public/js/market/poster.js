@@ -35,12 +35,12 @@ $(function() {
 		// validate description
 		if($('#uploadForm #description').val().length < 4) {
 			e.preventDefault();
-			window_message('Post must be at least 4 characters');
+			window_message('Post must be at least 4 characters', 'high');
 			return false;
 		}
 		if($('#uploadForm #description').val().length > 2500) {
 			e.preventDefault();
-			window_message('Post length must not exceed 2,500 characters');
+			window_message('Post length must not exceed 2,500 characters', 'high');
 			return false;
 		}
 		// update post type
@@ -55,7 +55,7 @@ $(function() {
 				}
 			});
 			if(counter == 0) {
-				window_message('To post a sale you must have at least 1 image');
+				window_message('To post a sale you must have at least 1 image', 'high');
 				e.preventDefault();
 				return false;
 			} else {
@@ -315,7 +315,7 @@ Market.validateUpload = function(file, inputID) {
 		var parent = $(inputID).parent();
 		$(inputID).remove();
 		$(parent).append(DOM);
-		window_message('You did not select an image');
+		window_message('You did not select an image', 'high');
 		// clear current handler
 		$('#handler' + inputID.split('file')[1]).attr('src', '/img/camera_blur.png');
 		$('#handler' + inputID.split('file')[1]).attr('data-active', 'false');
@@ -340,7 +340,7 @@ Market.validateUpload = function(file, inputID) {
 				$(parent).append(DOM);
 				$('#handler' + inputID.split('file')[1]).attr('src', '/img/camera_blur.png');
 				$('#handler' + inputID.split('file')[1]).attr('data-active', 'false');
-				window_message('Image too small');
+				window_message('Image too small', 'high');
 				return;
 			}
 			$('#handler' + inputID.split('file')[1]).attr('data-active', 'true');
@@ -358,7 +358,7 @@ Market.validateUpload = function(file, inputID) {
 			var parent = $(inputID).parent();
 			$(inputID).remove();
 			$(parent).append(DOM);
-			window_message('You did not select an image');
+			window_message('You did not select an image', 'high');
 			$('#handler' + inputID.split('file')[1]).attr('src', '/img/camera_blur.png');
 			$('#handler' + inputID.split('file')[1]).attr('data-active', 'false');
 			// clear validator src

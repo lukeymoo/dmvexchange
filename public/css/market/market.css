@@ -516,14 +516,28 @@
 
 
 
-
+.dialog_blur {
+	position: fixed;
+	z-index: 1000;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.6);
+}
 
 .dialog_box {
 	position: fixed;
+	z-index: 1001;
 	top: 27vh;
 	left: 30vw;
 	background-color: #fff;
 	width: 400px;
+}
+
+.dialog_box .for_post_id,
+.dialog_box .for_comment_id {
+	display: none;
 }
 
 .dialog_box .dialog_text {
@@ -536,7 +550,9 @@
 .dialog_box .dialog_controls {
 	display: block;
 	background-color: #ddd;
-	padding: 0px 5px;
+	padding: 0px 10px;
+	height: 50px;
+	line-height: 50px;
 }
 
 .dialog_box .cancel_dialog,
@@ -546,17 +562,19 @@
 	text-align: center;
 	padding: 7px 15px;
 	border-radius: 3px;
+	cursor: pointer;
+	pointer: hand;
 }
 
 .dialog_box .cancel_dialog {
-	color: rgb(230, 230, 230);
+	color: rgb(235, 235, 235);
 	background-color: rgb(190, 0, 0);
 }
 
 .dialog_box .confirm_dialog {
 	color: black;
 	background-color: rgb(0, 190, 210);
-	margin-left: 225px;
+	margin-left: 228px;
 }
 
 #centerFeed {
@@ -813,7 +831,6 @@
 	border-radius: 3px;
 
 	width: 100px;
-	float: left;
 
 	background-color: rgba(190, 0, 0, 0.8);
 	
@@ -830,6 +847,18 @@
 
 	cursor: pointer;
 	pointer: hand;
+}
+
+#centerFeed .post .load_older_comments {
+	color: rgb(0, 200, 250);
+	display: block;
+	text-align: center;	
+	cursor: pointer;
+	pointer: hand;
+	padding: 5px 0px;
+	border-top: 1px solid rgba(0, 0, 0, 0.07);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+	text-decoration: underline;
 }
 
 #centerFeed .post .view_change {
@@ -928,8 +957,12 @@
 	display: none;
 }
 
+#centerFeed .post .is_edited {
+	color: rgb(155, 155, 155);
+}
+
 #centerFeed .post .comment .is_edited {
-	color: rgb(100, 100, 100);
+	color: rgb(150, 150, 150);
 }
 
 #centerFeed .post .comment .username {
@@ -952,6 +985,10 @@
 	display: block;
 	padding-left: 2px;
 	padding-right: 2px;
+}
+
+.fake .comment_text {
+	text-align: center;
 }
 
 #centerFeed .post .commentInput:focus,

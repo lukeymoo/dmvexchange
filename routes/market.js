@@ -94,7 +94,6 @@ router.post('/post', function(req, res, next) {
 		poster_username: req.session.USERNAME,
 		post_type: req.body.t,
 		post_text: req.body.d,
-		comment_count: 0,
 		visibility: 1,
 		images: []
 	};

@@ -35,11 +35,25 @@ $(function() {
 			// Display messages
 			Market.display();
 
-			// Description VIEW MORE buttons
-			// After 700 characters
+			// Add view more buttons where needed
 			$('#centerFeed').find('.post').each(function() {
 				if($(this).find('.description').html().length > 700) {
 					parse_viewchanger($(this).find('.description'));
+				}
+				var pid = $(this).find('.post_id').html();
+				var cid = ($(this).find('.comment').length) ? $(this).find('.comment')[0] : false;
+				if(cid != false) {
+					var first_comment = $(this).find('.comment')[0];
+					cid = $(cid).find('.comment_id').html();
+					is_more_comments(pid, cid, function(res) {
+						if(res.status == 'DX-OK') {
+							if(res.message != false) {
+								var LOAD_MORE_COMMENTS =
+								"<span class='load_older_comments'>" + res.message + " more comments</span>";
+								$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
+							}
+						}
+					});
 				}
 			});
 		} else {
@@ -47,9 +61,53 @@ $(function() {
 		}
 	});
 
+	// Load more comments on click
+	$(document).on('click', '.post .load_older_comments', function() {
+		var view_more_elem = $(this);
+		var pid = $(this).parents('.post').find('.post_id').html();
+		var cid = ($(this).parents('.post').find('.comment').length) ? $(this).parents('.post').find('.comment')[0] : false;
+		if(cid) {
+			var cid = $(cid).find('.comment_id').html();
+			console.log('old =>', cid);
+			load_older_comments(pid, cid, function(res) {
+				if(res.status == 'DX-OK') {
+					// parse comments by prepending commentContainer for post_id
+					if(res.message) {
+						// remove view more button
+						$(view_more_elem).remove();
+						parse_loaded_comments(pid, res.message);
+						var first_comment = '';
+						$('.post').each(function() {
+							if($(this).find('.post_id').html() == pid) {
+								first_comment = $(this).find('.comment')[0];
+							}
+						});
+						cid = $(first_comment).find('.comment_id').html();
+						console.log('new => ', cid);
+						is_more_comments(pid, cid, function(res) {
+							if(res.status == 'DX-OK') {
+								if(res.message != false) {
+									var LOAD_MORE_COMMENTS =
+									"<span class='load_older_comments'>" + res.message + " more comments</span>";
+									$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
+								}
+							}
+						});
+					}
+				} else {
+					window_message(res.message, 'high');
+				}
+			});
+		} else {
+			window_message('Cannot determine comment index', 'medium');
+			return;
+		}
+	});
+
 	// handle view more/less clicks
 	$(document).on('click', '.view_change', function() {
 
+		// Ensure there is no editing going on
 		if($(this).attr('data-state') == 'less') {
 			$(this).html('View less');
 			expand_view($(this).parents('.post').find('.description'));
@@ -58,10 +116,12 @@ $(function() {
 		}
 
 		if($(this).attr('data-state') == 'more') {
-			$(this).html('View more');
-			compact_view($(this).parents('.post').find('.description'));
-			$(this).attr('data-state', 'less');
-			return;
+			if(!$(this).parents('.post').find('.edit_controls').length) {
+				$(this).html('View more');
+				compact_view($(this).parents('.post').find('.description'));
+				$(this).attr('data-state', 'less');
+				return;
+			}
 		}
 	});
 
@@ -131,6 +191,8 @@ $(function() {
 	// submit edit button
 	$(document).on('click', '.post .submit_edit', function() {
 
+		var post_elem = $(this).parents('.post');
+		var date_elem = $(this).parents('.post').find('.post_date');
 		var desc_elem = $(this).parents('.post').find('.description');
 		var controls_elem = $(this).parent('.edit_controls');
 		// hide edit controls
@@ -140,16 +202,32 @@ $(function() {
 		var post_id = $(this).parents('.post').find('.post_id').html();
 		var post_desc = $(this).parents('.post').find('.description').html();
 
-		Market.save_edit(post_id, post_desc, function(res) {
-			console.log(res);
-			if(res.status == 'DX-OK') {
-				if(parseInt(res.message.nModified) > 0) {
-					window_message('Post updated!');
-					$(desc_elem).attr('contenteditable', 'false');
-					$(controls_elem).remove();
+		// validate desc before attempting submission
+		if(validate_post_description(post_desc)) {
+			Market.save_edit(post_id, post_desc, function(res) {
+				if(res.status == 'DX-OK') {
+					if(parseInt(res.message.nModified) > 0) {
+						window_message('Post updated!');
+						$(desc_elem).attr('contenteditable', 'false');
+						$(controls_elem).remove();
+						if(!$(post_elem).find('.is_edited').length) {
+							var DOM = "<span class='is_edited'>&#8627; Edited</span>";
+							$(DOM).insertAfter(date_elem);
+						}
+					} else if(res.message == 'Description is unchanged') {
+						$(desc_elem).attr('contenteditable', 'false');
+						$(controls_elem).remove();
+						window_message(res.message, 'medium');
+					} else {
+						window_message(res.message, 'medium');
+					}
+				} else {
+					window_message(res.message, 'high');
 				}
-			}
-		});
+			});
+		} else {
+			window_message('Description must be 2-2500 characters', 'high');
+		}
 	});
 
 	// cancel edit button
@@ -175,10 +253,100 @@ $(function() {
 
 
 
+function make_comment_from_json(json) {
+	var COMMENT =
+	"<div class='comment'>" +
+			"<div class='comment_info'>" +
+				"<span class='comment_id'>" + json._id + "</span>" +
+				"<span class='comment_user_id'>" + json.poster_id + "</span>";
+				if(json.poster_username == state.USERNAME) {
+					COMMENT +=
+					"<span class='comment_options' data-state='closed'></span>" +
+					"<ul class='comment_options_menu'>" +
+						"<li class='edit_comment'>Edit</li>" +
+						"<li class='remove_comment'>Remove</li>" +
+					"</ul>";
+				}
+				COMMENT += "<span class='username'>" + json.poster_username + "</span>" +
+				"<span data-iso='" + date_from_objectid(json._id) + "' class='comment_date'>" + time_since(date_from_objectid(json._id)) + "</span>" +
+			"</div>" +
+			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.text).data + "</span>";
+			if(json.edited) {
+				COMMENT += "<span class='is_edited'>&#8627; Edited</span>";
+			}
+	COMMENT += "</div>";
+	return COMMENT;
+}
 
+/**
+	Parses OLDER comments
+*/
+function parse_loaded_comments(post_id, json) {
+	console.log(json);
+	// remove the view more button
+	var comments = '';
+	for(var comment in json) {
+		comments += make_comment_from_json(json[comment]);
+	}
+	if(comments) {
+		$('.post').each(function() {
+			if($(this).find('.post_id').html() == post_id) {
+				$(this).find('.commentContainer').prepend(comments);
+			}
+		});
+	}
+	return;
+}
 
+function load_older_comments(post_id, comment_id, callback) {
+	$.ajax({
+		url: '/api/comments',
+		data: {
+			type: 'BEFORE',
+			post_id: post_id,
+			comment_id: comment_id
+		},
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error occurred'
+			};
+			if(err.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
+		}
+	}).done(function(res) {
+		callback(res);
+	});
+	return;
+}
 
+function is_more_comments(post_id, comment_id, callback) {
+	$.ajax({
+		url: '/api/is_more_comments',
+		data: {
+			post_id: post_id,
+			comment_id: comment_id
+		},
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error occurred'
+			};
+			if(err.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
+		}
+	}).done(function(res) {
+		callback(res);
+	});
+}
 
+function validate_post_description(string) {
+	return (string.length >= 4 && string.length <= 2500) ? true : false;
+}
 
 function place_cursor_end(cursor) {
     cursor.focus();
@@ -222,10 +390,21 @@ Market.get = function(callback) {
 
 Market.save_edit = function(post_id, desc, callback) {
 	$.ajax({
+		type: 'POST',
 		url: '/api/save_post_edit',
 		data: {
 			post_id: post_id,
 			text: desc
+		},
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error'
+			};
+			if(res.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
 		}
 	}).done(function(res) {
 		callback(res);
@@ -291,9 +470,7 @@ function post_from_json(json) {
 	"<div class='post'>" +
 		"<span class='post_id'>" + json._id + "</span>" + 
 		"<span class='post_type'>" + json.post_type + "</span>" + 
-		"<span class='creatorID'>" + 
-			json.poster_id + 
-		"</span>" + 
+		"<span class='creatorID'>" + json.poster_id + "</span>" + 
 		"<div class='post_general'>";
 			if(json.is_owner) {
 				DOM +=
@@ -304,12 +481,15 @@ function post_from_json(json) {
 				"</ul>";
 			}
 			DOM += "<span class='creatorUsername'>" +
-				json.poster_username + 
+				json.poster_username +
 			"</span>" +
 			"<span value='" + date_from_objectid(json._id) + "' class='post_date'>" + 
 				time_since(date_from_objectid(json._id)) +
-			"</span>" +
-			"<span class='description'>" +
+			"</span>";
+			if(json.edited) {
+				DOM += "<span class='is_edited'>&#8627; Edited</span>";
+			}
+			DOM += "<span class='description' spellcheck='false'>" +
 			document.createTextNode(json.post_text).data + "</span>";
 
 	if(json.images.length) {
@@ -321,27 +501,7 @@ function post_from_json(json) {
 
 	var comments = '';
 	for(var comment in json.comments) {
-		comments +=
-		"<div class='comment'>" +
-			"<div class='comment_info'>" +
-				"<span class='comment_id'>" + json.comments[comment]._id + "</span>" +
-				"<span class='comment_user_id'>" + json.comments[comment].poster_id + "</span>";
-				if(json.comments[comment].poster_username == state.USERNAME) {
-					comments +=
-					"<span class='comment_options' data-state='closed'></span>" +
-					"<ul class='comment_options_menu'>" +
-						"<li class='edit_comment'>Edit</li>" +
-						"<li class='remove_comment'>Remove</li>" +
-					"</ul>";
-				}
-				comments += "<span class='username'>" + json.comments[comment].poster_username + "</span>" +
-				"<span data-iso='" + date_from_objectid(json.comments[comment]._id) + "' class='comment_date'>" + time_since(date_from_objectid(json.comments[comment]._id)) + "</span>" +
-			"</div>" +
-			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.comments[comment].text).data + "</span>";
-			if(json.comments[comment].edited) {
-				comments += "<span class='is_edited'>&#8627; Edited</span>";
-			}
-		comments += "</div>";
+		comments += make_comment_from_json(json.comments[comment]);
 	}
 
 	DOM +=

@@ -27,18 +27,158 @@ var uuid = require('node-uuid');
 
 router.get('*', function(req, res, next) {
 	if(!req.xhr && req.session.USERNAME != 'lukeymoo') {
-		res.send({status: 'DX-REJECTED', message: 'Cannot use browser to view'});
+		res.send({status: 'DX-REJECTED', message: 'Cannot use browser for API endpoints'});
 		return;
 	}
 	next();
 });
 
-router.get('/save_comment_edit', function(req, res, next) {
+router.post('/remove_comment', function(req, res, next) {
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
+	// Ensure we received a post_id and comment_id
+	if(!('post_id' in req.body) || !req.body.post_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
+		return;
+	}
+	if(!('comment_id' in req.body) || !req.body.comment_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No comment ID specified'});
+		return;
+	}
+
+	var db = dbManager.getDB();
+	var feed = db.collection('FEED');
+	feed.update({
+		_id: ObjectID(req.body.post_id),
+		comments: {
+			$elemMatch: {
+				_id: ObjectID(req.body.comment_id)
+			}
+		}
+	}, { $pull: { comments: { _id: ObjectID(req.body.comment_id) } } }, function(err, result) {
+		if(err) {
+			smtp.report_error('Error removing comment :: ' + err, function(){});
+			res.send({status:'DX-FAILED', message: 'Server error occurred'});
+			return;
+		}
+		res.send({status: 'DX-OK', message: result});
+		return;
+	});
+});
+
+router.post('/save_comment_edit', function(req, res, next) {
 	// Ensure logged in
-	authManager.json_is_authenticated(req, res);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// Ensure we received a post_id, comment_id and text for
 	// new comment
+	if(!('post_id' in req.body) || !req.body.post_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
+		return;
+	}
+	if(!('comment_id' in req.body) || !req.body.comment_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No comment ID specified'});
+		return;
+	}
+	if(!('text' in req.body) || !req.body.text.length) {
+		res.send({status: 'DX-REJECTED', message: 'No text given to replace comment with'});
+		return;
+	}
+	// Validate text
+	if(!validate_comment(req.body.text)) {
+		res.send({status: 'DX-REJECTED', message: 'Comments must be 2-500 characters'});
+		return;
+	}
+
+	// ensure there was a change in text
+	var db = dbManager.getDB();
+	var feed = db.collection('FEED');
+
+	feed.findOne({
+		_id: ObjectID(req.body.post_id),
+		comments: {
+			$elemMatch: {
+				text: req.body.text
+			}
+		}
+	}, { _id: 1 }, function(err, doc) {
+		if(err) {
+			smtp.report_error('Error checking if comment was unchanged :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+			return;
+		}
+		if(doc) {
+			res.send({status: 'DX-OK', message: 'Comment is unchanged'});
+			return;
+		}
+
+		// find post_id and comment id
+		feed.update({
+			_id: ObjectID(req.body.post_id),
+			comments: {
+				$elemMatch: { _id: ObjectID(req.body.comment_id) }
+			}
+		}, { $set: { "comments.$.text": req.body.text, "comments.$.edited": true } }, function(err, result) {
+			if(err) {
+				smtp.report_error('Error occurred editing comment text :: ' + err, function(){});
+				res.send({status: 'DX-FAILED', message: 'Server error'});
+				return;
+			}
+			res.send({status: 'DX-OK', message: result});
+			return;
+		});
+
+
+	});
+});
+
+router.get('/is_more_comments', function(req, res, next) {
+	// Ensure we've got a post_id and last comment id for indexing
+	if(!('post_id' in req.query) || !req.query.post_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
+		return;
+	}
+	if(!('comment_id' in req.query) || !req.query.comment_id.length) {
+		res.send({status: 'DX-REJECTED', message: 'No comment index specified'});
+		return;
+	}
+
+	// Find comment in collection
+	// get its index, if 0 return false
+
+	var db = dbManager.getDB();
+	var feed = db.collection('FEED');
+
+	feed.findOne({
+		_id: ObjectID(req.query.post_id),
+		comments: {
+			$elemMatch: {
+				_id: ObjectID(req.query.comment_id)
+			}
+		}
+	}, { comments: 1 }, function(err, doc) {
+		for(var i = 0; i < doc.comments.length; i++) {
+			if(doc.comments[i]._id == req.query.comment_id) {
+				if(i == 0) {
+					res.send({status: 'DX-OK', message: false});
+					return;
+				} else {
+					// if there are more comments send the index of the comment
+					res.send({status: 'DX-OK', message: i});
+					return;
+				}
+			}
+		}
+		res.send({status: 'DX-REJECTED', message: 'No matching comment'});
+		return;
+	});
+});
+
+router.get('/load_older_comments', function(req, res, next) {
+	// Ensure we recieved a post id and comment id for indexing
 	if(!('post_id' in req.query) || !req.query.post_id.length) {
 		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
 		return;
@@ -47,34 +187,224 @@ router.get('/save_comment_edit', function(req, res, next) {
 		res.send({status: 'DX-REJECTED', message: 'No comment ID specified'});
 		return;
 	}
-	if(!('text' in req.query) || !req.query.text.length) {
-		res.send({status: 'DX-REJECTED', message: 'No text given to replace comment with'});
-		return;
-	}
-	// Validate text
-	if(!validate_comment(req.query.text)) {
-		res.send({status: 'DX-REJECTED', message: 'Comments must be 2-500 characters'});
-		return;
-	}
-	// find post_id and comment id
 	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
-	feed.update({
+
+	// Grab comments determine index & perform slice query
+	var comment_index = 0;
+	feed.findOne({
 		_id: ObjectID(req.query.post_id),
 		comments: {
-			$elemMatch: { _id: ObjectID(req.query.comment_id) }
+			$elemMatch: {
+				_id: ObjectID(req.query.comment_id)
+			}
 		}
-	}, { $set: { "comments.$.text": req.query.text, "comments.$.edited": true } }, function(err, result) {
+	}, { comments: 1 }, function(err, doc) {
 		if(err) {
-			smtp.report_error('Error occurred editing comment text :: ' + err, function(){});
-			res.send({status: 'DX-FAILED', message: 'Server error'});
+			smtp.report_error('Error fetching older comments ( Resolving index ) :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
 			return;
 		}
-		res.send({status: 'DX-OK', message: result});
-		return;
+
+		comment_index = 0;
+		for(var i = 0; i < doc.comments.length; i++) {
+			if(doc.comments[i]._id == req.query.comment_id) {
+				comment_index = i;
+			}
+		}
+		var start_index = comment_index;
+		for(var i = 0; i < 10; i++) {
+			if(start_index >= 0) {
+				start_index--;
+			} else {
+				break;
+			}
+		}
+		// Perform slice query
+		feed.findOne({
+			_id: ObjectID(req.query.post_id),
+			comments: {
+				$elemMatch: {
+					_id: ObjectID(req.query.comment_id)
+				}
+			}
+		}, { comments: { $slice: [start_index, comment_index] } }, function(err, sliced) {
+			if(err) {
+				console.log(err);
+				smtp.report_error('Error fetching older comments ( Slicing ) :: ' + err, function(){});
+				res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+				return;
+			}
+			res.send({status: 'DX-OK', message: sliced.comments});
+			return;
+		});
 	});
 });
 
+/** New version of getting comments **/
+router.get('/comments', function(req, res, next) {
+	/**
+		Types
+		------
+		1. Get comments prior to 	=>		BEFORE
+		2. Get comments since		=>		AFTER
+	*/
+	/**
+		Determine the type of request, if no type is present return error
+	*/
+	if(!('type' in req.query) || !req.query.type) {
+		res.send({status: 'DX-REJECTED', message: 'No request type specified'});
+		return;
+	}
+	/**
+		Ensure we received a valid type of request
+	*/
+	if(req.query.type != 'BEFORE' && req.query.type != 'AFTER') {
+		res.send({status: 'DX-REJECTED', message: 'Invalid request type'});
+		return;
+	}
+	/**
+		If request == BEFORE
+	*/
+	if(req.query.type == 'BEFORE') {
+		/**
+			Ensure we recieved a post_id to speed up database query
+		*/
+		if(!('post_id' in req.query) || !req.query.post_id.length) {
+			res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
+			return;
+		}
+		/**
+			Ensure we received a comment_id to use as start index
+		*/
+		if(!('comment_id' in req.query) || !req.query.comment_id.length) {
+			res.send({status: 'DX-REJECTED', message: 'No comment ID specified to start from'});
+			return;
+		}
+		/**
+			Fetch last 10 comments before specified comment
+		*/
+		var feed = dbManager.getDB().collection('FEED');
+		feed.findOne({
+			_id: ObjectID(req.query.post_id),
+			comments: {
+				$elemMatch: {
+					_id: ObjectID(req.query.comment_id)
+				}
+			}
+		}, { comments: 1 }, function(err, doc) {
+			if(err) {
+				smtp.report_error('Error while fetching comments BEFORE :: ' + err, function(){});
+				res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+				return;
+			}
+			if(!doc) {
+				res.send({status: 'DX-FAILED', message: 'Failed to retrieve comments'});
+				return;
+			}
+			/**
+				Slice manually since MongoDB doesn't offer reverse-skip slicing
+			*/
+			/**
+				Find the comment that was specified
+			*/
+			/** This will be our container for parsed comments **/
+			var to_return = [];
+			/** This variable maintains a distance of 10 if possible **/
+			var last_comment = 0;
+			for(var i = 0; i < doc.comments.length; i++) {
+				if(i > 10) {
+					last_comment ++;
+				}
+				if(String(doc.comments[i]._id) == req.query.comment_id) {
+					/**
+						Iterate through comments again starting at last_comment
+						through to `i` and push comment into container `to_return`
+					*/
+					for(var t = last_comment; t < i; t++) {
+						to_return.push(doc.comments[t]);
+					}
+					/**
+						Return collection to user
+					*/
+					res.send({status: 'DX-OK', message: to_return});
+					return;
+				}
+			}
+			/**
+				If we get this far something wrong occurred
+			*/
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+			return;
+		});
+	} /** End of request type `BEFORE` **/
+	if(req.query.type == 'AFTER') {
+		/**
+			Ensure we received a post_id to speed up query
+		*/
+		if(!('post_id' in req.query) || !req.query.post_id.length) {
+			res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
+			return;
+		}
+		if(!('comment_id' in req.query) || !req.query.comment_id.length) {
+			res.send({status: 'DX-REJECTED', message: 'No comment ID specified'});
+			return;
+		}
+		var feed = dbManager.getDB().collection('FEED');
+		feed.findOne({
+			_id: ObjectID(req.query.post_id),
+		}, function(err, doc) {
+			console.log(doc);
+			if(err) {
+				smtp.report_error('Error occurred fetching comments AFTER :: ' + err, function(){});
+				res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+				return;
+			}
+			if(!doc) {
+				res.send({status: 'DX-FAILED', message: 'Failed to retrieve comments'});
+				return;
+			}
+			if(!('comments' in doc) || !doc.comments.length) {
+				res.send({status: 'DX-OK', message: null});
+				return;
+			}
+			/**
+				Splice comments manually returning the following comments of
+				specified comment
+			*/
+			/** Collection of comments to return **/
+			var to_return = [];
+			/**
+				Used to determine if we've passed the specified comment and should
+				start adding comments to collection `to_return`
+			*/
+			var start_adding = (req.query.comment_id == 0) ? true : false;
+			for(var i = 0; i < doc.comments.length; i++) {
+				if(!start_adding) {
+					if(String(doc.comments[i]._id) == req.query.comment_id) {
+						start_adding = true;
+						continue;
+					}
+				}
+				if(start_adding) {
+					to_return.push(doc.comments[i]);
+				}
+			}
+			/**
+				Return collected comments
+			*/
+			res.send({status: 'DX-OK', message: to_return});
+			return;
+		});
+	} /** End of comment type `AFTER` **/
+});
+
+
+
+
+/*
+	Soon to be deprecated version of getting post comments
+*/
 router.get('/get_post_comments', function(req, res, next) {
 	// ensure we recieved a post_id
 	if(!('post_id' in req.query) || !req.query.post_id.length) {
@@ -87,21 +417,22 @@ router.get('/get_post_comments', function(req, res, next) {
 	var feed = db.collection('FEED');
 	feed.findOne({
 		_id: ObjectID(req.query.post_id)
-	}, function(err, doc) {
+	}, { comments: { $slice: -4 } }, function(err, doc) {
 		if(err) {
 			smtp.report_error('Error occurred fetching comments :: ' + err, function(){});
 			return;
 		}
-		var comment_array = doc.comments;
-		res.send({status: 'DX-OK', message: comment_array});
+		res.send({status: 'DX-OK', message: doc.comments});
 		return;
 	});
 });
 
-router.get('/post_comment', function(req, res, next) {
+router.post('/post_comment', function(req, res, next) {
 
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req, res);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// Limit posts per timeframe ( 2 seconds => 30 comments per minute )
 	if(!authManager.can_comment(req, res)) {
@@ -110,13 +441,13 @@ router.get('/post_comment', function(req, res, next) {
 	}
 	
 	// Ensure a post ID was given
-	if(!('post_id' in req.query) || !req.query.post_id.length) {
+	if(!('post_id' in req.body) || !req.body.post_id.length) {
 		res.send({status: 'DX-REJECTED', message: 'No post specified'});
 		return;
 	}
 
 	// Ensure comment text was given
-	if(!('text' in req.query) || !req.query.text.length) {
+	if(!('text' in req.body) || !req.body.text.length) {
 		res.send({status: 'DX-REJECTED', message: 'Cannot post empty comments'});
 		return;
 	}
@@ -124,80 +455,96 @@ router.get('/post_comment', function(req, res, next) {
 		_id: new ObjectID(),
 		poster_username: req.session.USERNAME,
 		poster_id: req.session.USER_ID,
-		text: req.query.text
+		text: req.body.text
 	};
 	// Validate the comment
-	if(validate_comment(req.query.text)) {		
+	if(validate_comment(req.body.text)) {		
 		// update post pushing this comment to array
 		var db = dbManager.getDB();
 		var feed = db.collection('FEED');
 		feed.update({
-			_id: ObjectID(req.query.post_id),
+			_id: ObjectID(req.body.post_id),
 			poster_username: req.session.USERNAME,
-			poster_id: req.session.USER_ID			
-		}, { $push: { comments: new_comment }, $inc: { comment_count: 1 } }, function(err, result) {
+			poster_id: req.session.USER_ID
+		}, { $push: { comments: new_comment } }, function(err, result) {
 			if(err) {
 				smtp.report_error('MongoDB Error occurred while posting comment :: ' + err, function(){});
 				res.send({status: 'DX-FAILED', message: 'Error occurred while posting comment'});
 				return;
 			}
 			authManager.inc_comment(req);
-			var blank = { nModified: 0 };
-			result = result || blank;
 			res.send({status: 'DX-OK', message: result})
 			return;
 		});
 	}
 });
 
-router.get('/save_post_edit', function(req, res, next) {
+router.post('/save_post_edit', function(req, res, next) {
 
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// ensure recieved post_id
-	if(!('post_id' in req.query) || req.query.post_id.length != 24) {
+	if(!('post_id' in req.body) || req.body.post_id.length != 24) {
 		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
 		return;
 	}
 
 	// ensure received new description
-	if(!('text') in req.query || !req.query.text.length) {
+	if(!('text') in req.body || !req.body.text.length) {
 		res.send({status: 'DX-REJECTED', message:'No description specified'});
 		return;
 	}
 
-	// validate description
-	if(req.query.text.length < 4) {
-		res.send({status: 'DX-REJECTED', message: 'Description must be at least 4 characters'});
-		return;
-	}
-	if(req.query.text.length > 2500) {
-		res.send({status: 'DX-REJECTED', message: 'Description must not exceed 2,500 characters'});
-		return;
-	}
-
-	// update description
+	// ensure text is not already the same
 	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
 
-	feed.update({
-		_id: ObjectID(req.query.post_id), // POST ID
-		poster_username: req.session.USERNAME.toLowerCase(),
-		poster_id: req.session.USER_ID
-	}, { $set: { post_text: req.query.text } }, function(err, result) {
+	feed.findOne({
+		post_text: req.body.text
+	}, function(err, doc) {
 		if(err) {
-			smtp.report_error('[-] MongoDB error while updating post' + err, function(){});
-			res.send({status: 'DX-FAILED', message: 'Error occurred updating post'});
+			smtp.report_error('Error checking if post is the same :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
 			return;
 		}
-		if(result) {
-			res.send({status: 'DX-OK', message: result});
-			return;
-		} else {
-			res.send({status: 'DX-REJECTED', message: 'Post not found'});
+		if(doc) {
+			res.send({status: 'DX-OK', message: 'Description is unchanged'});
 			return;
 		}
+
+		if(validate_post_description(req.body.text) == 'short') {
+			res.send({status: 'DX-REJECTED', message: 'Description must be at least 4 characters'});
+			return;
+		}
+
+		if(validate_post_description(req.body.text) == 'long') {
+			res.send({status: 'DX-REJECTED', message: 'Description must not exceed 2,500 characters'});
+			return;
+		}
+
+		feed.update({
+			_id: ObjectID(req.body.post_id), // POST ID
+			poster_username: req.session.USERNAME.toLowerCase(),
+			poster_id: req.session.USER_ID
+		}, { $set: { post_text: req.body.text, edited: true } }, function(err, result) {
+			if(err) {
+				smtp.report_error('[-] MongoDB error while updating post' + err, function(){});
+				res.send({status: 'DX-FAILED', message: 'Error occurred updating post'});
+				return;
+			}
+			if(result) {
+				res.send({status: 'DX-OK', message: result});
+				return;
+			} else {
+				res.send({status: 'DX-REJECTED', message: 'Post not found'});
+				return;
+			}
+		});
+
+
 	});
 });
 
@@ -220,7 +567,7 @@ router.get('/get_feed', function(req, res, next) {
 	// find by id sort descending, grab following 50 posts
 	if(minID == 0) {
 		feed.find({
-		}).sort({_id: -1}).limit(10).toArray(function(err, feed) {
+		}, { comments: { $slice: -4 } }).sort({_id: -1}).limit(10).toArray(function(err, feed) {
 			res.send({ status: 'DX-OK', message: feed });
 			return;
 		});
@@ -229,7 +576,7 @@ router.get('/get_feed', function(req, res, next) {
 			_id: {
 				$gt: ObjectID(minID)
 			}
-		}).skip(1).sort({_id: -1}).limit(10).toArray(function(err, feed) {
+		}, { comments: { $slice: -4 } }).skip(1).sort({_id: -1}).limit(10).toArray(function(err, feed) {
 			res.send({ status: 'DX-OK', message: feed });
 			return;
 		});
@@ -335,7 +682,9 @@ router.get('/session', function(req, res, next) {
 router.get('/chgpwd', function(req, res, next) {
 
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// Ensure we recieved the old password, the new password and a confirmation re-entry
 	if(!('oldP' in req.query) || req.query.oldP.length == 0) {
@@ -410,7 +759,9 @@ router.get('/chgpwd', function(req, res, next) {
 // Get unread message count
 router.get('/unread', function(req, res, next) {
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	var database = dbManager.getDB();
 	var mailCol = database.collection('MAIL');
@@ -440,7 +791,9 @@ router.get('/unread', function(req, res, next) {
 router.get('/mail', function(req, res, next) {
 
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// Ensure they've sent a request
 	if(!('request' in req.query) || req.query.request.length == 0) {
@@ -563,7 +916,9 @@ router.get('/mail', function(req, res, next) {
 // Account Settings page add new email
 router.get('/add_email', function(req, res, next) {
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// Ensure they've sent the email
 	if(!('email' in req.query) || req.query.email.length == 0) {
@@ -664,7 +1019,9 @@ router.get('/add_email', function(req, res, next) {
 // Account Settings page add new email
 router.get('/remove_email', function(req, res, next) {
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// Ensure they've sent the email
 	if(!('email' in req.query) || req.query.email.length == 0) {
@@ -713,7 +1070,9 @@ router.get('/remove_email', function(req, res, next) {
 router.get('/getmail', function(req, res, next) {
 
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	// Query database for messages with matching username in targets
 	var database = dbManager.getDB();
@@ -752,7 +1111,9 @@ router.get('/getmail', function(req, res, next) {
 router.get('/sendmail', function(req, res, next) {
 
 	// Handle all authentication and respond if necessary
-	authManager.json_is_authenticated(req);
+	if(!authManager.json_is_authenticated(req, res)) {
+		return;
+	}
 
 	var s = ''; // subject
 	var m = ''; // message text
@@ -834,6 +1195,17 @@ function returnFeed(res, feedObj, iteration) {
 		res.send({status: 'DX-OK', message: feedObj});
 	}
 	return;
+}
+
+function validate_post_description(string) {
+	// validate description
+	if(string.length < 4) {
+		return 'short';
+	}
+	if(string.length > 2500) {
+		return 'long';
+	}
+	return true;
 }
 
 function validate_comment(string) {
