@@ -266,7 +266,7 @@ $(function() {
 				});
 			} else {
 				// Spawn error
-				window_message(res.message);
+				createAlert(res.message);
 			}
 		});
 	});
@@ -285,7 +285,7 @@ $(function() {
 
 			} else {
 				// Spawn error
-				window_message(res.message);
+				createAlert(res.message);
 			}
 		});
 	});
@@ -317,7 +317,7 @@ $(function() {
 				Controls.disable();
 			} else {
 				Controls.showSelected();
-				window_message(res.message);
+				createAlert(res.message);
 			}
 		});
 	});
@@ -356,7 +356,7 @@ $(function() {
 				}
 			} else {
 				Controls.showSelected();
-				window_message(res.message);
+				createAlert(res.message);
 			}
 		});
 	});
@@ -419,7 +419,7 @@ $(function() {
 				}
 			} else {
 				Controls.showSelected();
-				window_message(res.message);
+				createAlert(res.message);
 			}
 		});
 	});

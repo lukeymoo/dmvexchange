@@ -15,7 +15,7 @@ var Messenger = {
 	messageText: ''
 };
 
-Messenger.quick_reply = function(to, subject) {
+Messenger.quickReply = function(to, subject) {
 	Viewer.hide();
 	this.showForm();
 	$('#composeForm #messageTo').val(to);

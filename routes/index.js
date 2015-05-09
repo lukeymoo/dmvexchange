@@ -257,6 +257,7 @@ router.get('/logout', function(req, res, next) {
 	req.session.LOGGED_IN = false;
 	delete req.session.USERNAME;
 	delete req.session.EMAIL;
+	delete req.session.USER_ID;
 	delete req.session.LAST_ACTIVITY;
 	res.redirect('/');
 });

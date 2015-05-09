@@ -61,6 +61,7 @@ module.exports = {
 						}
 						if(!colExist.FEED) {
 							dbObj.createCollection('FEED', function(){});
+							dbObj.ensureIndex({post_text: 'text'}, function(){});
 							console.log('[+] MongoDB Created collection `FEED`');
 						}
 						if(!colExist.EARLY_BIRD) {

@@ -25,6 +25,11 @@ router.get('/', function(req, res, next) {
 });
 
 
+// ignore GET `/post`, accepts POST requests
+router.get('/post', function(req, res, next) {
+	res.redirect('/market');
+	return;
+});
 /*
 	ERROR CODES
 	-------------
@@ -36,7 +41,6 @@ router.get('/', function(req, res, next) {
 	[ ] sale_no_images			=>		Post type is a sale but it has no images of product...(sketchy)
 	[ ] invalid_mimetype		=> 		Uploaded file has a non-image mimetype...(Prob a virus payload)
 */
-
 router.post('/post', function(req, res, next) {
 
 	// ensure the user is logged in
@@ -177,12 +181,6 @@ router.post('/post', function(req, res, next) {
 	}
 });
 
-// IGNORE GET FOR /market/post
-router.get('/post', function(req, res, next) {
-	res.redirect('/market');
-	return;
-});
-
 
 
 
@@ -194,7 +192,10 @@ function insertPost(photo, res, postObj, iteration, neededIterations) {
 		var db = dbManager.getDB();
 		var feed = db.collection('FEED');
 		feed.insert(postObj);
-		res.redirect('/market');
+		/** Delay the redirect to ensure image processing is complete **/
+		setTimeout(function() {
+			res.redirect('/market');
+		}, 1000);
 	}
 	return;
 }

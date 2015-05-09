@@ -10,51 +10,62 @@ var initial_comment = '';
 
 $(function() {
 
-	// Update ALL comment time_since's every 9 seconds
+	/**
+		Updates time since post date for all comments
+	*/
 	setInterval(function() {
 		$(document).find('.comment').each(function() {
-			var new_time_since = time_since($(this).find('.comment_date').attr('data-iso'));
-			$(this).find('.comment_date').html(new_time_since);
+			var new_timeSince = timeSince($(this).find('.comment_date').attr('data-iso'));
+			$(this).find('.comment_date').html(new_timeSince);
 		});
-	}, 9000);
+	}, 11000);
 
-	// close comment options menu if clicked outside
+	/**
+		Toggle comment options menu
+	*/
+	$(document).on('click', '.comment_options', function() {
+		if($(this).attr('data-state') == 'closed') {
+			showCommentOptions($(this).parent('.comment_info').find('.comment_id').html());
+		} else {
+			hideCommentOptions($(this).parent('.comment_info').find('.comment_id').html());
+		}
+	});
+
+	/**
+		Close comment options menu if click is outside `.comment_options` element
+	*/
 	$(document).on('click', function(e) {
 		$(document).find('.comment_options').each(function() {
 			if(!$(e.target).is($(this))) {
 				if($(this).attr('data-state') == 'opened') {
-					hide_comment_options($(this).parent('.comment_info').find('.comment_id').html());
+					hideCommentOptions($(this).parent('.comment_info').find('.comment_id').html());
 				}
 			}
 		});
 	});
 
-	// comment options menu
-	$(document).on('click', '.comment_options', function() {
-		if($(this).attr('data-state') == 'closed') {
-			show_comment_options($(this).parent('.comment_info').find('.comment_id').html());
-		} else {
-			hide_comment_options($(this).parent('.comment_info').find('.comment_id').html());
-		}
-	});
-
-	// remove comment click
+	/**
+		Removes comment when comment options menu `.remove_comment` button
+		is clicked
+	*/
 	$(document).on('click', '.remove_comment', function() {
 		var pid = $(this).parents('.post').find('.post_id').html();
 		var cid = $(this).parents('.comment').find('.comment_id').html();
-		// Ask to confirm
-		confirmation_remove_comment(pid, cid);
+		// Ask to confirm comment removal
+		confirmRemoveComment(pid, cid);
 	});
 
-	// Confirm remove comment
+	
+	/**
+		Confirm button for comment removal
+	*/
 	$(document).on('click', '.dialog_box .confirm_dialog', function() {
 		var pid = $(this).parents('.dialog_box').find('.for_post_id').html();
 		var cid = $(this).parents('.dialog_box').find('.for_comment_id').html();
-		remove_comment(pid, cid, function(res) {
+		removeComment(pid, cid, function(res) {
 			if(res.status == 'DX-OK') {
 				if(parseInt(res.message.nModified) > 0) {
-					window_message('Comment removed!');
-					// Remove dialog and blur
+					// Remove dialog and background blur
 					$(document).find('.dialog_box').remove();
 					$(document).find('.dialog_blur').remove();
 					// Remove comment by id
@@ -68,113 +79,138 @@ $(function() {
 						}
 					});
 				} else {
-					// Remove dialog and blur
+					/** If no comment was removed by the back-end **/
+					// Remove dialog and background blur
 					$(document).find('.dialog_box').remove();
 					$(document).find('.dialog_blur').remove();
-					window_message('Seems like something went wrong...', 'medium');
+					createAlert('Seems like something went wrong...', 'medium');
 				}
 			} else {
+				/** If something bad happened on the back-end **/
 				// Remove dialog and blur
 				$(document).find('.dialog_box').remove();
 				$(document).find('.dialog_blur').remove();
-				window_message(res.message, 'high');
+				createAlert(res.message, 'high');
 			}
 		});
 	});
 
-
-
-
-
-
-	// Cancel remove comment
+	/**
+		Cancel button for remove comment dialog
+	*/
 	$(document).on('click', '.dialog_box .cancel_dialog', function() {
 		$(document).find('.dialog_box').remove();
 		$(document).find('.dialog_blur').remove();
 	});
 
-	// edit comment click
+	/**
+		Edits comment when comment options menu `.edit_comment` button
+		is clicked
+	*/
 	$(document).on('click', '.edit_comment', function() {
 		// close other edits & post edit
 		$(document).find('.comment').each(function() {
 			if($(this).find('.comment_edit_controls').length) {
 				var pid = $(this).parents('.post').find('.post_id').html();
 				var cid = $(this).find('.comment_id').html();
-				cancel_comment_edit(pid, cid);
+				cancelEditComment(pid, cid);
 			}
 		});
 		var cid = $(this).parents('.comment').find('.comment_id').html();
 		var pid = $(this).parents('.post').find('.post_id').html();
-		edit_comment(pid, cid);
+		editComment(pid, cid);
 	});
 
-	// submit comment edit
+	/**
+		Saves comment edits when comment options menu `.comment_submit_edit` button
+		is clicked
+	*/
 	$(document).on('click', '.comment_submit_edit', function() {
 
 		var pid = $(this).parents('.post').find('.post_id').html();
 		var cid = $(this).parents('.comment').find('.comment_id').html();
 		var new_comment = $(this).parents('.comment').find('.comment_text').html();
 
-		// validate comment on client then send to server
-		if(validate_comment(new_comment)) {
-			// hide edit controls
+		// Ensure comment is valid
+		if(isValidComment(new_comment)) {
+			// Hide edit controls
 			var comment_controls = $(this).parent('.comment_edit_controls');
 			var comment_elem = $(this).parents('.comment');
 			var comment_text_elem = $(this).parents('.comment').find('.comment_text');
-			//$(comment_controls).hide();
+			$(comment_controls).hide();
 
-			submit_comment_edit(pid, cid, new_comment, function(res) {
+			/** Post comment to server **/
+			saveComment(pid, cid, new_comment, function(res) {
 				if(res.status == 'DX-OK') {
+					/** If successful request **/
 					if(parseInt(res.message.nModified) > 0) {
-						// Remove edit controls and contenteditable attr
+						// Remove `.edit_controls` and contenteditable attr
 						$(comment_controls).remove();
 						$(comment_text_elem).attr('contenteditable', 'false');
-						window_message('Updated!');
 						if(!$(comment_elem).find('.is_edited').length) {
 							var edited = "<span class='is_edited'>&#8627; Edited</span>";
 							$(edited).insertAfter(comment_text_elem);
 						}
+						// Present user with success message
+						createAlert('Updated!');
 					} else if(res.message == 'Comment is unchanged') {
+						/** If submitted comment matches original **/
 						$(comment_controls).remove();
 						$(comment_text_elem).attr('contenteditable', 'false');
-						window_message(res.message, 'medium');
+						// Present no change message to user
+						createAlert(res.message, 'medium');
 					}
 				} else {
+					/** If we received bad response **/
 					$(comment_controls).show();
-					window_message('Failed to update comment', 'high');
+					// Present error message to user
+					createAlert('Failed to update comment', 'high');
 				}
 			});
 		} else {
-			window_message('Cannot save changes, comment must be 2-500 characters', 'high');
+			/** If the comment was not valid present error message **/
+			createAlert('Cannot save changes, comment must be 2-500 characters', 'high');
 		}
 	});
 
-	// cancel comment edit
+	/**
+		Cancels comment edits and restores original text when
+		`.comment_cancel_edit` is clicked
+	*/
 	$(document).on('click', '.comment_cancel_edit', function() {
 		var pid = $(this).parents('.post').find('.post_id').html();
 		var cid = $(this).parents('.comment').find('.comment_id').html();
-		cancel_comment_edit(pid, cid);
+		cancelEditComment(pid, cid);
 	});
 
-	// on enter key preventDefault unless shift is pressed
+	/**
+		Post comment to server on enter key ( keycode == 13 )
+		Clears comment input and removes focus on escape ( keycode == 27 )
+	*/
 	$(document).on('keydown', '.post .commentInput', function(key) {
-		var comment_field = $(this);
+		if(key.which == 27) {
+			$(this).html('');
+			$(this).blur();
+		}
 		if(key.which == 13) {
+			// Prevent creation of newline in div
 			key.preventDefault();
+			var comment_field = $(this);
 			var comment_input = $(this);
-			// validate comment
-			// submit comment to server
 			var comment = {
 				id: $(this).parents('.post').find('.post_id').html(),
 				text: $(this).html()
 			};
-			if(validate_comment(comment.text)) {
-				post_comment(comment, function(res) {
+			// Ensure valid comment
+			if(isValidComment(comment.text)) {
+				// Posts comment to server
+				createComment(comment, function(res) {
 					if(res.status == 'DX-OK') {
+						/** If successful request **/
 						if(parseInt(res.message.nModified) > 0) {
-							// cancel comment timeout func
+							// Cancel function that stops interval comment update function
 							cancel_comment_updater = null;
-							// cancel comment interval func
+							// Cancel interval comment update function
 							comment_updater = null;
 
 							// Parse typed comment and append to container
@@ -186,7 +222,7 @@ $(function() {
 							if(comment_id) {
 								comment_id = $(comment_id).find('.comment_id').html();
 							}
-							// Create comment and append it
+							// Create comment placeholder and append it to `.commentContainer`
 							var FAKE_COMMENT = 
 							"<div class='fake comment'>" +
 								"<div class='comment_info'>" +
@@ -196,44 +232,59 @@ $(function() {
 							"</div>";
 							$(FAKE_COMMENT).insertBefore(comment_input);
 
-							// update comments
+							/**
+								Retreive post comments after 1.75 seconds
+								we delay because the comment may not be inserted into database
+								in time if we request immediately
+							*/
 							setTimeout(function() {
-								get_latest_comments(post_id, comment_id, function(upres) {
+								getNewComments(post_id, comment_id, function(upres) {
 									if(upres.status == 'DX-OK') {
 										if(upres.message.length) {
-											parse_comments(post_elem, comment_input, upres.message);
+											parseComments(post_elem, comment_input, upres.message);
 										} else {
-											// null response
+											// Null response means no comments for specified post
 										}
 									} else {
-										window_message(upres.message, 'high');
+										/** If bad request present error message **/
+										createAlert(upres.message, 'high');
 									}
 								});
-							}, 750)
+							}, 1750)
 
-							// Remove focus from comment field
+							// Remove focus from comment input field
 							$(comment_field).blur();
 
-							// Clean comment field
+							// Clear comment input field
 							$(comment_field).html('');
 
-							// re-init comment timeout func ( 1 minute timeout )
+							/**
+								Create timeout that cancels update function
+								( 1 minute timeout )
+							*/
 							cancel_comment_updater = setTimeout(function() {
 								clearInterval(comment_updater);
 								comment_updater = null;
 							}, 60000);
 
-							// re-init comment interval func ( 6 second intervals )
-							comment_updater = interval_comment_update(comment_field, comment_id, post_id, post_elem);
+							/**
+								Updates and retrieves comments for post at intervals
+								( 6 second intervals )
+							*/
+							comment_updater = intervalCommentUpdate(comment_field, comment_id, post_id, post_elem);
 						} else {
-							window_message(res.message, 'medium');
+							/** If good response but no server action **/
+							// Present user with response
+							createAlert(res.message, 'medium');
 						}
 					} else {
-						window_message(res.message, 'high');
+						/** If bad response present error message to user **/
+						createAlert(res.message, 'high');
 					}
 				});
 			} else {
-				window_message('Comment must be 2-500 characters', 'medium');
+				/** If not valid comment present user with error message **/
+				createAlert('Comment must be 2-500 characters', 'medium');
 			}
 		}
 	});
@@ -243,9 +294,10 @@ $(function() {
 
 
 /**
-	Retreive latest comments for specified post
+	Updates existing comments & retrieves new comments
+	since last comment in view
 */
-function get_latest_comments(post_id, comment_id, callback) {
+function getNewComments(post_id, comment_id, callback) {
 	if(comment_id == null) {
 		comment_id = 0;
 	}
@@ -271,7 +323,7 @@ function get_latest_comments(post_id, comment_id, callback) {
 	});
 }
 
-function confirmation_remove_comment(pid, cid) {
+function confirmRemoveComment(pid, cid) {
 	// Display confirmation dialog
 	var BLUR = "<div class='dialog_blur'></div>";
 	var DIALOG = 
@@ -289,7 +341,7 @@ function confirmation_remove_comment(pid, cid) {
 	return;
 }
 
-function remove_comment(post_id, comment_id, callback) {
+function removeComment(post_id, comment_id, callback) {
 	$.ajax({
 		type: 'POST',
 		url: '/api/remove_comment',
@@ -313,7 +365,7 @@ function remove_comment(post_id, comment_id, callback) {
 	return;
 }
 
-function show_comment_options(comment_id) {
+function showCommentOptions(comment_id) {
 	$('#centerFeed').find('.comment_id').each(function() {
 		if($(this).html() == comment_id) {
 			// open this
@@ -324,7 +376,7 @@ function show_comment_options(comment_id) {
 	return;
 }
 
-function hide_comment_options(comment_id) {
+function hideCommentOptions(comment_id) {
 	$('#centerFeed').find('.comment_id').each(function() {
 		if($(this).html() == comment_id) {
 			// close this
@@ -335,7 +387,7 @@ function hide_comment_options(comment_id) {
 	return;
 }
 
-function edit_comment(post_id, comment_id) {
+function editComment(post_id, comment_id) {
 	$(document).find('.post').each(function() {
 		if($(this).find('.post_id').html() == post_id) {
 			$(this).find('.comment').each(function() {
@@ -351,7 +403,7 @@ function edit_comment(post_id, comment_id) {
 					initial_comment = $(this).find('.comment_text').html();
 					// Make contenteditable & give focus
 					$(this).find('.comment_text').attr('contenteditable', 'true');
-					place_cursor_end($(this).find('.comment_text').get(0));
+					placeCursorEnd($(this).find('.comment_text').get(0));
 				}
 			});
 			return;
@@ -360,7 +412,7 @@ function edit_comment(post_id, comment_id) {
 	return;
 }
 
-function submit_comment_edit(post_id, comment_id, text, callback) {
+function saveComment(post_id, comment_id, text, callback) {
 	// clear initial comment variable
 	$.ajax({
 		type: 'POST',
@@ -383,7 +435,7 @@ function submit_comment_edit(post_id, comment_id, text, callback) {
 	return;
 }
 
-function cancel_comment_edit(post_id, comment_id) {
+function cancelEditComment(post_id, comment_id) {
 	$(document).find('.post').each(function() {
 		if($(this).find('.post_id').html() == post_id) {
 			$(this).find('.comment').each(function() {
@@ -404,44 +456,25 @@ function cancel_comment_edit(post_id, comment_id) {
 }
 
 
-function interval_comment_update(comment_field, comment_id, post_id, post_elem) {
+function intervalCommentUpdate(comment_field, comment_id, post_id, post_elem) {
 	// update comments every 6 seconds
 	var auto_update_comments = setInterval(function() {
-		get_latest_comments(post_id, comment_id, function(upres) {
+		getNewComments(post_id, comment_id, function(upres) {
 			if(upres.status == 'DX-OK') {
 				if(upres.message.length) {
-					parse_comments(post_elem, comment_field, upres.message);
+					parseComments(post_elem, comment_field, upres.message);
 				} else {
 					// null response
 				}
 			} else {
-				window_message(upres.message, 'high');
+				createAlert(upres.message, 'high');
 			}
 		});
 	}, 6000);
 	return auto_update_comments
 }
 
-function update_comments(post_id, callback) {
-	$.ajax({
-		url: '/api/get_post_comments',
-		data: {
-			post_id: post_id
-		},
-		error: function(err) {
-			var res = {
-				status: 'DX-FAILED',
-				message: (err.status == 0) ? 'Server is currently down' : 'Server error'
-			};
-			callback(res);
-		}
-	}).done(function(res) {
-		callback(res);
-	});
-	return;
-}
-
-function parse_comments(post, comment_input, res) {
+function parseComments(post, comment_input, res) {
 	var json = res;
 	var DOM = '';
 	for(var comment in json) {
@@ -455,8 +488,8 @@ function parse_comments(post, comment_input, res) {
 			if($(this).find('.comment_id').html() == json[comment]._id) {
 				added = true;
 				// update time since
-				var new_time_since = time_since($(this).find('.comment_date').attr('data-iso'));
-				$(this).find('.comment_date').html(new_time_since);
+				var new_timeSince = timeSince($(this).find('.comment_date').attr('data-iso'));
+				$(this).find('.comment_date').html(new_timeSince);
 				// update text
 				var new_text = json[comment].text;
 				$(this).find('.comment_text').html(new_text);
@@ -472,11 +505,11 @@ function parse_comments(post, comment_input, res) {
 						DOM += "<span class='comment_options' data-state='closed'></span>" +
 						"<ul class='comment_options_menu'>" +
 							"<li class='edit_comment'>Edit</li>" +
-							"<li class='remove_comment'>Remove</li>" +
+							"<li class='removeComment'>Remove</li>" +
 						"</ul>";
 					}
 					DOM += "<span class='username'>" + json[comment].poster_username + "</span>" +
-					"<span class='comment_date' data-iso='" + date_from_objectid(json[comment]._id) + "'>" + time_since(date_from_objectid(json[comment]._id)) + "</span>" +
+					"<span class='comment_date' data-iso='" + dateFromObjectID(json[comment]._id) + "'>" + timeSince(dateFromObjectID(json[comment]._id)) + "</span>" +
 				"</div>" +
 				"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json[comment].text).data + "</span>" +
 			"</div>";
@@ -488,7 +521,7 @@ function parse_comments(post, comment_input, res) {
 	return;
 }
 
-function post_comment(commentObj, callback) {
+function createComment(commentObj, callback) {
 	$.ajax({
 		type: 'POST',
 		url: '/api/post_comment',
@@ -508,7 +541,7 @@ function post_comment(commentObj, callback) {
 	});
 }
 
-function validate_comment(string) {
+function isValidComment(string) {
 	return (string.length >= 2 && string.length <= 500) ? true : false;
 }
 

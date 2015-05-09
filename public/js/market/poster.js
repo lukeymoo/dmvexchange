@@ -1,16 +1,28 @@
 'use strict';
 
 $(function() {
-	var photoButton = {
-		blur: '/img/camera_blur.png',
-		focus: '/img/camera_focus.png',
-	};
 
-	var start_scroll_height = parseInt($('#inputContainer #placeholderInput')[0].scrollHeight);
+	// photoHandler event handler
+	$('.photoHandler').on({
+		mouseenter: function() {
+			// show hover img
+			if($(this).attr('data-active') == 'false') {
+				$(this).attr('src', '/img/camera_focus.png');
+			}
+		},
+		mouseleave: function() {
+			if($(this).attr('data-active') == 'false') {
+				$(this).attr('src', '/img/camera_blur.png');
+			}
+		},
+		click: function() {
+			$($(this).attr('data-for')).click();
+		}
+	});
 
 	Market.handlers();
 
-	// set handler images
+	// Init photoHandler images to `camera_blur`
 	$('.photoHandler').each(function() {
 		$(this).attr('src', '/img/camera_blur.png');
 	});
@@ -35,12 +47,12 @@ $(function() {
 		// validate description
 		if($('#uploadForm #description').val().length < 4) {
 			e.preventDefault();
-			window_message('Post must be at least 4 characters', 'high');
+			createAlert('Post must be at least 4 characters', 'high');
 			return false;
 		}
 		if($('#uploadForm #description').val().length > 2500) {
 			e.preventDefault();
-			window_message('Post length must not exceed 2,500 characters', 'high');
+			createAlert('Post length must not exceed 2,500 characters', 'high');
 			return false;
 		}
 		// update post type
@@ -55,7 +67,7 @@ $(function() {
 				}
 			});
 			if(counter == 0) {
-				window_message('To post a sale you must have at least 1 image', 'high');
+				createAlert('To post a sale you must have at least 1 image', 'high');
 				e.preventDefault();
 				return false;
 			} else {
@@ -79,24 +91,6 @@ $(function() {
 			if($(this).find('.photoHandler').attr('data-active') == 'true') {
 				$(this).find('.remove').css('opacity', '0');
 			}
-		}
-	});
-
-	// photoHandler event handler
-	$('.photoHandler').on({
-		mouseenter: function() {
-			// show hover img
-			if($(this).attr('data-active') == 'false') {
-				$(this).attr('src', '/img/camera_focus.png');
-			}
-		},
-		mouseleave: function() {
-			if($(this).attr('data-active') == 'false') {
-				$(this).attr('src', '/img/camera_blur.png');
-			}
-		},
-		click: function() {
-			$($(this).attr('data-for')).click();
 		}
 	});
 
@@ -310,12 +304,12 @@ Market.validateUpload = function(file, inputID) {
 	}
 
 	// check extension
-	if(!valid_image_extension($(inputID).val())) {
+	if(!validImageExt($(inputID).val())) {
 		var DOM = $(inputID)[0].outerHTML;
 		var parent = $(inputID).parent();
 		$(inputID).remove();
 		$(parent).append(DOM);
-		window_message('You did not select an image', 'high');
+		createAlert('You did not select an image', 'high');
 		// clear current handler
 		$('#handler' + inputID.split('file')[1]).attr('src', '/img/camera_blur.png');
 		$('#handler' + inputID.split('file')[1]).attr('data-active', 'false');
@@ -340,7 +334,7 @@ Market.validateUpload = function(file, inputID) {
 				$(parent).append(DOM);
 				$('#handler' + inputID.split('file')[1]).attr('src', '/img/camera_blur.png');
 				$('#handler' + inputID.split('file')[1]).attr('data-active', 'false');
-				window_message('Image too small', 'high');
+				createAlert('Image too small', 'high');
 				return;
 			}
 			$('#handler' + inputID.split('file')[1]).attr('data-active', 'true');
@@ -358,7 +352,7 @@ Market.validateUpload = function(file, inputID) {
 			var parent = $(inputID).parent();
 			$(inputID).remove();
 			$(parent).append(DOM);
-			window_message('You did not select an image', 'high');
+			createAlert('You did not select an image', 'high');
 			$('#handler' + inputID.split('file')[1]).attr('src', '/img/camera_blur.png');
 			$('#handler' + inputID.split('file')[1]).attr('data-active', 'false');
 			// clear validator src
@@ -371,7 +365,7 @@ Market.validateUpload = function(file, inputID) {
 	reader.readAsDataURL(file[0]);
 };
 
-function valid_image_extension(filename) {
+function validImageExt(filename) {
 	var filename_parts = filename.split('.');
 	var partToCheck = filename_parts[filename_parts.length - 1];
 	

@@ -212,7 +212,7 @@ $(function() {
 		// Grab all message data and place into compose form
 		var to = Viewer.from;
 		var subject = (Viewer.subject.indexOf('RE: ') == -1) ? 'RE: ' + Viewer.subject : Viewer.subject;
-		Messenger.quick_reply(to, subject);
+		Messenger.quickReply(to, subject);
 	});
 
 	// Hide message

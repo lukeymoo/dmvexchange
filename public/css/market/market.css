@@ -626,8 +626,8 @@
 }
 
 #centerFeed .post .thumbnail img {
-	margin: 0px;
-	padding: 0px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 #centerFeed .post .creatorID {

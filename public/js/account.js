@@ -85,14 +85,14 @@ $(function() {
 					updateUnread();
 					// Remove the button
 					$(document).find('.newEmailContainer').remove();
-					window_message(res.message);
+					createAlert(res.message);
 					var DOM = "<span value='" + res.email + "' class='email'>" + res.email + "\
 					<button id='removeEmail'>Remove</button>\
 					</span>\
 					<button id='addEmail'>Add new email</button>";
 					$('#emailContainer').append(DOM);
 				} else {
-					window_message(res.message);
+					createAlert(res.message);
 					$('#emailContainer').find('.newEmailContainer').show();
 					$('#emailContainer').find('input[type=text]').focus();
 				}
@@ -118,10 +118,10 @@ $(function() {
 			// if it was ok remove it
 			if(res.status == 'DX-OK') {
 				updateUnread();
-				window_message(res.message);
+				createAlert(res.message);
 				$('.email:contains(' + string + ')').remove();
 			} else {
-				window_message(res.message);
+				createAlert(res.message);
 			}
 		});
 	});
@@ -181,13 +181,13 @@ $(function() {
 					$(newPassword).val('');
 					$(newPasswordAgain).val('');
 
-					window_message(res.message);
+					createAlert(res.message);
 				} else {
-					window_message(res.message);
+					createAlert(res.message);
 				}
 			});
 		} else {
-			window_message('Invalid fields');
+			createAlert('Invalid fields');
 		}
 	});
 

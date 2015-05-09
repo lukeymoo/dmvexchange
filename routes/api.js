@@ -135,7 +135,7 @@ router.post('/save_comment_edit', function(req, res, next) {
 	});
 });
 
-router.get('/is_more_comments', function(req, res, next) {
+router.get('/is_older_comments', function(req, res, next) {
 	// Ensure we've got a post_id and last comment id for indexing
 	if(!('post_id' in req.query) || !req.query.post_id.length) {
 		res.send({status: 'DX-REJECTED', message: 'No post ID specified'});
@@ -282,61 +282,85 @@ router.get('/comments', function(req, res, next) {
 			return;
 		}
 		/**
-			Fetch last 10 comments before specified comment
+			If `comment_id` == 0 return last 10 comments for post
 		*/
 		var feed = dbManager.getDB().collection('FEED');
-		feed.findOne({
-			_id: ObjectID(req.query.post_id),
-			comments: {
-				$elemMatch: {
-					_id: ObjectID(req.query.comment_id)
-				}
-			}
-		}, { comments: 1 }, function(err, doc) {
-			if(err) {
-				smtp.report_error('Error while fetching comments BEFORE :: ' + err, function(){});
-				res.send({status: 'DX-FAILED', message: 'Server error occurred'});
-				return;
-			}
-			if(!doc) {
-				res.send({status: 'DX-FAILED', message: 'Failed to retrieve comments'});
-				return;
-			}
-			/**
-				Slice manually since MongoDB doesn't offer reverse-skip slicing
-			*/
-			/**
-				Find the comment that was specified
-			*/
-			/** This will be our container for parsed comments **/
-			var to_return = [];
-			/** This variable maintains a distance of 10 if possible **/
-			var last_comment = 0;
-			for(var i = 0; i < doc.comments.length; i++) {
-				if(i > 10) {
-					last_comment ++;
-				}
-				if(String(doc.comments[i]._id) == req.query.comment_id) {
-					/**
-						Iterate through comments again starting at last_comment
-						through to `i` and push comment into container `to_return`
-					*/
-					for(var t = last_comment; t < i; t++) {
-						to_return.push(doc.comments[t]);
-					}
-					/**
-						Return collection to user
-					*/
-					res.send({status: 'DX-OK', message: to_return});
+		if(req.query.comment_id == 0) {
+			feed.findOne({
+				_id: ObjectID(req.query.post_id),
+			}, { comments: { $slice: -10 } }, function(err, doc) {
+				if(err) {
+					smtp.report_error('Error while fetching comments BEFORE ( comment_id = 0 ) :: ' + err, function(){});
+					res.send({status: 'DX-FAILED', message: 'Failed to retrieve comments'});
 					return;
 				}
-			}
+				if(!doc) {
+					res.send({status: 'DX-FAILED', message: 'Failed to retrieve comments'});
+					return;
+				}
+				/**
+					Return comments
+				*/
+				res.send({status: 'DX-OK', message: doc.comments});
+				return;
+			});
+		} else {
 			/**
-				If we get this far something wrong occurred
+				Fetch last 10 comments before specified comment
 			*/
-			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
-			return;
-		});
+			feed.findOne({
+				_id: ObjectID(req.query.post_id),
+				comments: {
+					$elemMatch: {
+						_id: ObjectID(req.query.comment_id)
+					}
+				}
+			}, { comments: 1 }, function(err, doc) {
+				if(err) {
+					smtp.report_error('Error while fetching comments BEFORE :: ' + err, function(){});
+					res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+					return;
+				}
+				if(!doc) {
+					res.send({status: 'DX-FAILED', message: 'Failed to retrieve comments'});
+					return;
+				}
+				/**
+					Slice manually since MongoDB doesn't offer reverse-skip slicing
+				*/
+				/**
+					Find the comment that was specified
+				*/
+				/** This will be our container for parsed comments **/
+				var to_return = [];
+				/** This variable maintains a distance of 10 if possible **/
+				var last_comment = 0;
+				for(var i = 0; i < doc.comments.length; i++) {
+					if(i > 10) {
+						last_comment ++;
+					}
+					if(String(doc.comments[i]._id) == req.query.comment_id) {
+						/**
+							Iterate through comments again starting at last_comment
+							through to `i` and push comment into container `to_return`
+						*/
+						for(var t = last_comment; t < i; t++) {
+							to_return.push(doc.comments[t]);
+						}
+						/**
+							Return collection to user
+						*/
+						res.send({status: 'DX-OK', message: to_return});
+						return;
+					}
+				}
+				/**
+					If we get this far something wrong occurred
+				*/
+				res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+				return;
+			});
+		}
 	} /** End of request type `BEFORE` **/
 	if(req.query.type == 'AFTER') {
 		/**
@@ -555,31 +579,41 @@ router.get('/get_feed', function(req, res, next) {
 	var si = ('si' in req.query && parseInt(req.query.si) > 0) ? req.query.si : 0;
 	var gi = ('gi' in req.query && parseInt(req.query.gi) > 0) ? req.query.gi : 0;
 	var minID = ('minID' in req.query && req.query.minID.length == 24) ? req.query.minID : 0;
+	var search = ('search' in req.query && req.query.search.length) ? req.query.search : null;
 
 	// get feed data for each
 	var db = dbManager.getDB();
 	var feed = db.collection('FEED');
 
-	var iteration = 0;
-
-	var feedObj = {};
-
-	// find by id sort descending, grab following 50 posts
-	if(minID == 0) {
+	// If a search was requested
+	if(search) {
+		console.log(search);
 		feed.find({
+			$text: {
+				$search: decodeURI(req.query.search)
+			}
 		}, { comments: { $slice: -4 } }).sort({_id: -1}).limit(10).toArray(function(err, feed) {
 			res.send({ status: 'DX-OK', message: feed });
 			return;
 		});
 	} else {
-		feed.find({
-			_id: {
-				$gt: ObjectID(minID)
-			}
-		}, { comments: { $slice: -4 } }).skip(1).sort({_id: -1}).limit(10).toArray(function(err, feed) {
-			res.send({ status: 'DX-OK', message: feed });
-			return;
-		});
+		// find by id sort descending, grab following 50 posts
+		if(minID == 0) {
+			feed.find({
+			}, { comments: { $slice: -4 } }).sort({_id: -1}).limit(10).toArray(function(err, feed) {
+				res.send({ status: 'DX-OK', message: feed });
+				return;
+			});
+		} else {
+			feed.find({
+				_id: {
+					$gt: ObjectID(minID)
+				}
+			}, { comments: { $slice: -4 } }).skip(1).sort({_id: -1}).limit(10).toArray(function(err, feed) {
+				res.send({ status: 'DX-OK', message: feed });
+				return;
+			});
+		}
 	}
 });
 

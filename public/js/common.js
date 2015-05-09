@@ -8,7 +8,7 @@ $(function() {
 
 	// remove window message on close button
 	$(document).on('click', '.notification .close_button', function() {
-		close_window_message($(this).parent());
+		removeAlert($(this).parent());
 	});
 
 
@@ -23,11 +23,9 @@ $(function() {
 		// store response in global object
 		state = res.state;
 
-		// Check session every 5 minute
+		// Check session every 5 minutes
 		// if logged in add interval to ensure session has not timed out
 		if(state.LOGGED_IN) {
-
-
 			if(page != 'Mail') {
 				// Check unread messages and display counter
 				// next to mail button
@@ -55,13 +53,13 @@ $(function() {
 						}
 					}
 				});
-			}, 120000);
+			}, 300000);
 		}
 
 	});
 	
 
-	// General click handler
+	// Closes header menu if a click is outside it
 	$(document).on('click', function(e) {
 		if(isMenu()) {
 			if(!$('#headerMenu').is(e.target)
@@ -86,8 +84,10 @@ $(function() {
 
 
 
-
-function window_message(message, type) {
+/**
+	Presents notifications to the user at various levels
+*/
+function createAlert(message, type) {
 
 	type = type || 'low'; // normal alert level
 	
@@ -124,7 +124,7 @@ function window_message(message, type) {
 	return;
 }
 
-function close_window_message(obj) {
+function removeAlert(obj) {
 	$(obj).fadeOut(function() {
 		$(this).remove();
 	});

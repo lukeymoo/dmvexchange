@@ -15,22 +15,32 @@ var initial_description = '';
 	----------------
 	- Things to do -
 	----------------
-	1. Ajax product fetching
-	2. Create product filters ( for views )
-	3. Allow ability to create custom filters
+	1. Create product filters ( for views )
+	2. Allow ability to create custom filters
 */
 
 $(function() {
 
-	// fetch timeline for users
-	Market.get(function(res) {
+	/**
+		To search if there is search parameter in URL, query the database with that
+
+		Otherwise just query database for last `n` posts
+	*/
+	var search_query = (getParam('search') && getParam('search').length) ? 
+		getParam('search') : null;
+		
+	/** Place search query in search field for easy edits **/
+	if(search_query) {
+		$('#searchContainer input').val(decodeURI(search_query));
+	}
+	Market.get(search_query, function(res) {
 		if(res.status == 'DX-OK') {
 
 			// save arrays for types of feed
 			Market.minimumPostID = res.message[0];
 
 			// Parse array into storage
-			Market.parse_messages(res.message);
+			Market.parsePost(res.message);
 
 			// Display messages
 			Market.display();
@@ -38,14 +48,14 @@ $(function() {
 			// Add view more buttons where needed
 			$('#centerFeed').find('.post').each(function() {
 				if($(this).find('.description').html().length > 700) {
-					parse_viewchanger($(this).find('.description'));
+					parseDescViewMore($(this).find('.description'));
 				}
 				var pid = $(this).find('.post_id').html();
 				var cid = ($(this).find('.comment').length) ? $(this).find('.comment')[0] : false;
 				if(cid != false) {
 					var first_comment = $(this).find('.comment')[0];
 					cid = $(cid).find('.comment_id').html();
-					is_more_comments(pid, cid, function(res) {
+					hasOlderComments(pid, cid, function(res) {
 						if(res.status == 'DX-OK') {
 							if(res.message != false) {
 								var LOAD_MORE_COMMENTS =
@@ -57,8 +67,24 @@ $(function() {
 				}
 			});
 		} else {
-			window_message(res.message);
+			createAlert(res.message);
 		}
+	});
+
+	/**
+		Search on enter key
+	*/
+	$('#searchContainer input').on('keydown', function(key) {
+		if(key.which == 13) {
+			$(this).parent('#searchContainer').find('button').click();
+		}
+	});
+
+	/**
+		Reload page with search query
+	*/
+	$(document).on('click', '#searchContainer button', function() {
+		window.location.href = '/market?search=' + $(this).parent('#searchContainer').find('input[type=text]').val();
 	});
 
 	// Load more comments on click
@@ -68,49 +94,47 @@ $(function() {
 		var cid = ($(this).parents('.post').find('.comment').length) ? $(this).parents('.post').find('.comment')[0] : false;
 		if(cid) {
 			var cid = $(cid).find('.comment_id').html();
-			console.log('old =>', cid);
-			load_older_comments(pid, cid, function(res) {
-				if(res.status == 'DX-OK') {
-					// parse comments by prepending commentContainer for post_id
-					if(res.message) {
-						// remove view more button
-						$(view_more_elem).remove();
-						parse_loaded_comments(pid, res.message);
-						var first_comment = '';
-						$('.post').each(function() {
-							if($(this).find('.post_id').html() == pid) {
-								first_comment = $(this).find('.comment')[0];
-							}
-						});
-						cid = $(first_comment).find('.comment_id').html();
-						console.log('new => ', cid);
-						is_more_comments(pid, cid, function(res) {
-							if(res.status == 'DX-OK') {
-								if(res.message != false) {
-									var LOAD_MORE_COMMENTS =
-									"<span class='load_older_comments'>" + res.message + " more comments</span>";
-									$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
-								}
-							}
-						});
-					}
-				} else {
-					window_message(res.message, 'high');
-				}
-			});
 		} else {
-			window_message('Cannot determine comment index', 'medium');
-			return;
+			// When the server receives 0 it just loads the last 10 comments
+			cid = 0;
 		}
+		getOlderComments(pid, cid, function(res) {
+			if(res.status == 'DX-OK') {
+				// parse comments by prepending commentContainer for post_id
+				if(res.message) {
+					// remove view more button
+					$(view_more_elem).remove();
+					parseOldComments(pid, res.message);
+					var first_comment = '';
+					$('.post').each(function() {
+						if($(this).find('.post_id').html() == pid) {
+							first_comment = $(this).find('.comment')[0];
+						}
+					});
+					cid = $(first_comment).find('.comment_id').html();
+					hasOlderComments(pid, cid, function(res) {
+						if(res.status == 'DX-OK') {
+							if(res.message != false) {
+								var LOAD_MORE_COMMENTS =
+								"<span class='load_older_comments'>" + res.message + " more comments</span>";
+								$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
+							}
+						}
+					});
+				}
+			} else {
+				createAlert(res.message, 'high');
+			}
+		});
 	});
 
-	// handle view more/less clicks
+	// Handle view more/less clicks
 	$(document).on('click', '.view_change', function() {
 
 		// Ensure there is no editing going on
 		if($(this).attr('data-state') == 'less') {
 			$(this).html('View less');
-			expand_view($(this).parents('.post').find('.description'));
+			expandDescView($(this).parents('.post').find('.description'));
 			$(this).attr('data-state', 'more');
 			return;
 		}
@@ -118,16 +142,15 @@ $(function() {
 		if($(this).attr('data-state') == 'more') {
 			if(!$(this).parents('.post').find('.edit_controls').length) {
 				$(this).html('View more');
-				compact_view($(this).parents('.post').find('.description'));
+				contractDescView($(this).parents('.post').find('.description'));
 				$(this).attr('data-state', 'less');
 				return;
 			}
 		}
 	});
 
-	// close options menu when click is outside element
+	// Close options menu when click is outside element
 	$(document).on('click', function(e) {
-
 		// close other menus
 		$(document).find('.post .post_options').each(function() {
 			if(!$(e.target).is($(this))) {
@@ -137,10 +160,9 @@ $(function() {
 				}
 			}
 		});
-
 	});
 
-	// handle post option button clicks
+	// Toggles post options menu on click
 	$(document).on('click', '.post .post_options', function() {
 		if($(this).parents('.post').find('.post_options').attr('data-state') == 'opened') {
 			$(this).parents('.post').find('.post_options_menu').hide();
@@ -179,7 +201,7 @@ $(function() {
 		initial_description = $(this).parents('.post').find('.description').html();
 
 		$(this).parents('.post').find('.description').attr('contenteditable', 'true');
-		place_cursor_end($(this).parents('.post').find('.description').get(0));
+		placeCursorEnd($(this).parents('.post').find('.description').get(0));
 		var DOM = 
 		"<div class='edit_controls'>" +
 			"<span class='submit_edit'>Confirm</span>" +
@@ -194,39 +216,40 @@ $(function() {
 		var post_elem = $(this).parents('.post');
 		var date_elem = $(this).parents('.post').find('.post_date');
 		var desc_elem = $(this).parents('.post').find('.description');
-		var controls_elem = $(this).parent('.edit_controls');
-		// hide edit controls
-		//$(this).parent('.edit_controls').hide();
-		
+		var controls_html = $(this).parent('.edit_controls')[0].outerHTML;
+
 		// query server to save changes
 		var post_id = $(this).parents('.post').find('.post_id').html();
 		var post_desc = $(this).parents('.post').find('.description').html();
 
+		// Remove edit controls
+		$(this).parent('.edit_controls').remove();
+
 		// validate desc before attempting submission
-		if(validate_post_description(post_desc)) {
-			Market.save_edit(post_id, post_desc, function(res) {
+		if(validPostDesc(post_desc)) {
+			Market.savePostEdit(post_id, post_desc, function(res) {
 				if(res.status == 'DX-OK') {
 					if(parseInt(res.message.nModified) > 0) {
-						window_message('Post updated!');
+						createAlert('Post updated!');
 						$(desc_elem).attr('contenteditable', 'false');
-						$(controls_elem).remove();
 						if(!$(post_elem).find('.is_edited').length) {
 							var DOM = "<span class='is_edited'>&#8627; Edited</span>";
 							$(DOM).insertAfter(date_elem);
 						}
 					} else if(res.message == 'Description is unchanged') {
 						$(desc_elem).attr('contenteditable', 'false');
-						$(controls_elem).remove();
-						window_message(res.message, 'medium');
+						createAlert(res.message, 'medium');
 					} else {
-						window_message(res.message, 'medium');
+						createAlert(res.message, 'medium');
 					}
 				} else {
-					window_message(res.message, 'high');
+					// Append edit controls
+					$(controls_html).insertAfter(desc_elem);
+					createAlert(res.message, 'high');
 				}
 			});
 		} else {
-			window_message('Description must be 2-2500 characters', 'high');
+			createAlert('Description must be 2-2500 characters', 'high');
 		}
 	});
 
@@ -238,10 +261,10 @@ $(function() {
 		$(this).parent('.edit_controls').remove();
 	});
 
-	// update post's time_since's every 29 seconds
+	// update post's timeSince's every 29 seconds
 	setInterval(function() {
 		$('.post').find('.post_date').each(function() {
-			$(this).html(time_since(new Date($(this).attr('value'))));
+			$(this).html(timeSince(new Date($(this).attr('value'))));
 		});
 	}, 29000);
 
@@ -253,7 +276,7 @@ $(function() {
 
 
 
-function make_comment_from_json(json) {
+function jsonToComment(json) {
 	var COMMENT =
 	"<div class='comment'>" +
 			"<div class='comment_info'>" +
@@ -268,7 +291,7 @@ function make_comment_from_json(json) {
 					"</ul>";
 				}
 				COMMENT += "<span class='username'>" + json.poster_username + "</span>" +
-				"<span data-iso='" + date_from_objectid(json._id) + "' class='comment_date'>" + time_since(date_from_objectid(json._id)) + "</span>" +
+				"<span data-iso='" + dateFromObjectID(json._id) + "' class='comment_date'>" + timeSince(dateFromObjectID(json._id)) + "</span>" +
 			"</div>" +
 			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.text).data + "</span>";
 			if(json.edited) {
@@ -281,12 +304,11 @@ function make_comment_from_json(json) {
 /**
 	Parses OLDER comments
 */
-function parse_loaded_comments(post_id, json) {
-	console.log(json);
+function parseOldComments(post_id, json) {
 	// remove the view more button
 	var comments = '';
 	for(var comment in json) {
-		comments += make_comment_from_json(json[comment]);
+		comments += jsonToComment(json[comment]);
 	}
 	if(comments) {
 		$('.post').each(function() {
@@ -298,7 +320,7 @@ function parse_loaded_comments(post_id, json) {
 	return;
 }
 
-function load_older_comments(post_id, comment_id, callback) {
+function getOlderComments(post_id, comment_id, callback) {
 	$.ajax({
 		url: '/api/comments',
 		data: {
@@ -322,9 +344,9 @@ function load_older_comments(post_id, comment_id, callback) {
 	return;
 }
 
-function is_more_comments(post_id, comment_id, callback) {
+function hasOlderComments(post_id, comment_id, callback) {
 	$.ajax({
-		url: '/api/is_more_comments',
+		url: '/api/is_older_comments',
 		data: {
 			post_id: post_id,
 			comment_id: comment_id
@@ -344,11 +366,11 @@ function is_more_comments(post_id, comment_id, callback) {
 	});
 }
 
-function validate_post_description(string) {
+function validPostDesc(string) {
 	return (string.length >= 4 && string.length <= 2500) ? true : false;
 }
 
-function place_cursor_end(cursor) {
+function placeCursorEnd(cursor) {
     cursor.focus();
     if (typeof window.getSelection != "undefined"
             && typeof document.createRange != "undefined") {
@@ -370,25 +392,26 @@ function place_cursor_end(cursor) {
 Market.display = function() {
 	var collection = this.feed;
 	for(var message in collection) {
-		$('#centerFeed').append(post_from_json(collection[message]));
+		$('#centerFeed').append(jsonToPost(collection[message]));
 	}
 };
 
 // Retrieve feed for current view
-Market.get = function(callback) {
+Market.get = function(search, callback) {
 	$.ajax({
 		url: '/api/get_feed',
 		data: {
 			si: this.saleIndex,
 			gi: this.generalIndex,
-			minID: this.minimumPostID
+			minID: this.minimumPostID,
+			search: search
 		}
 	}).done(function(res) {
 		callback(res);
 	});
 };
 
-Market.save_edit = function(post_id, desc, callback) {
+Market.savePostEdit = function(post_id, desc, callback) {
 	$.ajax({
 		type: 'POST',
 		url: '/api/save_post_edit',
@@ -411,21 +434,7 @@ Market.save_edit = function(post_id, desc, callback) {
 	});
 };
 
-/*
-	Feed object
-	{
-		_id: ObjectID 			-- 	The post ID
-		poster_id: ObjectID 	-- 	The post creators user id
-		poster_username: String --	Who created this post
-		post_type: String 		--	'sale' || 'general' (will eventually expand options)
-		post_text: String 		-- 	Contains the post description
-		images: Array 			--	Contains image paths
-		visibility: Integer		--	For use when products are sold or promoted
-		comment_count: Integer  -- 	Number of comments (will be used for heat icon)
-	}
-*/
-
-Market.parse_messages = function(json_response) {
+Market.parsePost = function(json_response) {
 
 	// iterate through message and save object in collection
 	for(var message in json_response) {
@@ -446,26 +455,26 @@ Market.parse_messages = function(json_response) {
 
 
 
-function parse_viewchanger(description_obj) {
-	compact_view(description_obj);
+function parseDescViewMore(description_obj) {
+	contractDescView(description_obj);
 	var DOM = '<div class="view_change" data-state="less">View more</div>'
 	$(DOM).insertAfter(description_obj)
 	return;
 }
 
-function expand_view(description_obj) {
+function expandDescView(description_obj) {
 	$(description_obj).css('overflow', 'initial');
 	$(description_obj).css('max-height', 'initial');
 	return;
 }
 
-function compact_view(description_obj) {
+function contractDescView(description_obj) {
 	$(description_obj).css('overflow', 'hidden');
 	$(description_obj).css('max-height', '140px');
 	return;
 }
 
-function post_from_json(json) {
+function jsonToPost(json) {
 	var DOM = 
 	"<div class='post'>" +
 		"<span class='post_id'>" + json._id + "</span>" + 
@@ -483,8 +492,8 @@ function post_from_json(json) {
 			DOM += "<span class='creatorUsername'>" +
 				json.poster_username +
 			"</span>" +
-			"<span value='" + date_from_objectid(json._id) + "' class='post_date'>" + 
-				time_since(date_from_objectid(json._id)) +
+			"<span value='" + dateFromObjectID(json._id) + "' class='post_date'>" + 
+				timeSince(dateFromObjectID(json._id)) +
 			"</span>";
 			if(json.edited) {
 				DOM += "<span class='is_edited'>&#8627; Edited</span>";
@@ -495,13 +504,13 @@ function post_from_json(json) {
 	if(json.images.length) {
 		DOM += 
 		"<div class='thumbnail'>" +
-			"<img src='" + json.images[0].large + "'>" +
+			"<img src='" + json.images[0].small + "'>" +
 		"</div>";
 	}
 
 	var comments = '';
 	for(var comment in json.comments) {
-		comments += make_comment_from_json(json.comments[comment]);
+		comments += jsonToComment(json.comments[comment]);
 	}
 
 	DOM +=
@@ -516,7 +525,7 @@ function post_from_json(json) {
 	return DOM;
 }
 
-function time_since(date) {
+function timeSince(date) {
 	date = (date instanceof Date) ? date : new Date(date);
 
 	var time = Math.floor((new Date() - date) / 1000);
@@ -536,8 +545,13 @@ function time_since(date) {
 			//date_type = (time == 1) ? 'hour' : 'hours' ;
 			date_type = 'h';
 
-			// beyond 24 h return to regular date time format
-			if(time > 24) {
+			// If 24 h < time h > 48 h return `yesterday @ time`
+			if(time >= 24 && time <= 47) {
+				date_type = 'yesterday';
+			}
+
+			// 48 h or more return to regular date time format
+			if(time >= 48) {
 				time = Math.floor(time / 24);
 				//date_type = (time == 1) ? 'day' : 'days';
 				date_type = '';
@@ -548,16 +562,21 @@ function time_since(date) {
 		}
 	}
 
+	if(date_type == '') {
+		return isoToString(date);
+	}
+	if(date_type == 'yesterday') {
+		return date_type;
+	}
 
-
-	return (date_type == '') ? string_to_date(date) : time + date_type + ' ago';
+	return time + date_type + ' ago';
 }
 
-function date_from_objectid(object_id) {
+function dateFromObjectID(object_id) {
 	return new Date(parseInt(object_id.substring(0, 8), 16) * 1000);
 }
 
-function string_to_date(iso_date) {
+function isoToString(iso_date) {
 	var date_obj = new Date(iso_date);
 	var time = '';
 
@@ -589,7 +608,6 @@ function string_to_date(iso_date) {
 		minute = '0' + minute;
 	}
 
-	//time = month + ' ' + day + '   ' + hour + ':' + minute + ' ' + period;
 	time = month + ' ' + day;
 
 	return time;
