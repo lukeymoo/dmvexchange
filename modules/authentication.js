@@ -2,8 +2,8 @@
 
 var sessionManager = require('./session/session');
 
-// 2 second cooldown for each comment
-var COMMENT_COOLDOWN = 2 * 1000;
+// 4 seconds cooldown for each comment
+var COMMENT_COOLDOWN = 4 * 1000;
 
 var modules = {
 	/**	DOES NOT CHECK FOR EMAIL IN CASE USER ACTIVATION WAS REJECTED	**/
@@ -50,7 +50,7 @@ var modules = {
 		return req.session.CAN_COMMENT;
 	},
 	// update comment limiters/counters
-	inc_comment: function(req) {
+	startCooldown: function(req) {
 		req.session.COMMENT_COOLDOWN_START = Date.now();
 		req.session.CAN_COMMENT = false;
 		return;

@@ -99,6 +99,7 @@ router.post('/post', function(req, res, next) {
 		post_type: req.body.t,
 		post_text: req.body.d,
 		visibility: 1,
+		timestamp: new Date().getTime(),
 		images: []
 	};
 

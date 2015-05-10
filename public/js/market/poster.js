@@ -40,7 +40,7 @@ $(function() {
 		$('#uploadForm').submit();
 	});
 
-	// on submit
+	// On post submit
 	$('#uploadForm').on('submit', function(e) {
 		// update description field
 		$('#uploadForm #description').val($('#inputContainer textarea').val());

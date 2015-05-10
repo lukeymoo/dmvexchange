@@ -92,7 +92,7 @@ $(function() {
 					<button id='addEmail'>Add new email</button>";
 					$('#emailContainer').append(DOM);
 				} else {
-					createAlert(res.message);
+					createAlert(res.message, 'high');
 					$('#emailContainer').find('.newEmailContainer').show();
 					$('#emailContainer').find('input[type=text]').focus();
 				}
@@ -183,11 +183,9 @@ $(function() {
 
 					createAlert(res.message);
 				} else {
-					createAlert(res.message);
+					createAlert(res.message, 'high');
 				}
 			});
-		} else {
-			createAlert('Invalid fields');
 		}
 	});
 
@@ -221,6 +219,7 @@ function validateChange() {
 		goodStyle(currentPassword);
 	} else {
 		badStyle(currentPassword);
+		createAlert('Password must be 2-32 characters', 'high');
 		status = false;
 	}
 
@@ -228,18 +227,13 @@ function validateChange() {
 		goodStyle(newPassword);
 	} else {
 		badStyle(newPassword);
-		status = false;
-	}
-
-	if(validatePassword($(newPasswordAgain).val())) {
-		goodStyle(newPasswordAgain);
-	} else {
-		badStyle(newPasswordAgain);
+		createAlert('Password must be 2-32 characters', 'high');
 		status = false;
 	}
 
 	if($(newPassword).val() != $(newPasswordAgain).val()) {
 		status = false;
+		createAlert('Passwords do not match', 'high');
 	}
 
 	if($(currentPassword).val() == $(newPassword).val()) {
@@ -247,6 +241,7 @@ function validateChange() {
 		badStyle(currentPassword);
 		badStyle(newPassword);
 		badStyle(newPasswordAgain);
+		createAlert('Passwords cannot match', 'high');
 	}
 
 	return status;

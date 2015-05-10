@@ -9,6 +9,7 @@ var Market = {
 	feed: []
 };
 
+var loading_older_posts = false;
 var initial_description = '';
 
 /*
@@ -27,47 +28,128 @@ $(function() {
 		Otherwise just query database for last `n` posts
 	*/
 	var search_query = (getParam('search') && getParam('search').length) ? 
-		getParam('search') : null;
-		
+		decodeURI(getParam('search')) : null;
+
 	/** Place search query in search field for easy edits **/
 	if(search_query) {
 		$('#searchContainer input').val(decodeURI(search_query));
-	}
-	Market.get(search_query, function(res) {
-		if(res.status == 'DX-OK') {
+		getWithSearch(search_query, function(res) {
+			if(res.status == 'DX-OK') {
 
-			// save arrays for types of feed
-			Market.minimumPostID = res.message[0];
+				// save arrays for types of feed
+				Market.minimumPostID = res.message[0];
 
-			// Parse array into storage
-			Market.parsePost(res.message);
+				// Parse array into storage
+				Market.parsePost(res.message);
 
-			// Display messages
-			Market.display();
+				// Display messages
+				Market.display();
 
-			// Add view more buttons where needed
-			$('#centerFeed').find('.post').each(function() {
-				if($(this).find('.description').html().length > 700) {
-					parseDescViewMore($(this).find('.description'));
-				}
-				var pid = $(this).find('.post_id').html();
-				var cid = ($(this).find('.comment').length) ? $(this).find('.comment')[0] : false;
-				if(cid != false) {
-					var first_comment = $(this).find('.comment')[0];
-					cid = $(cid).find('.comment_id').html();
-					hasOlderComments(pid, cid, function(res) {
-						if(res.status == 'DX-OK') {
-							if(res.message != false) {
-								var LOAD_MORE_COMMENTS =
-								"<span class='load_older_comments'>" + res.message + " more comments</span>";
-								$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
+				// Add view more buttons where needed
+				$('#centerFeed').find('.post').each(function() {
+					/**
+						Create view more for descriptions that are too long
+					*/
+					if($(this).find('.description').html().length > 700) {
+						parseDescViewMore($(this).find('.description'));
+					}
+
+					/**
+						Determine if there are more comments for post
+					*/
+					var pid = $(this).find('.post_id').html();
+					var timestamp = ($(this).find('.comment').length) ? $(this).find('.comment')[0] : false;
+					if(timestamp != false) {
+						var first_comment = $(this).find('.comment')[0];
+						timestamp = $(timestamp).attr('timestamp');
+						hasOlderComments(pid, timestamp, function(res) {
+							if(res.status == 'DX-OK') {
+								if(res.message != false) {
+									var LOAD_MORE_COMMENTS =
+									"<span class='load_older_comments'>" + res.message + " more comments</span>";
+									$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
+								}
 							}
-						}
-					});
+						});
+					}
+				});
+			} else {
+				createAlert(res.message, 'high');
+			}
+		});
+	} else {
+		get(function(res) {
+			if(res.status == 'DX-OK') {
+
+				// save arrays for types of feed
+				Market.minimumPostID = res.message[0];
+
+				// Parse array into storage
+				Market.parsePost(res.message);
+
+				// Display messages
+				Market.display();
+
+				// Add view more buttons where needed
+				$('#centerFeed').find('.post').each(function() {
+					/**
+						Create view more for descriptions that are too long
+					*/
+					if($(this).find('.description').html().length > 700) {
+						parseDescViewMore($(this).find('.description'));
+					}
+
+					/**
+						Determine if there are more comments for post
+					*/
+					var pid = $(this).find('.post_id').html();
+					var timestamp = ($(this).find('.comment').length) ? $(this).find('.comment')[0] : false;
+					if(timestamp != false) {
+						var first_comment = $(this).find('.comment')[0];
+						timestamp = $(timestamp).attr('timestamp');
+						hasOlderComments(pid, timestamp, function(res) {
+							if(res.status == 'DX-OK') {
+								if(res.message != false) {
+									var LOAD_MORE_COMMENTS =
+									"<span class='load_older_comments'>" + res.message + " more comments</span>";
+									$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
+								}
+							}
+						});
+					}
+				});
+			} else {
+				createAlert(res.message, 'high');
+			}
+		});
+	}
+
+	/**
+		Load older posts when user scrolls to the bottom
+		of page
+	*/
+	$(document).scroll(function() {
+		if(!getParam('search')) {
+			if($(window).scrollTop() + $(window).height() >= $(document).height() - 200) {
+				if(loading_older_posts) {
+					return;
 				}
-			});
-		} else {
-			createAlert(res.message);
+				var timestamp = $('.post:last-child').attr('timestamp');
+				/** Queries server with `BEFORE` request @ /api/post **/
+				getOlderPosts(timestamp, function(res) {
+					if(res.status == 'DX-OK') {
+						/** Reached bottom of feed **/
+						if(!res.message.length) {
+							loading_older_posts = true;
+							return;
+						}
+						parseOldPosts(res.message);
+					} else {
+						loading_older_posts = true;
+						createAlert(res.message, 'high');
+					}
+				});
+			}
 		}
 	});
 
@@ -89,43 +171,72 @@ $(function() {
 
 	// Load more comments on click
 	$(document).on('click', '.post .load_older_comments', function() {
-		var view_more_elem = $(this);
-		var pid = $(this).parents('.post').find('.post_id').html();
-		var cid = ($(this).parents('.post').find('.comment').length) ? $(this).parents('.post').find('.comment')[0] : false;
-		if(cid) {
-			var cid = $(cid).find('.comment_id').html();
-		} else {
-			// When the server receives 0 it just loads the last 10 comments
-			cid = 0;
-		}
-		getOlderComments(pid, cid, function(res) {
-			if(res.status == 'DX-OK') {
-				// parse comments by prepending commentContainer for post_id
-				if(res.message) {
-					// remove view more button
-					$(view_more_elem).remove();
-					parseOldComments(pid, res.message);
-					var first_comment = '';
-					$('.post').each(function() {
-						if($(this).find('.post_id').html() == pid) {
-							first_comment = $(this).find('.comment')[0];
-						}
-					});
-					cid = $(first_comment).find('.comment_id').html();
-					hasOlderComments(pid, cid, function(res) {
-						if(res.status == 'DX-OK') {
-							if(res.message != false) {
+		/** Get timestamp for older comment in view & post ID **/
+		var post_elem = $(this).parents('.post');
+		var post_id = $(this).parents('.post').find('.post_id').html();
+		var timestamp = $(this).parents('.post').find('.comment')[0];
+		timestamp = $(timestamp).attr('timestamp');
+		/**
+			If timestamp is null there were no comments, so just query database
+			for last 10 comments
+		*/
+		if(!timestamp) {
+			getLatestComments(post_id, function(res) {
+				if(res.status == 'DX-OK') {
+					if('string' !== typeof res.message) {
+						/** Remove the load older comments button **/
+						$(post_elem).find('.load_older_comments').remove();
+						/**
+							Parse the comments
+						*/
+						parseComments(post_elem, res.message);
+						/**
+							Determine if there are more comments to load
+						*/
+						timestamp = $(post_elem).find('.comment')[0];
+						timestamp = $(timestamp).attr('timestamp');
+						hasOlderComments(post_id, timestamp, function(res) {
+							if(parseInt(res.message) > 0) {
 								var LOAD_MORE_COMMENTS =
 								"<span class='load_older_comments'>" + res.message + " more comments</span>";
-								$(LOAD_MORE_COMMENTS).insertBefore(first_comment);
+								$(post_elem).find('.commentContainer').prepend(LOAD_MORE_COMMENTS);
 							}
-						}
-					});
+						});
+					} else {
+						createAlert('Something went wrong...', 'medium');
+					}
+				} else {
+					createAlert(res.message, 'high');
 				}
-			} else {
-				createAlert(res.message, 'high');
-			}
-		});
+			});
+		} else {
+			getOlderComments(post_id, timestamp, function(res) {
+				if(res.status == 'DX-OK') {
+					if('string' !== typeof res.message) {
+						/** Remove the load older comments button **/
+						$(post_elem).find('.load_older_comments').remove();
+						/** Parse the older comments into `.commentContainer` **/
+						parseOldComments(post_id, res.message);
+						/**
+							Determine if there are more comments to load
+						*/
+						timestamp = $(post_elem).find('.comment')[0];
+						timestamp = $(timestamp).attr('timestamp');
+						hasOlderComments(post_id, timestamp, function(res) {
+							if(parseInt(res.message) > 0) {
+								var LOAD_MORE_COMMENTS =
+								"<span class='load_older_comments'>" + res.message + " more comments</span>";
+								$(post_elem).find('.commentContainer').prepend(LOAD_MORE_COMMENTS);
+							}
+						});
+					} else {
+						createAlert('Something went wrong...', 'medium');
+					}
+				} else {
+					createAlert(res.message, 'high');
+				}
+			});
+		}
 	});
 
 	// Handle view more/less clicks
@@ -210,6 +321,16 @@ $(function() {
 		$(DOM).insertAfter($(this).parents('.post').find('.description'));
 	});
 
+	/**
+		On post description edit
+	*/
+	$(document).on('keydown', '.post .description', function(key) {
+		if(key.which == 13) {
+			document.execCommand('insertHTML', false, '<br><br>');
+			return false;
+		}
+	});
+
 	// submit edit button
 	$(document).on('click', '.post .submit_edit', function() {
 
@@ -221,6 +342,11 @@ $(function() {
 		// query server to save changes
 		var post_id = $(this).parents('.post').find('.post_id').html();
 		var post_desc = $(this).parents('.post').find('.description').html();
+
+		/** Escape user entered `[+n]` **/
+		post_desc = post_desc.replace('[+n]', '[||||||+special_n||||||]')
+		/** Convert line breaks into custom line-break tags **/
+		post_desc = post_desc.replace('<br>', '[+n]');
 
 		// Remove edit controls
 		$(this).parent('.edit_controls').remove();
@@ -250,6 +376,7 @@ $(function() {
 			});
 		} else {
 			createAlert('Description must be 2-2500 characters', 'high');
+			$(controls_html).insertAfter($(desc_elem));
 		}
 	});
 
@@ -271,14 +398,9 @@ $(function() {
 });
 
 
-
-
-
-
-
 function jsonToComment(json) {
 	var COMMENT =
-	"<div class='comment'>" +
+	"<div class='comment' timestamp='" + json.timestamp + "'>" +
 			"<div class='comment_info'>" +
 				"<span class='comment_id'>" + json._id + "</span>" +
 				"<span class='comment_user_id'>" + json.poster_id + "</span>";
@@ -293,7 +415,7 @@ function jsonToComment(json) {
 				COMMENT += "<span class='username'>" + json.poster_username + "</span>" +
 				"<span data-iso='" + dateFromObjectID(json._id) + "' class='comment_date'>" + timeSince(dateFromObjectID(json._id)) + "</span>" +
 			"</div>" +
-			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.text).data + "</span>";
+			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]') + "</span>";
 			if(json.edited) {
 				COMMENT += "<span class='is_edited'>&#8627; Edited</span>";
 			}
@@ -302,13 +424,24 @@ function jsonToComment(json) {
 }
 
 /**
+	Parses OLDER posts
+*/
+function parseOldPosts(json) {
+	var dom = '';
+	for(var post in json) {
+		dom += jsonToPost(json[post]);
+	}
+	$('#centerFeed').append(dom);
+}
+
+/**
 	Parses OLDER comments
 */
 function parseOldComments(post_id, json) {
 	// remove the view more button
 	var comments = '';
-	for(var comment in json) {
-		comments += jsonToComment(json[comment]);
+	for(var i = json.length - 1; i >= 0; i--) {
+		comments += jsonToComment(json[i]);
 	}
 	if(comments) {
 		$('.post').each(function() {
@@ -320,14 +453,55 @@ function parseOldComments(post_id, json) {
 	return;
 }
 
-function getOlderComments(post_id, comment_id, callback) {
+/**
+	Query server with `BEFORE` requests @ /api/post
+*/
+function getOlderPosts(timestamp, callback) {
+	loading_older_posts = true;
 	$.ajax({
-		url: '/api/comments',
-		data: {
-			type: 'BEFORE',
-			post_id: post_id,
-			comment_id: comment_id
-		},
+		type: 'GET',
+		url: '/api/post/before/' + timestamp,
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error occurred'
+			};
+			if(err.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
+		}
+	}).done(function(res) {
+		loading_older_posts = false;
+		callback(res);
+	});
+}
+
+function getLatestComments(post_id, callback) {
+	$.ajax({
+		url: 'api/post/' + post_id + '/comment',
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error occurred'
+			};
+			if(res.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
+		}
+	}).done(function(res) {
+		callback(res);
+	});
+}
+
+/**
+	Query server @ /api/post/:post_id/comment/BEFORE/:timestamp
+*/
+function getOlderComments(post_id, timestamp, callback) {
+	$.ajax({
+		type: 'GET',
+		url: '/api/post/' + post_id + '/comment/before/' + timestamp,
 		error: function(err) {
 			var res = {
 				status: 'DX-FAILED',
@@ -344,13 +518,9 @@ function getOlderComments(post_id, comment_id, callback) {
 	return;
 }
 
-function hasOlderComments(post_id, comment_id, callback) {
+function hasOlderComments(post_id, timestamp, callback) {
 	$.ajax({
-		url: '/api/is_older_comments',
-		data: {
-			post_id: post_id,
-			comment_id: comment_id
-		},
+		url: '/api/post/' + post_id + '/comment/more/' + timestamp,
 		error: function(err) {
 			var res = {
 				status: 'DX-FAILED',
@@ -390,33 +560,75 @@ function placeCursorEnd(cursor) {
 
 // Display all posts inside of the feed array
 Market.display = function() {
+	if(!this.feed.length) {
+		if(getParam('search')) {
+			/**
+				Display no products
+			*/
+			var dom = 
+			"<span class='search-no-match'>No posts matched your search</span>"
+			$('#centerFeed').append(dom);
+		}
+		return;
+	}
 	var collection = this.feed;
 	for(var message in collection) {
 		$('#centerFeed').append(jsonToPost(collection[message]));
 	}
 };
 
-// Retrieve feed for current view
-Market.get = function(search, callback) {
+/**
+	Get feed
+*/
+function get(callback) {
 	$.ajax({
-		url: '/api/get_feed',
-		data: {
-			si: this.saleIndex,
-			gi: this.generalIndex,
-			minID: this.minimumPostID,
-			search: search
+		type: 'GET',
+		url: '/api/post',
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error occurred'
+			};
+			if(err.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
 		}
 	}).done(function(res) {
 		callback(res);
 	});
-};
+}
+
+/**
+	Search feed
+*/
+function getWithSearch(search_query, callback) {
+	$.ajax({
+		type: 'GET',
+		url: '/api/post/search',
+		data: {
+			search: search_query
+		},
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error occurred'
+			};
+			if(err.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
+		}
+	}).done(function(res) {
+		callback(res);
+	});
+}
 
 Market.savePostEdit = function(post_id, desc, callback) {
 	$.ajax({
 		type: 'POST',
-		url: '/api/save_post_edit',
+		url: '/api/post/' + post_id + '/edit',
 		data: {
-			post_id: post_id,
 			text: desc
 		},
 		error: function(err) {
@@ -476,7 +688,7 @@ function contractDescView(description_obj) {
 
 function jsonToPost(json) {
 	var DOM = 
-	"<div class='post'>" +
+	"<div class='post' timestamp='" + json.timestamp + "'>" +
 		"<span class='post_id'>" + json._id + "</span>" + 
 		"<span class='post_type'>" + json.post_type + "</span>" + 
 		"<span class='creatorID'>" + json.poster_id + "</span>" + 
@@ -499,7 +711,7 @@ function jsonToPost(json) {
 				DOM += "<span class='is_edited'>&#8627; Edited</span>";
 			}
 			DOM += "<span class='description' spellcheck='false'>" +
-			document.createTextNode(json.post_text).data + "</span>";
+			document.createTextNode(json.post_text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]') + "</span>";
 
 	if(json.images.length) {
 		DOM += 
@@ -518,7 +730,7 @@ function jsonToPost(json) {
 		"<div class='commentContainer'>" +
 			comments +
 			"<span class='commentImage'></span>" +
-			"<div contenteditable='true' class='commentInput' type='text'></div>" +
+			"<div contenteditable='true' class='commentInput' type='text' spellcheck='false'></div>" +
 		"</div>" +
 	"</div>";
 	

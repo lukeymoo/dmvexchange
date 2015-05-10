@@ -122,6 +122,17 @@ $(function() {
 	});
 
 	/**
+		When editing comment we need to change default html insertions
+		for proper formatting in database
+	*/
+	$(document).on('keydown', '.comment_text[contenteditable="true"]', function(key) {
+		if(key.which == 13) {
+			document.execCommand('insertHTML', false, '<br><br>');
+			return false;
+		}
+	});
+
+	/**
 		Saves comment edits when comment options menu `.comment_submit_edit` button
 		is clicked
 	*/
@@ -130,6 +141,14 @@ $(function() {
 		var pid = $(this).parents('.post').find('.post_id').html();
 		var cid = $(this).parents('.comment').find('.comment_id').html();
 		var new_comment = $(this).parents('.comment').find('.comment_text').html();
+		/**
+			Escape user entries of [+n]
+		*/
+		new_comment = new_comment.replace(/\[\+n\]/g, '[||||||+special_n||||||]');
+		/**
+			Replace <br> with custom symbol [/+n+]
+		*/
+		new_comment = new_comment.replace(/<br\s*(\s+[^>]+)*[\/]?>/gi, '[+n]');
 
 		// Ensure comment is valid
 		if(isValidComment(new_comment)) {
@@ -169,7 +188,7 @@ $(function() {
 			});
 		} else {
 			/** If the comment was not valid present error message **/
-			createAlert('Cannot save changes, comment must be 2-500 characters', 'high');
+			createAlert('Cannot save changes, comment must be 2-1000 characters', 'high');
 		}
 	});
 
@@ -199,7 +218,7 @@ $(function() {
 			var comment_input = $(this);
 			var comment = {
 				id: $(this).parents('.post').find('.post_id').html(),
-				text: $(this).html()
+				text: $(this).text()
 			};
 			// Ensure valid comment
 			if(isValidComment(comment.text)) {
@@ -216,11 +235,11 @@ $(function() {
 							// Parse typed comment and append to container
 							var post_id = $(comment_field).parents('.post').find('.post_id').html();
 							var post_elem = $(comment_field).parents('.post');
-							var comment_id = null;
-							comment_id = ($(comment_field).parents('.commentContainer').find('.comment').length) ?
+							var timestamp = null;
+							timestamp = ($(comment_field).parents('.commentContainer').find('.comment').length) ?
 								$(comment_field).parents('.commentContainer').find('.comment')[0] : null;
-							if(comment_id) {
-								comment_id = $(comment_id).find('.comment_id').html();
+							if(timestamp) {
+								timestamp = $(timestamp).attr('timestamp');
 							}
 							// Create comment placeholder and append it to `.commentContainer`
 							var FAKE_COMMENT = 
@@ -238,10 +257,10 @@ $(function() {
 								in time if we request immediately
 							*/
 							setTimeout(function() {
-								getNewComments(post_id, comment_id, function(upres) {
+								getNewComments(post_id, timestamp, function(upres) {
 									if(upres.status == 'DX-OK') {
 										if(upres.message.length) {
-											parseComments(post_elem, comment_input, upres.message);
+											parseComments(post_elem, upres.message);
 										} else {
 											// Null response means no comments for specified post
 										}
@@ -271,7 +290,7 @@ $(function() {
 								Updates and retrieves comments for post at intervals
 								( 6 second intervals )
 							*/
-							comment_updater = intervalCommentUpdate(comment_field, comment_id, post_id, post_elem);
+							comment_updater = intervalCommentUpdate(timestamp, post_id, post_elem);
 						} else {
 							/** If good response but no server action **/
 							// Present user with response
@@ -284,7 +303,7 @@ $(function() {
 				});
 			} else {
 				/** If not valid comment present user with error message **/
-				createAlert('Comment must be 2-500 characters', 'medium');
+				createAlert('Comment must be 2-1000 characters', 'medium');
 			}
 		}
 	});
@@ -297,17 +316,14 @@ $(function() {
 	Updates existing comments & retrieves new comments
 	since last comment in view
 */
-function getNewComments(post_id, comment_id, callback) {
-	if(comment_id == null) {
-		comment_id = 0;
+function getNewComments(post_id, timestamp, callback) {
+	var param = '';
+	if(timestamp) {
+		param = '/AFTER/' + timestamp;
 	}
 	$.ajax({
-		url: '/api/comments',
-		data: {
-			type: 'AFTER',
-			post_id: post_id,
-			comment_id
-		},
+		type: 'GET',
+		url: '/api/post/' + post_id + '/comment' + param,
 		error: function(err) {
 			var res = {
 				status: 'DX-FAILED',
@@ -344,11 +360,7 @@ function confirmRemoveComment(pid, cid) {
 function removeComment(post_id, comment_id, callback) {
 	$.ajax({
 		type: 'POST',
-		url: '/api/remove_comment',
-		data: {
-			post_id: post_id,
-			comment_id, comment_id
-		},
+		url: '/api/post/' + post_id + '/comment/remove/' + comment_id,
 		error: function(err) {
 			var res = {
 				status: 'DX-FAILED',
@@ -416,10 +428,8 @@ function saveComment(post_id, comment_id, text, callback) {
 	// clear initial comment variable
 	$.ajax({
 		type: 'POST',
-		url: '/api/save_comment_edit',
+		url: '/api/post/' + post_id + '/comment/edit/' + comment_id,
 		data: {
-			post_id: post_id,
-			comment_id: comment_id,
 			text: text
 		},
 		error: function(err) {
@@ -456,13 +466,13 @@ function cancelEditComment(post_id, comment_id) {
 }
 
 
-function intervalCommentUpdate(comment_field, comment_id, post_id, post_elem) {
+function intervalCommentUpdate(timestamp, post_id, post_elem) {
 	// update comments every 6 seconds
 	var auto_update_comments = setInterval(function() {
-		getNewComments(post_id, comment_id, function(upres) {
+		getNewComments(post_id, timestamp, function(upres) {
 			if(upres.status == 'DX-OK') {
 				if(upres.message.length) {
-					parseComments(post_elem, comment_field, upres.message);
+					parseComments(post_elem, upres.message);
 				} else {
 					// null response
 				}
@@ -474,60 +484,54 @@ function intervalCommentUpdate(comment_field, comment_id, post_id, post_elem) {
 	return auto_update_comments
 }
 
-function parseComments(post, comment_input, res) {
-	var json = res;
-	var DOM = '';
+/**
+	1. Loop through res & create comment from json & insert into commentContainer
+	
+	2. Remove `.fake` class comments
+
+	3. If the comment is already in `.commentContainer` update text of comment
+		to detect edits
+*/
+function parseComments(post, json) {
+	var comments = '';
 	for(var comment in json) {
-		// Check if message is already in container
+		// Determine if comment is already in `.commentContainer`
 		var added = false;
 		$(post).find('.comment').each(function() {
-			// if it is fake remove it
+			/**
+				Ensure we remove `.fake` comments
+			*/
 			if($(this).hasClass('fake')) {
 				$(this).remove();
+				return true;
 			}
 			if($(this).find('.comment_id').html() == json[comment]._id) {
+				/**
+					If comment is in container, update its text and don't parse
+				*/
 				added = true;
-				// update time since
-				var new_timeSince = timeSince($(this).find('.comment_date').attr('data-iso'));
-				$(this).find('.comment_date').html(new_timeSince);
-				// update text
-				var new_text = json[comment].text;
-				$(this).find('.comment_text').html(new_text);
+				var ct = document.createTextNode(json[comment].text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]');
+				$(this).find('.comment_text').html(ct);
 			}
 		});
 		if(!added) {
-			DOM +=
-			"<div class='comment'>" +
-				"<div class='comment_info'>" +
-					"<span class='comment_id'>" + json[comment]._id + "</span>" +
-					"<span class='comment_user_id'>" + json[comment].poster_id + "</span>";
-					if(json[comment].poster_username == state.USERNAME) {
-						DOM += "<span class='comment_options' data-state='closed'></span>" +
-						"<ul class='comment_options_menu'>" +
-							"<li class='edit_comment'>Edit</li>" +
-							"<li class='removeComment'>Remove</li>" +
-						"</ul>";
-					}
-					DOM += "<span class='username'>" + json[comment].poster_username + "</span>" +
-					"<span class='comment_date' data-iso='" + dateFromObjectID(json[comment]._id) + "'>" + timeSince(dateFromObjectID(json[comment]._id)) + "</span>" +
-				"</div>" +
-				"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json[comment].text).data + "</span>" +
-			"</div>";
+			// create comments from json response
+			comments += jsonToComment(json[comment]);
 		}
 	}
-	if(DOM.length) {
-		$(DOM).insertBefore(comment_input);
-	}
+	/**
+		Append comments
+	*/
+	$(comments).insertBefore($(post).find('.commentInput'));
 	return;
 }
 
 function createComment(commentObj, callback) {
 	$.ajax({
 		type: 'POST',
-		url: '/api/post_comment',
+		url: '/api/post/' + commentObj.id + '/comment/create',
 		data: {
-			post_id: commentObj.id,
-			text: commentObj.text
+			text: encodeURI(commentObj.text)
 		},
 		error: function(err) {
 			var res = {
@@ -542,7 +546,7 @@ function createComment(commentObj, callback) {
 }
 
 function isValidComment(string) {
-	return (string.length >= 2 && string.length <= 500) ? true : false;
+	return (string.length >= 2 && string.length <= 1000) ? true : false;
 }
 
 
