@@ -423,7 +423,7 @@ router.post('/post/:post_id/comment/edit/:comment_id', function(req, res, next) 
 
 
 /**
-	Remove a comment for specified comments
+	Remove a comment for specified post
 */
 router.post('/post/:post_id/comment/remove/:comment_id', function(req, res, next) {
 	if(!authManager.json_is_authenticated(req, res)) {
