@@ -260,6 +260,74 @@ $(function() {
 		}
 	});
 
+	/**
+		Object -> `.remove_post` button
+		
+		Request confirmation to delete a post on click
+	*/
+	$(document).on('click', '.post_options_menu .remove_post', function() {
+		/** Prompt user to confirm removal of post **/
+		var post_id = $(this).parents('.post').find('.post_id').html();
+		confirmRemovePost(post_id);
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+	/**
+		Object -> `.delete_post` Subclass of `.confirm_dialog`
+
+		Confirm removal of post
+	*/
+	$(document).on('click', '.delete_post .confirm_dialog', function() {
+		var post_id = $(this).parents('.dialog_box').find('.for_post_id').html();
+
+		/** Remove blur & dialog box **/
+		$('.dialog_box').remove();
+		$('.dialog_blur').remove();
+
+		/** Query server to remove post **/
+		removePost(post_id, function(res) {
+			console.log(res);
+			if(res.status == 'DX-OK') {
+				if(res.message.n > 0) {
+					// Remove the post
+					$('.post').each(function() {
+						if($(this).find('.post_id').html() == post_id) {
+							$(this).remove();
+						}
+					});
+					// Notify user of success
+					createAlert('Post removed!');
+				} else {
+					createAlert('Failed to remove post', 'medium');
+				}
+			} else {
+				createAlert(res.message, 'high');
+			}
+		});
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
 	// Close options menu when click is outside element
 	$(document).on('click', function(e) {
 		// close other menus
@@ -398,30 +466,28 @@ $(function() {
 });
 
 
-function jsonToComment(json) {
-	var COMMENT =
-	"<div class='comment' timestamp='" + json.timestamp + "'>" +
-			"<div class='comment_info'>" +
-				"<span class='comment_id'>" + json._id + "</span>" +
-				"<span class='comment_user_id'>" + json.poster_id + "</span>";
-				if(json.poster_username == state.USERNAME) {
-					COMMENT +=
-					"<span class='comment_options' data-state='closed'></span>" +
-					"<ul class='comment_options_menu'>" +
-						"<li class='edit_comment'>Edit</li>" +
-						"<li class='remove_comment'>Remove</li>" +
-					"</ul>";
-				}
-				COMMENT += "<span class='username'>" + json.poster_username + "</span>" +
-				"<span data-iso='" + dateFromObjectID(json._id) + "' class='comment_date'>" + timeSince(dateFromObjectID(json._id)) + "</span>" +
-			"</div>" +
-			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]') + "</span>";
-			if(json.edited) {
-				COMMENT += "<span class='is_edited'>&#8627; Edited</span>";
-			}
-	COMMENT += "</div>";
-	return COMMENT;
-}
+
+
+
+
+
+
+
+
+/**
+	END OF jQuery onload
+**/
+
+
+
+
+
+
+
+
+
+
+
 
 /**
 	Parses OLDER posts
@@ -433,6 +499,47 @@ function parseOldPosts(json) {
 	}
 	$('#centerFeed').append(dom);
 }
+
+
+
+
+
+
+
+
+
+/**
+	Remove post by ID
+*/
+function removePost(post_id, callback) {
+	$.ajax({
+		type: 'POST',
+		url: '/api/post/' + post_id + '/remove',
+		error: function(err) {
+			var res = {
+				status: 'DX-FAILED',
+				message: 'Server error occurred'
+			};
+			if(err.status == 0) {
+				res.message = 'Server is currently down';
+			}
+			callback(res);
+		}
+	}).done(function(res) {
+		callback(res);
+	});
+}
+
+
+
+
+
+
+
+
+
+
+
 
 /**
 	Parses OLDER comments
@@ -452,6 +559,16 @@ function parseOldComments(post_id, json) {
 	}
 	return;
 }
+
+
+
+
+
+
+
+
+
+
 
 /**
 	Query server with `BEFORE` requests @ /api/post
@@ -477,6 +594,18 @@ function getOlderPosts(timestamp, callback) {
 	});
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 function getLatestComments(post_id, callback) {
 	$.ajax({
 		url: 'api/post/' + post_id + '/comment',
@@ -494,6 +623,17 @@ function getLatestComments(post_id, callback) {
 		callback(res);
 	});
 }
+
+
+
+
+
+
+
+
+
+
+
 
 /**
 	Query server @ /api/post/:post_id/comment/BEFORE/:timestamp
@@ -518,6 +658,20 @@ function getOlderComments(post_id, timestamp, callback) {
 	return;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function hasOlderComments(post_id, timestamp, callback) {
 	$.ajax({
 		url: '/api/post/' + post_id + '/comment/more/' + timestamp,
@@ -536,9 +690,25 @@ function hasOlderComments(post_id, timestamp, callback) {
 	});
 }
 
+
+
+
+
+
+
+
+
+
 function validPostDesc(string) {
 	return (string.length >= 4 && string.length <= 2500) ? true : false;
 }
+
+
+
+
+
+
+
 
 function placeCursorEnd(cursor) {
     cursor.focus();
@@ -558,6 +728,14 @@ function placeCursorEnd(cursor) {
     }
 }
 
+
+
+
+
+
+
+
+
 // Display all posts inside of the feed array
 Market.display = function() {
 	if(!this.feed.length) {
@@ -576,6 +754,16 @@ Market.display = function() {
 		$('#centerFeed').append(jsonToPost(collection[message]));
 	}
 };
+
+
+
+
+
+
+
+
+
+
 
 /**
 	Get feed
@@ -598,6 +786,15 @@ function get(callback) {
 		callback(res);
 	});
 }
+
+
+
+
+
+
+
+
+
 
 /**
 	Search feed
@@ -624,6 +821,16 @@ function getWithSearch(search_query, callback) {
 	});
 }
 
+
+
+
+
+
+
+
+
+
+
 Market.savePostEdit = function(post_id, desc, callback) {
 	$.ajax({
 		type: 'POST',
@@ -646,6 +853,15 @@ Market.savePostEdit = function(post_id, desc, callback) {
 	});
 };
 
+
+
+
+
+
+
+
+
+
 Market.parsePost = function(json_response) {
 
 	// iterate through message and save object in collection
@@ -667,6 +883,41 @@ Market.parsePost = function(json_response) {
 
 
 
+
+
+
+
+
+function confirmRemovePost(post_id) {
+	// Display confirmation dialog
+	var BLUR = "<div class='dialog_blur'></div>";
+	var DIALOG = 
+	"<div class='dialog_box delete_post'>" +
+		"<span class='for_post_id'>" + post_id + "</span>" +
+		"<span class='dialog_text'>" +
+			"<p>Are you sure you want to delete this post ?</p>" +
+			"<p><strong>All</strong> comments and information will be <strong style='color:red;'>lost!</strong></p>" +
+		"</span>" +
+		"<div class='dialog_controls'>" +
+			"<span class='cancel_dialog'>Cancel</span>" +
+			"<span class='confirm_dialog'>Confirm</span>" +
+		"</div>" +
+	"</div>";
+	$(BLUR).appendTo('#wrapper');
+	$(DIALOG).appendTo('#wrapper');
+	return;
+}
+
+
+
+
+
+
+
+
+
+
+
 function parseDescViewMore(description_obj) {
 	contractDescView(description_obj);
 	var DOM = '<div class="view_change" data-state="less">View more</div>'
@@ -674,17 +925,40 @@ function parseDescViewMore(description_obj) {
 	return;
 }
 
+
+
+
+
+
+
+
 function expandDescView(description_obj) {
 	$(description_obj).css('overflow', 'initial');
 	$(description_obj).css('max-height', 'initial');
 	return;
 }
 
+
+
+
+
+
+
+
+
 function contractDescView(description_obj) {
 	$(description_obj).css('overflow', 'hidden');
 	$(description_obj).css('max-height', '140px');
 	return;
 }
+
+
+
+
+
+
+
+
 
 function jsonToPost(json) {
 	var DOM = 
@@ -737,6 +1011,53 @@ function jsonToPost(json) {
 	return DOM;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+function jsonToComment(json) {
+	var COMMENT =
+	"<div class='comment' timestamp='" + json.timestamp + "'>" +
+			"<div class='comment_info'>" +
+				"<span class='comment_id'>" + json._id + "</span>" +
+				"<span class='comment_user_id'>" + json.poster_id + "</span>";
+				if(json.poster_username == state.USERNAME) {
+					COMMENT +=
+					"<span class='comment_options' data-state='closed'></span>" +
+					"<ul class='comment_options_menu'>" +
+						"<li class='edit_comment'>Edit</li>" +
+						"<li class='remove_comment'>Remove</li>" +
+					"</ul>";
+				}
+				COMMENT += "<span class='username'>" + json.poster_username + "</span>" +
+				"<span data-iso='" + dateFromObjectID(json._id) + "' class='comment_date'>" + timeSince(dateFromObjectID(json._id)) + "</span>" +
+			"</div>" +
+			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]') + "</span>";
+			if(json.edited) {
+				COMMENT += "<span class='is_edited'>&#8627; Edited</span>";
+			}
+	COMMENT += "</div>";
+	return COMMENT;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 function timeSince(date) {
 	date = (date instanceof Date) ? date : new Date(date);
 
@@ -784,9 +1105,26 @@ function timeSince(date) {
 	return time + date_type + ' ago';
 }
 
+
+
+
+
+
+
+
+
+
 function dateFromObjectID(object_id) {
 	return new Date(parseInt(object_id.substring(0, 8), 16) * 1000);
 }
+
+
+
+
+
+
+
+
 
 function isoToString(iso_date) {
 	var date_obj = new Date(iso_date);

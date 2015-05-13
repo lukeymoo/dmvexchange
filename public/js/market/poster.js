@@ -78,6 +78,17 @@ $(function() {
 				});
 			}
 		}
+		var DOM = 
+		"<div class='loading'>" +
+			"<span>Creating post...</span>" +
+		"</div>";
+		$('body').html(DOM);
+		showLoading();
+
+		function showLoading() {
+			$('.loading').animate({opacity:'1'}, 900);
+			$('.loading').animate({opacity:'0'}, 900, showLoading);
+		}
 	});
 
 	// handler controls

@@ -14,7 +14,7 @@ var fs = require('fs');
 var pmSystem = require('../modules/PM/pm');
 var smtp = require('../modules/smtp/smtp');
 var uuid = require('node-uuid');
-
+var secret = require('../modules/secret/secret');
 
 /**
 	RESPONSE TYPES
@@ -45,7 +45,6 @@ router.get('*', function(req, res, next) {
 router.get('/session', function(req, res, next) {
 	var sessionState = sessionManager.isLoggedInQuiet(req.session);
 	if('r' in req.query && req.query.r == 'state') {
-
 		// convert message to string type
 		var msg = (sessionState == true) ? 'true' : 'false';
 		res.send({status: 'DX-OK', message: msg});
@@ -80,6 +79,14 @@ router.get('/post', function(req, res, next) {
 		return;
 	});
 });
+
+
+
+
+
+
+
+
 
 
 
@@ -162,6 +169,10 @@ router.get('/post/:post_id/comment/more/:timestamp', function(req, res, next) {
 
 
 
+
+
+
+
 /**
 	Get posts before specified timestamp
 */
@@ -218,6 +229,7 @@ router.get('/post/more/:timestamp', function(req, res, next) {
 
 
 /**
+	* Must be owner of post *
 	Edit a specified post's description
 */
 router.post('/post/:post_id/edit', function(req, res, next) {
@@ -233,9 +245,9 @@ router.post('/post/:post_id/edit', function(req, res, next) {
 	}
 
 	// ensure text is not already the same
-	var db = dbManager.getDB();
-	var feed = db.collection('FEED');
+	var feed = dbManager.getDB().collection('FEED');
 
+	/** Determine if post already has specified text **/
 	feed.findOne({
 		post_text: req.body.text
 	}, function(err, doc) {
@@ -259,8 +271,9 @@ router.post('/post/:post_id/edit', function(req, res, next) {
 			return;
 		}
 
+		/** Change the posts text **/
 		feed.update({
-			_id: ObjectID(req.params.post_id), // POST ID
+			_id: ObjectID(req.params.post_id),
 			poster_username: req.session.USERNAME.toLowerCase(),
 			poster_id: req.session.USER_ID
 		}, { $set: { post_text: req.body.text, edited: true } }, function(err, result) {
@@ -288,9 +301,90 @@ router.post('/post/:post_id/edit', function(req, res, next) {
 
 
 
+/**
+	* Must be owner of post *
+	Remove a post specified by ID
+*/
+router.post('/post/:post_id/remove', function(req, res, next) {
+	var feed = dbManager.getDB().collection('FEED');
+
+	/** Ensure the post belongs to the user requesting removal **/
+	feed.findOne({
+		_id: ObjectID(req.params.post_id)
+	}, function(err, doc) {
+		if(err) {
+			smtp.report_error('Error while removing post :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+			return;
+		}
+		/** If the post was found, check if username matches session **/
+		if(doc) {
+			if(doc.poster_username.toLowerCase() != req.session.USERNAME.toLowerCase()) {
+				res.send({stauts: 'DX-REJECTED', message: 'This post does not belong to you'});
+				return;
+			}
+		} else {
+			smtp.report_error('Error while removing post :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+			return;
+		}
+		/** Remove the associated images with product **/
+		for(var img in doc.images) {
+			/** Check if the __DEFAULT__ image still exists **/
+			fs.exists(secret._SECRET_PATH + doc.images[img].large.replace('__LARGE__', '__DEFAULT__'), function(exists) {
+				if(exists) {
+					fs.unlink(secret._SECRET_PATH + doc.images[img].large.replace('__LARGE__', '__DEFAULT__'), function(err) {
+						if(err) {
+							smtp.report_error('Error removing image ' + doc.images[img].large.replace('__LARGE__', '__DEFAULT__') + ' :: ' + err, function(){});
+						}
+					});
+				}
+			});
+			if(doc.images[img].large) {
+				fs.unlink(secret._SECRET_PATH + doc.images[img].large, function(err) {
+					if(err) {
+						smtp.report_error('Error removing image ' + doc.images[img].large + ' :: ' + err, function(){});
+					}
+				});
+			}
+			if(doc.images[img].small) {
+				fs.unlink(secret._SECRET_PATH + doc.images[img].small, function(err) {
+					if(err) {
+						smtp.report_error('Error removing image ' + doc.images[img].large + ' :: ' + err, function(){});
+					}
+				});
+			}
+		}
+		/** Remove the post **/
+		feed.remove({
+			_id: ObjectID(req.params.post_id),
+			poster_username: req.session.USERNAME.toLowerCase(),
+			poster_id: req.session.USER_ID
+		}, function(err, result) {
+			if(err) {
+				smtp.report_error('Error while removing post :: ' + err, function(){});
+				res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+				return;
+			}
+			res.send({status: 'DX-OK', message: result});
+		});
+	});
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
+	* Must be authenticated *
 	Create a comment for specified post
 */
 router.post('/post/:post_id/comment/create', function(req, res, next) {
@@ -324,9 +418,7 @@ router.post('/post/:post_id/comment/create', function(req, res, next) {
 		var feed  = dbManager.getDB().collection('FEED');
 
 		feed.update({
-			_id: ObjectID(req.params.post_id),
-			poster_username: req.session.USERNAME,
-			poster_id: req.session.USER_ID
+			_id: ObjectID(req.params.post_id)
 		}, { $push: { comments: new_comment } }, function(err, result) {
 			if(err) {
 				smtp.report_error('MongoDB Error occurred while posting comment :: ' + err, function(){});
@@ -353,6 +445,7 @@ router.post('/post/:post_id/comment/create', function(req, res, next) {
 
 
 /**
+	* Must be owner of comment *
 	Edit a comment for specified post
 */
 router.post('/post/:post_id/comment/edit/:comment_id', function(req, res, next) {
@@ -400,7 +493,11 @@ router.post('/post/:post_id/comment/edit/:comment_id', function(req, res, next) 
 		feed.update({
 			_id: ObjectID(req.params.post_id),
 			comments: {
-				$elemMatch: { _id: ObjectID(req.params.comment_id) }
+				$elemMatch: {
+					_id: ObjectID(req.params.comment_id),
+					poster_username: req.session.USERNAME,
+					poster_id: req.session.USER_ID
+				}
 			}
 		}, { $set: { "comments.$.text": req.body.text, "comments.$.edited": true } }, function(err, result) {
 			if(err) {
@@ -423,6 +520,7 @@ router.post('/post/:post_id/comment/edit/:comment_id', function(req, res, next) 
 
 
 /**
+	* Must be owner of comment *
 	Remove a comment for specified post
 */
 router.post('/post/:post_id/comment/remove/:comment_id', function(req, res, next) {
@@ -436,7 +534,9 @@ router.post('/post/:post_id/comment/remove/:comment_id', function(req, res, next
 		_id: ObjectID(req.params.post_id),
 		comments: {
 			$elemMatch: {
-				_id: ObjectID(req.params.comment_id)
+				_id: ObjectID(req.params.comment_id),
+				poster_username: req.session.USERNAME,
+				poster_id: req.session.USER_ID
 			}
 		}
 	}, { $pull: { comments: { _id: ObjectID(req.params.comment_id) } } }, function(err, result) {
@@ -525,6 +625,14 @@ function cmpT(a, b) {
 	}
 	return 0;
 }
+
+
+
+
+
+
+
+
 
 
 

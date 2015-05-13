@@ -59,7 +59,7 @@ $(function() {
 	/**
 		Confirm button for comment removal
 	*/
-	$(document).on('click', '.dialog_box .confirm_dialog', function() {
+	$(document).on('click', '.delete_comment .confirm_dialog', function() {
 		var pid = $(this).parents('.dialog_box').find('.for_post_id').html();
 		var cid = $(this).parents('.dialog_box').find('.for_comment_id').html();
 		removeComment(pid, cid, function(res) {
@@ -294,7 +294,7 @@ $(function() {
 						} else {
 							/** If good response but no server action **/
 							// Present user with response
-							createAlert(res.message, 'medium');
+							createAlert('Failed to create comment', 'medium');
 						}
 					} else {
 						/** If bad response present error message to user **/
@@ -343,7 +343,7 @@ function confirmRemoveComment(pid, cid) {
 	// Display confirmation dialog
 	var BLUR = "<div class='dialog_blur'></div>";
 	var DIALOG = 
-	"<div class='dialog_box'>" +
+	"<div class='dialog_box delete_comment'>" +
 		"<span class='for_post_id'>" + pid + "</span>" +
 		"<span class='for_comment_id'>" + cid + "</span>" +
 		"<span class='dialog_text'>Are you sure you want to delete this comment ?</span>" +
