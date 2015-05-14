@@ -15,6 +15,9 @@ var pmSystem = require('../modules/PM/pm');
 var smtp = require('../modules/smtp/smtp');
 var uuid = require('node-uuid');
 var secret = require('../modules/secret/secret');
+var magicModule = require('mmmagic');
+var Magic = magicModule.Magic;
+var gm = require('gm');
 
 /**
 	RESPONSE TYPES
@@ -388,6 +391,7 @@ router.post('/post/:post_id/remove', function(req, res, next) {
 	Create a comment for specified post
 */
 router.post('/post/:post_id/comment/create', function(req, res, next) {
+
 	/**
 		Decode and validate comment text
 	*/
@@ -404,16 +408,98 @@ router.post('/post/:post_id/comment/create', function(req, res, next) {
 		return;
 	}
 
-	var new_comment = {
-		_id: new ObjectID(),
-		poster_username: req.session.USERNAME,
-		poster_id: req.session.USER_ID,
-		text: text,
-		timestamp: new Date().getTime()
-	};
+	/** Validate the comment before doing continuing **/
+	if(!validComment(text)) {
+		res.send({status: 'DX-REJECTED', message: 'Comment must be 2-1000 characters'});
+		return;
+	}
 
-	// Validate the comment
-	if(validComment(text)) {
+	/**
+		Capture attachment
+	*/
+	var image = null;
+	
+	if(req.files.image) {
+		image = req.files['image'][0];
+
+		/** Validate the mime-type **/
+		var magic = new Magic(magicModule.MAGIC_MIME_TYPE);
+		magic.detectFile(image.path, function(err, mime) {
+			if(err) {
+				smtp.report_error('Error checking mime type :: ' + err,function(){});
+			} else {
+				switch(mime) {
+					case 'image/png':
+					case 'image/jpeg':
+					case 'image/jpg':
+					case 'image/gif':
+					case 'image/bmp':
+						resizeComment(req, res, image);
+						break;
+					default:
+						// bad mime => skip resizing
+						image = null;
+						createComment(req, res, image);
+						return;
+						break;
+				}
+			}
+		});
+	} else {
+		createComment(req, res, image);
+	}
+
+	function resizeComment(req, res, image) {
+		var small_path = image.path.replace('__LC__', '__SC__');
+		// Create small version
+		gm(image.path)
+		.resize(null, 100)
+		.write(small_path, function(err) {
+			if(err) {
+				image = null;
+				smtp.report_error('Error occurred while resizing comment image -> small :: ' + err, function(){});
+				createComment(req, res, image);
+			}
+			if(image != null) {
+				// Create resize large version to max at 960x?
+				gm(image.path)
+				.resize(960)
+				.write(image.path, function(err) {
+					if(err) {
+						image = null;
+						smtp.report_error('Error occurred while resizing comment image -> large :: ' + err, function(){});
+					}
+					createComment(req, res, image);
+				});
+			}
+		});
+		return;
+	}
+
+	function createComment(req, res, image) {
+
+		var images;
+
+		if(image) {
+			var small_name = image.name.replace('__LC__', '__SC__');
+			images = [];
+			images.push({
+				large: '/cdn/comment/' + image.name,
+				small: '/cdn/comment/' + small_name
+			});
+		} else {
+			images = null;
+		}
+
+		var new_comment = {
+			_id: new ObjectID(),
+			poster_username: req.session.USERNAME,
+			poster_id: req.session.USER_ID,
+			text: text,
+			timestamp: new Date().getTime(),
+			images: images
+		};
+
 		// update post pushing this comment to `comments` array
 		var feed  = dbManager.getDB().collection('FEED');
 
@@ -429,9 +515,6 @@ router.post('/post/:post_id/comment/create', function(req, res, next) {
 			res.send({status: 'DX-OK', message: result})
 			return;
 		});
-	} else {
-		res.send({status: 'DX-REJECTED', message: 'Comment must be 2-1000 characters'});
-		return;
 	}
 });
 
@@ -461,10 +544,18 @@ router.post('/post/:post_id/comment/edit/:comment_id', function(req, res, next) 
 		res.send({status: 'DX-REJECTED', message: 'No text given to replace comment with'});
 		return;
 	}
+
 	// Validate text
 	if(!validComment(req.body.text)) {
 		res.send({status: 'DX-REJECTED', message: 'Comments must be 2-500 characters'});
 		return;
+	}
+
+	/** Determine if comment had image and was removed **/
+	// false -> remove image ~ remove image
+	if('image' in req.body && req.body.image == 'remove_image') {
+		// Removes comment image
+		removeCommentImage(req.params.post_id, req.params.comment_id, function() {});
 	}
 
 	// ensure there was a change in text
@@ -485,7 +576,7 @@ router.post('/post/:post_id/comment/edit/:comment_id', function(req, res, next) 
 			return;
 		}
 		if(doc) {
-			res.send({status: 'DX-OK', message: 'Comment is unchanged'});
+			res.send({status: 'DX-OK', message: 'Comment text is unchanged'});
 			return;
 		}
 
@@ -511,7 +602,61 @@ router.post('/post/:post_id/comment/edit/:comment_id', function(req, res, next) 
 	});
 });
 
-
+function removeCommentImage(post_id, comment_id, callback) {
+	var feed = dbManager.getDB().collection('FEED');
+	feed.findOne({
+		_id: ObjectID(post_id),
+		comments: {
+			$elemMatch: {
+				_id: ObjectID(comment_id)
+			}
+		}
+	}, function(err, doc) {
+		if(err) {
+			smtp.report_error('Error while getting comment image name from database for removal :: ' + err, function(){});
+		}
+		for(var comment in doc.comments) {
+			if(String(doc.comments[comment]._id) == comment_id) {
+				console.log('matched');
+				if(doc.comments[comment].images) {
+					if(doc.comments[comment].images[0].large) {
+						fs.unlink(secret._SECRET_PATH + doc.comments[comment].images[0].large, function(err) {
+							if(err) {
+								console.log(err);
+								smtp.report_error('Error unlinking comment image :: ' + err, function(){});
+							}
+						});
+					}
+					if(doc.comments[comment].images[0].small) {
+						fs.unlink(secret._SECRET_PATH + doc.comments[comment].images[0].small, function(err) {
+							if(err) {
+								console.log(err);
+								smtp.report_error('Error unlinking comment image :: ' + err, function(){});
+							}
+						});
+					}
+				}
+			} else {
+				console.log('no match');
+			}
+		}
+		// Remove database entry
+		feed.update({
+			_id: ObjectID(post_id),
+			comments: {
+				$elemMatch: {
+					_id: ObjectID(comment_id)
+				}
+			}
+		}, { $set: { "comments.$.images": null, "comments.$.edited": true } }, function(err, result) {
+			if(err) {
+				smtp.report_error('Error removing comment image :: ' + err, function(){});
+			}
+			callback();
+		});
+	});
+	return;
+}
 
 
 
@@ -528,9 +673,10 @@ router.post('/post/:post_id/comment/remove/:comment_id', function(req, res, next
 		return;
 	}
 
-	var db = dbManager.getDB();
-	var feed = db.collection('FEED');
-	feed.update({
+	var feed = dbManager.getDB().collection('FEED');
+
+	// If comment had image unlink it
+	feed.findOne({
 		_id: ObjectID(req.params.post_id),
 		comments: {
 			$elemMatch: {
@@ -539,14 +685,50 @@ router.post('/post/:post_id/comment/remove/:comment_id', function(req, res, next
 				poster_id: req.session.USER_ID
 			}
 		}
-	}, { $pull: { comments: { _id: ObjectID(req.params.comment_id) } } }, function(err, result) {
-		if(err) {
-			smtp.report_error('Error removing comment :: ' + err, function(){});
-			res.send({status:'DX-FAILED', message: 'Server error occurred'});
-			return;
+	}, function(err, doc) {
+		
+		for(var comment in doc.comments) {
+			if(String(doc.comments[comment]._id) == req.params.comment_id) {
+				// Remove comment images
+				if(doc.comments[comment].images) {
+					if(doc.comments[comment].images[0].large) {
+						fs.unlink(secret._SECRET_PATH + doc.comments[comment].images[0].large, function(err) {
+							if(err) {
+								smtp.report_error('Error removing image attached with comment that\'s being deleted :: ' + err, function(){});
+							}
+						});
+					}
+					if(doc.comments[comment].images[0].small) {
+						fs.unlink(secret._SECRET_PATH + doc.comments[comment].images[0].small, function(err) {
+							if(err) {
+								smtp.report_error('Error removing image attached with comment that\'s being deleted :: ' + err, function(){});
+							}
+						});
+					}
+				}
+			}
 		}
-		res.send({status: 'DX-OK', message: result});
-		return;
+
+		// Remove comment from db
+		feed.update({
+			_id: ObjectID(req.params.post_id),
+			comments: {
+				$elemMatch: {
+					_id: ObjectID(req.params.comment_id),
+					poster_username: req.session.USERNAME,
+					poster_id: req.session.USER_ID
+				}
+			}
+		}, { $pull: { comments: { _id: ObjectID(req.params.comment_id) } } }, function(err, result) {
+			if(err) {
+				smtp.report_error('Error removing comment :: ' + err, function(){});
+				res.send({status:'DX-FAILED', message: 'Server error occurred'});
+				return;
+			}
+			res.send({status: 'DX-OK', message: result});
+			return;
+		});
+
 	});
 });
 

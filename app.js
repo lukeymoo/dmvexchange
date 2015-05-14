@@ -51,18 +51,23 @@ app.use(multer({
     // if this was being post to feed, place into post within cdn folder
     if(req.originalUrl == '/market/post') {
       return path.join(dest, '/product');
-    } else {
-      // otherwise place into notarget because no location has been specified (cleaned regularly) 
-      return path.join(dest, '/notarget');
     }
+    if(req.body.isComment) {
+      return path.join(dest, '/comment');
+    }
+    // otherwise place into notarget because no location has been specified (cleaned regularly) 
+    return path.join(dest, '/notarget');
   },
   rename: function(fieldname, filename, req, res) {
     // if this was being posted to feed rename it accordingly
     if(req.originalUrl == '/market/post') {
       return '__DEFAULT__' + uuid.v1() + Date.now();
-    } else {
-      return uuid.v1() + '_' + Date.now(); // unknown destination = random name
     }
+    // If this image is a part of a comment
+    if(req.body.isComment) {
+      return '__LC__' + uuid.v1() + '_' + Date.now();
+    }
+    return uuid.v1() + '_' + Date.now(); // unknown destination = random name
   },
   onFileSizeLimit: function(file) {
     console.log('[-] File exceeded size limit...has been removed');

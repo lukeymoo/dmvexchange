@@ -56,7 +56,7 @@
 	width: 240px;
 	height: 83vh;
 
-	font-family: DX-REG;
+	font-family: GOOGLE;
 	background-color: white;
 	border: 1px solid rgb(220, 220, 220);
 
@@ -426,7 +426,7 @@
 	user-select: none;
 }
 
-#validator {
+#validator, #commentValidator {
 	display: none;
 }
 
@@ -993,7 +993,31 @@
 	display: none;
 }
 
+#centerFeed .post .comment .inCommentImage {
+	max-width: 250px;
+	height: 100px;
+	margin-left: 10px;
+	margin-bottom: 5px;
+	border-left: 3px solid rgba(0, 0, 0, 0.3);
+	cursor: pointer;
+	pointer: hand;
+}
+
+#centerFeed .post .inCommentImageRemove {
+	position: absolute;
+	opacity: 0;
+	margin-left: 13px;
+	font-size: 1.25em;
+	padding: 0px 5px;
+	color: white;
+	background-color: rgb(190, 0, 0);
+	border: 1px solid rgb(175, 0, 0);
+	cursor: pointer;
+	pointer: hand;
+}
+
 #centerFeed .post .is_edited {
+	display: block;
 	color: rgb(155, 155, 155);
 }
 
@@ -1021,10 +1045,12 @@
 	display: block;
 	padding-left: 2px;
 	padding-right: 2px;
+	margin-bottom: 2px;
 }
 
 .fake .comment_text {
 	text-align: center;
+	margin-left: -15px;
 }
 
 #centerFeed .post .commentInput:focus,
@@ -1040,7 +1066,6 @@
 }
 
 #centerFeed .post .commentImage {
-	display: none;
 	position: absolute;
 	margin-top: 4px;
 	margin-left: 440px;
@@ -1049,6 +1074,42 @@
 	background: url('/img/camera_blur.png') no-repeat center center;
 	cursor: pointer;
 	pointer: hand;
+}
+
+#centerFeed .post .commentImageContainer {
+	margin-top: 5px;
+	display: inline-block;
+}
+
+#centerFeed .post .commentImagePlaceholder {
+	border: 3px dotted rgba(0, 0, 0, 0.2);
+	border-radius: 3px;
+	margin-top: 5px;
+	height: 100px;
+	cursor: pointer;
+	pointer: hand;
+}
+
+#centerFeed .post .commentImageContainer[data-active='false'] {
+	display: none;
+}
+
+#centerFeed .post .commentRemovePlaceholder {
+	position: absolute;
+	margin-top: 8px;
+	margin-left: 3px;
+	font-size: 1.25em;
+	padding: 0px 5px;
+	color: white;
+	background-color: rgb(190, 0, 0);
+	border: 1px solid rgb(175, 0, 0);
+	cursor: pointer;
+	pointer: hand;
+	opacity: 0;
+}
+
+#centerFeed .post .commentImageInput {
+	display: none;
 }
 
 #centerFeed .post .commentImage:hover {
@@ -1064,8 +1125,9 @@
 	color: rgb(50, 50, 50);
 	background-color: #fff;
 	border: 1px solid rgba(0, 0, 0, 0.15);
-	padding-top: 2px;
+	padding-top: 4px;
 	padding-left: 5px;
+	padding-right: 35px;
 }
 
 #centerFeed .post .commentInput[contenteditable='true']:empty:not(:focus):before {

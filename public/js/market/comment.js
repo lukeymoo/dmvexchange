@@ -7,6 +7,7 @@ var comment_updater;
 // pointer to timeout func that cancels updater interval
 var cancel_comment_updater;
 var initial_comment = '';
+var comment_had_image = null;
 
 $(function() {
 
@@ -20,6 +21,135 @@ $(function() {
 		});
 	}, 11000);
 
+
+
+
+
+
+
+
+	/**
+		Open image selection on commentImage button click
+	*/
+	$(document).on('click', '.commentImage', function() {
+		$(this).parent('.commentInputContainer').find('.commentImageInput').click();
+	});
+
+	/**
+		Show remove comment image on hover
+	*/
+	$(document).on({
+		mouseenter: function() {
+			$(this).find('.commentRemovePlaceholder')
+			.css('opacity', '1');
+		},
+		mouseleave: function() {
+			$(this).find('.commentRemovePlaceholder')
+			.css('opacity', '0');
+		}
+	}, '.commentImageContainer');
+
+
+
+
+
+
+
+
+
+	/**
+		Remove image on remove button click
+	*/
+	$(document).on('click', '.commentRemovePlaceholder', function() {
+		var imageInput = $(this).parents('.commentInputContainer').find('.commentImageInput');
+		resetCommentImage(imageInput);
+	});
+
+
+
+
+
+
+
+
+
+
+	/**
+		Validate commentImage on change
+	*/
+	$(document).on('change', '.commentImageInput', function() {
+		/** Did the user cancel image selection ? **/
+		if(!$(this).val().length) {
+			resetCommentImage($(this));
+			return false;
+		}
+
+		/** If the file does not have a valid extension **/
+		if(!validImageExt($(this).val())) {
+			resetCommentImage($(this));
+			createAlert('You did not select an image', 'high');
+			return false;
+		}
+
+		/** Read the file for further validation **/
+		var reader = new FileReader();
+		var hiddenInput = $(this);
+		var file = $(this)[0].files;
+
+		reader.onload = function(e) {
+			// place stream into control img
+			$('#commentValidator').attr('src', e.target.result);
+
+			var image = new Image();
+
+			image.onload = function() {
+				// Reset input if smaller than 100 x 100
+				if(this.width < 100 || this.height < 100) {
+					resetCommentImage($(hiddenInput));
+					createAlert('Image too small', 'high');
+					return;
+				}
+				// Preview the image
+				$(hiddenInput).parent('.commentInputContainer')
+				.find('.commentImagePlaceholder')
+				.attr('src', e.target.result)
+				$(hiddenInput).parent('.commentInputContainer')
+				.find('.commentImageContainer')
+				.attr('data-active', 'true');
+
+				// Clear validator src
+				$('#commentValidator').attr('src', '');
+
+				// Give input field focus again
+				placeCursorEnd($(hiddenInput).parents('.commentInputContainer').find('.commentInput').get(0));
+			};
+
+			image.onerror = function() {
+				// Clear input if error
+				resetCommentImage($(hiddenInput));
+				// Clear validator src
+				$('#commentValidator').attr('src', '');
+				createAlert('You did not select an image', 'high');
+			};
+
+			image.src = $('#commentValidator').attr('src');
+		};
+
+		reader.readAsDataURL(file[0]);
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 		Toggle comment options menu
 	*/
@@ -30,6 +160,18 @@ $(function() {
 			hideCommentOptions($(this).parent('.comment_info').find('.comment_id').html());
 		}
 	});
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 		Close comment options menu if click is outside `.comment_options` element
@@ -44,6 +186,17 @@ $(function() {
 		});
 	});
 
+
+
+
+
+
+
+
+
+
+
+
 	/**
 		Removes comment when comment options menu `.remove_comment` button
 		is clicked
@@ -56,6 +209,16 @@ $(function() {
 	});
 
 	
+
+
+
+
+
+
+
+
+
+
 	/**
 		Confirm button for comment removal
 	*/
@@ -78,6 +241,7 @@ $(function() {
 							});
 						}
 					});
+					createAlert('Comment removed');
 				} else {
 					/** If no comment was removed by the back-end **/
 					// Remove dialog and background blur
@@ -95,6 +259,18 @@ $(function() {
 		});
 	});
 
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 		Cancel button for remove comment dialog
 	*/
@@ -102,6 +278,19 @@ $(function() {
 		$(document).find('.dialog_box').remove();
 		$(document).find('.dialog_blur').remove();
 	});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 		Edits comment when comment options menu `.edit_comment` button
@@ -121,6 +310,19 @@ $(function() {
 		editComment(pid, cid);
 	});
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 		When editing comment we need to change default html insertions
 		for proper formatting in database
@@ -131,6 +333,63 @@ $(function() {
 			return false;
 		}
 	});
+
+
+
+
+
+	/**
+		Remove comment image on click
+	*/
+	$(document).on('click', '.inCommentImageRemove', function() {
+		// Confirm image removal
+		var post_id = $(this).parents('.post').find('.post_id').html();
+		var comment_id = $(this).parents('.comment').find('.comment_id').html();
+		confirmCommentImageRemoval(post_id, comment_id);
+	});
+
+
+
+
+
+	/**
+		Remove comment image
+	*/
+	$(document).on('click', '.delete_comment_image .confirm_dialog', function() {
+		
+		// grab post_id, comment_id
+		var post_id = $(this).parents('.dialog_box').find('.for_post_id').html();
+		var comment_id = $(this).parents('.dialog_box').find('.for_comment_id').html();
+
+		// Hide the image
+		$('.post').each(function() {
+			if($(this).find('.post_id').html() == post_id) {
+				$(this).find('.comment').each(function() {
+					if($(this).find('.comment_id').html() == comment_id) {
+						// Hide image
+						$(this).find('.inCommentImageContainer').hide();
+						$('.dialog_box').remove();
+						$('.dialog_blur').remove();
+						// Give focus to comment input field
+						$('.post').each(function() {
+							if($(this).find('.post_id').html() == post_id) {
+								$(this).find('.comment').each(function() {
+									if($(this).find('.comment_id').html() == comment_id) {
+										placeCursorEnd($(this).find('.comment_text').get(0));
+									}
+								});
+							}
+						});
+					}
+				});
+			}
+		});
+	});
+
+
+
+
+
 
 	/**
 		Saves comment edits when comment options menu `.comment_submit_edit` button
@@ -158,8 +417,18 @@ $(function() {
 			var comment_text_elem = $(this).parents('.comment').find('.comment_text');
 			$(comment_controls).hide();
 
+			var image = 'do_nothing';
+			if(comment_had_image) {
+				if($(this).parents('.post').find('.inCommentImage').attr('data-removed', 'false')) {
+					image = 'do_nothing';
+				}
+				if($(this).parents('.post').find('.inCommentImage').attr('data-removed', 'true')) {
+					image = 'remove_image';
+				}
+			}
+
 			/** Post comment to server **/
-			saveComment(pid, cid, new_comment, function(res) {
+			saveComment(pid, cid, new_comment, image, function(res) {
 				if(res.status == 'DX-OK') {
 					/** If successful request **/
 					if(parseInt(res.message.nModified) > 0) {
@@ -172,12 +441,18 @@ $(function() {
 						}
 						// Present user with success message
 						createAlert('Updated!');
+						// Reset initial_comment and hadImage
+						initial_comment = '';
+						comment_had_image = null;
 					} else if(res.message == 'Comment is unchanged') {
 						/** If submitted comment matches original **/
 						$(comment_controls).remove();
 						$(comment_text_elem).attr('contenteditable', 'false');
 						// Present no change message to user
 						createAlert(res.message, 'medium');
+						// Reset initial_comment and hadImage
+						initial_comment = '';
+						comment_had_image = null;
 					}
 				} else {
 					/** If we received bad response **/
@@ -192,6 +467,16 @@ $(function() {
 		}
 	});
 
+
+
+
+
+
+
+
+
+
+
 	/**
 		Cancels comment edits and restores original text when
 		`.comment_cancel_edit` is clicked
@@ -201,6 +486,18 @@ $(function() {
 		var cid = $(this).parents('.comment').find('.comment_id').html();
 		cancelEditComment(pid, cid);
 	});
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 		Post comment to server on enter key ( keycode == 13 )
@@ -215,15 +512,21 @@ $(function() {
 			// Prevent creation of newline in div
 			key.preventDefault();
 			var comment_field = $(this);
-			var comment_input = $(this);
+			var comment_input_container = $(this).parent('.commentInputContainer');
 			var comment = {
 				id: $(this).parents('.post').find('.post_id').html(),
 				text: $(this).text()
 			};
+
+			var file = $(this).parent('.commentInputContainer').find('.commentImageInput')[0].files
+
+			// attachment
+			var attachment = (file.length) ? file : null;
+
 			// Ensure valid comment
 			if(isValidComment(comment.text)) {
 				// Posts comment to server
-				createComment(comment, function(res) {
+				createComment(comment, attachment, function(res) {
 					if(res.status == 'DX-OK') {
 						/** If successful request **/
 						if(parseInt(res.message.nModified) > 0) {
@@ -249,7 +552,7 @@ $(function() {
 								"</div>" +
 								"<span class='comment_text' spellcheck='false'>Posting...</span>" +
 							"</div>";
-							$(FAKE_COMMENT).insertBefore(comment_input);
+							$(FAKE_COMMENT).insertBefore(comment_input_container);
 
 							/**
 								Retreive post comments after 1.75 seconds
@@ -270,6 +573,10 @@ $(function() {
 									}
 								});
 							}, 1750)
+
+							var hiddenImageInput = $(post_elem).find('.commentImageInput');
+							// Reset commentImage
+							resetCommentImage(hiddenImageInput);
 
 							// Remove focus from comment input field
 							$(comment_field).blur();
@@ -312,6 +619,43 @@ $(function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+	Reset comment image related stuff
+*/
+function resetCommentImage(hiddenInputField) {
+	var hidden_input_field = $(hiddenInputField)[0].outerHTML;
+	var container = $(hiddenInputField).parent('.commentInputContainer');
+	var input_field = $(container).find('.commentInput');
+
+	// Reset image placeholder
+	$(hiddenInputField).parent('.commentInputContainer').find('.commentImageContainer').attr('data-active', 'false');
+	$(hiddenInputField).parent('.commentInputContainer').find('.commentImagePlaceholder').attr('src', '');
+	
+	// Reset hidden input field
+	$(hiddenInputField).remove();
+	$(hidden_input_field).insertBefore(input_field);
+	return;
+}
+
+
+
 /**
 	Updates existing comments & retrieves new comments
 	since last comment in view
@@ -339,6 +683,46 @@ function getNewComments(post_id, timestamp, callback) {
 	});
 }
 
+
+
+
+
+
+
+
+
+
+
+function confirmCommentImageRemoval(pid, cid) {
+	// Display confirmation dialog
+	var BLUR = "<div class='dialog_blur'></div>";
+	var DIALOG = 
+	"<div class='dialog_box delete_comment_image'>" +
+		"<span class='for_post_id'>" + pid + "</span>" +
+		"<span class='for_comment_id'>" + cid + "</span>" +
+		"<span class='dialog_text'>" +
+			"<p>Are you sure you want to remove image from comment ?</p>" +
+			"<p>You <strong style='color:rgb(190,0,0);'>cannot</strong> add the image to comment later</p>" +
+		"</span>" +
+		"<div class='dialog_controls'>" +
+			"<span class='cancel_dialog'>Cancel</span>" +
+			"<span class='confirm_dialog'>Confirm</span>" +
+		"</div>" +
+	"</div>";
+	$(BLUR).appendTo('#wrapper');
+	$(DIALOG).appendTo('#wrapper');
+	return;
+}
+
+
+
+
+
+
+
+
+
+
 function confirmRemoveComment(pid, cid) {
 	// Display confirmation dialog
 	var BLUR = "<div class='dialog_blur'></div>";
@@ -356,6 +740,15 @@ function confirmRemoveComment(pid, cid) {
 	$(DIALOG).appendTo('#wrapper');
 	return;
 }
+
+
+
+
+
+
+
+
+
 
 function removeComment(post_id, comment_id, callback) {
 	$.ajax({
@@ -411,11 +804,20 @@ function editComment(post_id, comment_id) {
 						"<span class='comment_submit_edit'>Submit</span>" +
 					"</div>";
 					$(this).append(DOM);
+					// Determine if comment had an image
+					comment_had_image = 
+						($(this).find('.inCommentImage').length) ? true : false;
 					// Save inital comment text
 					initial_comment = $(this).find('.comment_text').html();
 					// Make contenteditable & give focus
 					$(this).find('.comment_text').attr('contenteditable', 'true');
 					placeCursorEnd($(this).find('.comment_text').get(0));
+					/**
+						If this comment has an image, place remove button
+					*/
+					if($(this).find('.inCommentImage').length) {
+						$(this).find('.inCommentImageRemove').css('opacity', '1');
+					}
 				}
 			});
 			return;
@@ -424,13 +826,14 @@ function editComment(post_id, comment_id) {
 	return;
 }
 
-function saveComment(post_id, comment_id, text, callback) {
+function saveComment(post_id, comment_id, text, isImage, callback) {
 	// clear initial comment variable
 	$.ajax({
 		type: 'POST',
 		url: '/api/post/' + post_id + '/comment/edit/' + comment_id,
 		data: {
-			text: text
+			text: text,
+			image: isImage
 		},
 		error: function(err) {
 			var res = {
@@ -450,12 +853,21 @@ function cancelEditComment(post_id, comment_id) {
 		if($(this).find('.post_id').html() == post_id) {
 			$(this).find('.comment').each(function() {
 				if($(this).find('.comment_id').html() == comment_id) {
+					// restore comment had image
+					if(comment_had_image) {
+						$(this).find('.inCommentImageContainer').show();
+					}
+					comment_had_image = null;
 					// restore initial comment
 					$(this).find('.comment_text').html(initial_comment);
 					// remove edit controls
 					$(this).find('.comment_edit_controls').remove();
 					// reset contenteditable
 					$(this).find('.comment_text').attr('contenteditable', 'false');
+					// hide remove image button if there is an image
+					if($(this).find('.inCommentImage').length) {
+						$(this).find('.inCommentImageRemove').css('opacity', '0');
+					}
 				}
 			});
 		}
@@ -522,27 +934,51 @@ function parseComments(post, json) {
 	/**
 		Append comments
 	*/
-	$(comments).insertBefore($(post).find('.commentInput'));
+	$(comments).insertBefore($(post).find('.commentInputContainer'));
 	return;
 }
 
-function createComment(commentObj, callback) {
-	$.ajax({
-		type: 'POST',
-		url: '/api/post/' + commentObj.id + '/comment/create',
-		data: {
-			text: encodeURI(commentObj.text)
-		},
-		error: function(err) {
-			var res = {
-				status: 'DX-FAILED',
-				message: err.status + ': ' + err.statusText
-			};
+function createComment(commentObj, attachment, callback) {
+	var formData = new FormData();
+	if(attachment) {
+		formData.append('text', encodeURI(commentObj.text));
+		formData.append('isComment', true);
+		formData.append('image', attachment[0]);
+		$.ajax({
+			type: 'POST',
+			url: '/api/post/' + commentObj.id + '/comment/create',
+			data: formData,
+			processData: false,
+			contentType: false,
+			error: function(err) {
+				var res = {
+					status: 'DX-FAILED',
+					message: err.status + ': ' + err.statusText
+				};
+				callback(res);
+			}
+		}).done(function(res) {
 			callback(res);
-		}
-	}).done(function(res) {
-		callback(res);
-	});
+		});
+	} else {
+		$.ajax({
+			type: 'POST',
+			url: '/api/post/' + commentObj.id + '/comment/create',
+			data: {
+				text: encodeURI(commentObj.text),
+				image: attachment
+			},
+			error: function(err) {
+				var res = {
+					status: 'DX-FAILED',
+					message: err.status + ': ' + err.statusText
+				};
+				callback(res);
+			}
+		}).done(function(res) {
+			callback(res);
+		});
+	}
 }
 
 function isValidComment(string) {

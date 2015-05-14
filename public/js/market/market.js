@@ -124,6 +124,16 @@ $(function() {
 		});
 	}
 
+
+
+
+
+
+
+
+
+	
+
 	/**
 		Load older posts when user scrolls to the bottom
 		of page
@@ -153,6 +163,16 @@ $(function() {
 		}
 	});
 
+
+
+
+
+
+
+
+
+
+
 	/**
 		Search on enter key
 	*/
@@ -161,6 +181,17 @@ $(function() {
 			$(this).parent('#searchContainer').find('button').click();
 		}
 	});
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 		Reload page with search query
@@ -239,6 +270,16 @@ $(function() {
 		}
 	});
 
+
+
+
+
+
+
+
+
+
+
 	// Handle view more/less clicks
 	$(document).on('click', '.view_change', function() {
 
@@ -296,7 +337,6 @@ $(function() {
 
 		/** Query server to remove post **/
 		removePost(post_id, function(res) {
-			console.log(res);
 			if(res.status == 'DX-OK') {
 				if(res.message.n > 0) {
 					// Remove the post
@@ -710,6 +750,7 @@ function validPostDesc(string) {
 
 
 
+
 function placeCursorEnd(cursor) {
     cursor.focus();
     if (typeof window.getSelection != "undefined"
@@ -1003,8 +1044,15 @@ function jsonToPost(json) {
 	"</div>" +
 		"<div class='commentContainer'>" +
 			comments +
-			"<span class='commentImage'></span>" +
-			"<div contenteditable='true' class='commentInput' type='text' spellcheck='false'></div>" +
+			"<div class='commentInputContainer'>" +
+				"<span class='commentImage'></span>" +
+				"<input type='file' class='commentImageInput'>" +
+				"<div contenteditable='true' class='commentInput' type='text' spellcheck='false'></div>" +
+				"<div data-active='false' class='commentImageContainer'>" +
+					"<span class='commentRemovePlaceholder'>&times;</span>" +
+					"<img src='' class='commentImagePlaceholder'>" +
+				"</div>" +
+			"</div>" +
 		"</div>" +
 	"</div>";
 	
@@ -1042,6 +1090,13 @@ function jsonToComment(json) {
 			"<span class='comment_text' spellcheck='false'>" + document.createTextNode(json.text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]') + "</span>";
 			if(json.edited) {
 				COMMENT += "<span class='is_edited'>&#8627; Edited</span>";
+			}
+			if(json.images) {
+				COMMENT += 
+				"<div class='inCommentImageContainer'>" +
+					"<span class='inCommentImageRemove'>&times;</span>" +
+					"<img class='inCommentImage' src='" + json.images[0].small + "'>" +
+				"</div>";
 			}
 	COMMENT += "</div>";
 	return COMMENT;

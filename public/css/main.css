@@ -105,6 +105,11 @@ a, a:active, a:visited {
 }
 
 @font-face {
+    font-family: GOOGLE;
+    src: url('/font/roboto/Roboto-Regular.ttf');
+}
+
+@font-face {
 	font-family: DX-COND;
 	src: url('/font/MYRIADPRO-COND.OTF');
 }
