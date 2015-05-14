@@ -35,6 +35,17 @@ $(function() {
 		$(this).parent('.commentInputContainer').find('.commentImageInput').click();
 	});
 
+
+
+
+
+
+
+
+
+
+
+
 	/**
 		Show remove comment image on hover
 	*/
@@ -48,6 +59,10 @@ $(function() {
 			.css('opacity', '0');
 		}
 	}, '.commentImageContainer');
+
+
+
+
 
 
 
@@ -338,6 +353,13 @@ $(function() {
 
 
 
+
+
+
+
+
+
+
 	/**
 		Remove comment image on click
 	*/
@@ -347,6 +369,9 @@ $(function() {
 		var comment_id = $(this).parents('.comment').find('.comment_id').html();
 		confirmCommentImageRemoval(post_id, comment_id);
 	});
+
+
+
 
 
 
@@ -391,6 +416,8 @@ $(function() {
 
 
 
+
+
 	/**
 		Saves comment edits when comment options menu `.comment_submit_edit` button
 		is clicked
@@ -419,9 +446,6 @@ $(function() {
 
 			var image = 'do_nothing';
 			if(comment_had_image) {
-				if($(this).parents('.post').find('.inCommentImage').attr('data-removed', 'false')) {
-					image = 'do_nothing';
-				}
 				if($(this).parents('.post').find('.inCommentImage').attr('data-removed', 'true')) {
 					image = 'remove_image';
 				}
@@ -444,12 +468,26 @@ $(function() {
 						// Reset initial_comment and hadImage
 						initial_comment = '';
 						comment_had_image = null;
-					} else if(res.message == 'Comment is unchanged') {
+					} else if(res.message == 'TEXT_NO_CHANGE') {
+						/**
+							Check if comment_had_image & if we have one now
+						*/
+						if(comment_had_image) {
+							if(!$(comment_elem).find('.inCommentImage').is(':visible')) {
+								// Place edited message under message
+								if(!$(comment_elem).find('.is_edited').length) {
+									var edited = "<span class='is_edited'>&#8627; Edited</span>";
+									$(edited).insertAfter(comment_text_elem);
+									createAlert('Comment image removed');
+								} else {
+									// Present no change message to user
+									createAlert('Comment is unchanged');
+								}
+							}
+						}
 						/** If submitted comment matches original **/
 						$(comment_controls).remove();
 						$(comment_text_elem).attr('contenteditable', 'false');
-						// Present no change message to user
-						createAlert(res.message, 'medium');
 						// Reset initial_comment and hadImage
 						initial_comment = '';
 						comment_had_image = null;
@@ -656,6 +694,16 @@ function resetCommentImage(hiddenInputField) {
 
 
 
+
+
+
+
+
+
+
+
+
+
 /**
 	Updates existing comments & retrieves new comments
 	since last comment in view
@@ -770,6 +818,17 @@ function removeComment(post_id, comment_id, callback) {
 	return;
 }
 
+
+
+
+
+
+
+
+
+
+
+
 function showCommentOptions(comment_id) {
 	$('#centerFeed').find('.comment_id').each(function() {
 		if($(this).html() == comment_id) {
@@ -781,6 +840,18 @@ function showCommentOptions(comment_id) {
 	return;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 function hideCommentOptions(comment_id) {
 	$('#centerFeed').find('.comment_id').each(function() {
 		if($(this).html() == comment_id) {
@@ -791,6 +862,19 @@ function hideCommentOptions(comment_id) {
 	});
 	return;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function editComment(post_id, comment_id) {
 	$(document).find('.post').each(function() {
@@ -826,6 +910,17 @@ function editComment(post_id, comment_id) {
 	return;
 }
 
+
+
+
+
+
+
+
+
+
+
+
 function saveComment(post_id, comment_id, text, isImage, callback) {
 	// clear initial comment variable
 	$.ajax({
@@ -847,6 +942,17 @@ function saveComment(post_id, comment_id, text, isImage, callback) {
 	});
 	return;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 function cancelEditComment(post_id, comment_id) {
 	$(document).find('.post').each(function() {
@@ -878,6 +984,18 @@ function cancelEditComment(post_id, comment_id) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 function intervalCommentUpdate(timestamp, post_id, post_elem) {
 	// update comments every 6 seconds
 	var auto_update_comments = setInterval(function() {
@@ -895,6 +1013,18 @@ function intervalCommentUpdate(timestamp, post_id, post_elem) {
 	}, 6000);
 	return auto_update_comments
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
 	1. Loop through res & create comment from json & insert into commentContainer
@@ -922,8 +1052,13 @@ function parseComments(post, json) {
 					If comment is in container, update its text and don't parse
 				*/
 				added = true;
-				var ct = document.createTextNode(json[comment].text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]');
-				$(this).find('.comment_text').html(ct);
+				/**
+					Update comment text if not being edited
+				*/
+				if(!$(this).find('.comment_edit_controls').length) {
+					var ct = document.createTextNode(json[comment].text).data.replace(/\[\+n\]/g, '<br>').replace('[||||||+special_n||||||]', '[+n]');
+					$(this).find('.comment_text').html(ct);
+				}
 			}
 		});
 		if(!added) {
@@ -937,6 +1072,20 @@ function parseComments(post, json) {
 	$(comments).insertBefore($(post).find('.commentInputContainer'));
 	return;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function createComment(commentObj, attachment, callback) {
 	var formData = new FormData();
@@ -980,6 +1129,13 @@ function createComment(commentObj, attachment, callback) {
 		});
 	}
 }
+
+
+
+
+
+
+
 
 function isValidComment(string) {
 	return (string.length >= 2 && string.length <= 1000) ? true : false;

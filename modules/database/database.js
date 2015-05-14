@@ -78,6 +78,38 @@ module.exports = {
 		});
 	},
 
+	doesUsernameExist: function(username, callback) {
+		var mail = _db.collection('USERS');
+		mail.findOne({
+			username: username
+		}, function(err, doc) {
+			if(err) {
+				callback(err, null);
+			}
+			if(doc) {
+				callback(null, true);
+			} else {
+				callback(null, false);
+			}
+		});
+	},
+
+	doesUsernameExist_arr: function(username, index, callback) {
+		var mail = _db.collection('USERS');
+		mail.findOne({
+			username: username
+		}, function(err, doc) {
+			if(err) {
+				callback(err, null);
+			}
+			if(doc) {
+				callback(null, true, index);
+			} else {
+				callback(null, false, index);
+			}
+		});
+	},
+
 	doesUserExist: function(u, e, callback) {
 		var db = _db;
 		var usrCol = db.collection('USERS');

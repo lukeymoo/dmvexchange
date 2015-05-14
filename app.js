@@ -24,6 +24,8 @@ var api = require('./routes/api');
 var account = require('./routes/account');
 var user = require('./routes/user');
 var market = require('./routes/market');
+var mailApi = require('./routes/mailApi');
+var marketApi = require('./routes/marketApi');
 
 
 // Custom modules
@@ -117,6 +119,8 @@ app.use(function(req, res, next) {
 // Routes
 app.use(router);
 app.use('/', index);
+app.use('/api/mail', mailApi);
+app.use('/api/post', marketApi);
 app.use('/api', api);
 app.use('/user', user);
 app.use('/market', market);

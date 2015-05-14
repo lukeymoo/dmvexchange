@@ -189,7 +189,7 @@ function getPage() {
 
 function getUnreadCount(callback) {
 	$.ajax({
-		url: '/api/unread',
+		url: '/api/mail/unread',
 	}).done(function(res) {
 		callback(res);
 	});
