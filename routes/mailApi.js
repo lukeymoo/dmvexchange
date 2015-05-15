@@ -75,7 +75,7 @@ router.get('/unread', function(req, res, next) {
 router.get('/inbox', function(req, res, next) {
 	var mail = dbManager.getDB().collection('MAIL');
 	mail.find({
-		"RECIPIENTS.USERNAME": req.session.USERNAME
+		"RCPT.USERNAME": req.session.USERNAME
 	}).sort({_id: -1}).limit(17).toArray(function(err, inbox) {
 		if(err) {
 			smtp.report_error('Error occurred getting inbox :: ' + err, function(){});
