@@ -3,6 +3,7 @@
 	interact with the compose message form
 */
 
+
 'use strict';
 
 // Contains our methods for Message manipulation
