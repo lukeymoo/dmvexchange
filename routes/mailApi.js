@@ -74,8 +74,17 @@ router.get('/unread', function(req, res, next) {
 */
 router.get('/inbox', function(req, res, next) {
 	var mail = dbManager.getDB().collection('MAIL');
-	res.send({status: 'DX-OK', message: 'This endpoint is incomplete'});
-	return;
+	mail.find({
+		"RECIPIENTS.USERNAME": req.session.USERNAME
+	}).sort({_id: -1}).limit(17).toArray(function(err, inbox) {
+		if(err) {
+			smtp.report_error('Error occurred getting inbox :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
+			return;
+		}
+		res.send({status: 'DX-OK', message: inbox});
+		return;
+	});
 });
 
 
@@ -86,72 +95,119 @@ router.get('/inbox', function(req, res, next) {
 
 
 /**
-	Send mail to specified username(s)
+	Send PM to specified username(s)
 */
 router.post('/send', function(req, res, next) {
-	/** Ensure the user supplied required fields for a message **/
-	pmManager.validateMessage(req, res, function(bRcpt, isValid) {
-		var recipients = JSON.parse(req.body.RCPT);
-		/** If non-valid message, leave execution **/
-		if(!isValid) {
+	/** Ensure we recieved RCPT **/
+	if(!('RCPT' in req.body) || !req.body.RCPT.length) {
+		res.send({status: 'DX-REJECTED', message: 'No recipients specified'});
+		return;
+	}
+	/** Ensure we received message DATA **/
+	if(!('DATA' in req.body) || !req.body.DATA.length) {
+		res.send({status: 'DX-REJECTED', message: 'No message text specified'});
+		return;
+	}
+	/** Validate DATA **/
+	if(!pmManager.validateText(req.body.DATA)) {
+		res.send({status: 'DX-REJECTED', message: 'Message must be 2-360 characters'});
+		return;
+	}
+	/** Set subject if not set **/
+	if(!('SUBJECT' in req.body) || !req.body.SUBJECT.length) {
+		req.body.SUBJECT = 'No subject';
+	}
+	/** Validate subject or set to default **/
+	if(!pmManager.validateSubject(req.body.SUBJECT)) {
+		req.body.SUBJECT = 'No subject';
+	}
+	/** Ensure recipients exist **/
+	var RCPT = [];
+	var tmp = JSON.parse(req.body.RCPT);
+	for(var rr in tmp) {
+		RCPT.push(tmp[rr].toLowerCase());
+	}
+	var BRCPT = [];
+	var user = dbManager.getDB().collection('USERS');
+	user.find({
+		username: {
+			$in: RCPT
+		}
+	}).toArray(function(err, users) {
+		if(err) {
+			smtp.report_error('Error occurred checking if recipients existed :: ' + err, function(){});
+			res.send({status: 'DX-FAILED', message: 'Server error occurred'});
 			return;
 		}
 
-		/**
-			If all submitted recipients were bad
-		*/
-		if(bRcpt.length == JSON.parse(req.body.RCPT).length) {
-			var r = '';
-			for(var b in bRcpt) {
-				r += bRcpt[b] + ' ';
+		if(!users) {
+			var rs = '';
+			for(var rr in RCPT) {
+				rs += RCPT[rr] + ' ';
 			}
-			pmManager.serverSend(req.session.USERNAME, 'All specified recipients were invalid or non-existant ' + r);
+			pmManager.serverSend(req.session.USERNAME, 'Failed to reach all recipients ' + rs);
 			res.send({status: 'DX-REJECTED', message: 'No valid recipients'});
 			return;
 		}
-		/**
-			If only some recipients were bad
-		*/
-		if(bRcpt.length > 0 && bRcpt.length < JSON.parse(req.body.RCPT).length) {
-			var r = '';
-			for(var b in bRcpt) {
-				r += bRcpt[b] + ' ';
-			}
-			pmManager.serverSend(req.session.USERNAME, 'The following recipients were invalid or non-existant ' + r);
-			/** Remove bad recipients from recipients **/
-			for(var i = 0; i < recipients.length; i++) {
-				for(var t = 0; t < bRcpt.length; t++) {
-					/** If this recipient was in bad recipients remove it **/
-					if(recipients[i] == bRcpt[t]) {
-						recipients.splice(i, 1);
-					}
+
+		/** RCPT_g is generated from all usernames that exist **/
+		var RCPT_g = [];
+
+		/** RCPT is user supplied & may contain bad usernames **/
+		for(var r in RCPT) {
+			var exists = false;
+			for(var u in users) {
+				if(users[u].username == RCPT[r]) {
+					exists = true;
 				}
+			}
+			if(exists) {
+				RCPT_g.push(RCPT[r]);
+			} else {
+				BRCPT.push(RCPT[r]);
 			}
 		}
 
 		/**
-			Create proper RCPT objects for each recipient
+			If some of the recipients were bad
+			notify user with PM
 		*/
-		var RCPT = [];
-		for(var i = 0; i < recipients.length; i++) {
-			RCPT.push({
-				USERNAME: recipients[i],
+		if(BRCPT.length > 0 && BRCPT.length < RCPT.length) {
+			var rs = '';
+			for(var rr in BRCPT) {
+				rs += BRCPT[rr] + ' ';
+			}
+			if(BRCPT.length == 1) {
+				pmManager.serverSend(req.session.USERNAME, 'A recipient couldn\'t be reached => ' + rs);
+			}
+			if(BRCPT.length > 1) {
+				pmManager.serverSend(req.session.USERNAME, 'Some recipients couldn\'t be reached => ' + rs);
+			}
+		}
+
+		/** RCPT_s is generated and is an object structured for DB entry **/
+		var RCPT_s = [];
+		for(var rr in RCPT_g) {
+			RCPT_s.push({
+				USERNAME: RCPT_g[rr],
 				LABEL: '[INBOX]',
 				READ: false
 			});
 		}
 
-		/**
-			Insert message into database
-		*/
-		var message {
-			FROM: req.session.username,
-			RCPT: 
+		var message = {
+			FROM: req.session.USERNAME,
+			RCPT: RCPT_s,
 			SUBJECT: req.body.SUBJECT,
-			DATA: 
+			DATA: req.body.DATA
 		};
+
 		var mail = dbManager.getDB().collection('MAIL');
+
 		mail.insert(message);
+
+		res.send({status: 'DX-OK', message: 'Sent!'});
+		return;
 	});
 });
 
@@ -365,7 +421,7 @@ router.get('/add_email', function(req, res, next) {
 						// Email the user activation code
 						smtp.send(message, function(err, result) {
 							// Send reminder to activate account through internal PM system
-							pmSystem.serverSend(req.session.USERNAME, 'Don\'t forget to activate your account, activation link was sent to email ' + req.session.EMAIL);
+							pmManager.serverSend(req.session.USERNAME, 'Don\'t forget to activate your account, activation link was sent to email ' + req.session.EMAIL);
 							res.send({
 								status: 'DX-OK',
 								message: 'Email has been added',
@@ -381,7 +437,7 @@ router.get('/add_email', function(req, res, next) {
 						}, { $push: { other_emails: req.query.email.toLowerCase() } });
 
 						// Tell the user to activate the new emails
-						pmSystem.serverSend(req.session.USERNAME, 'New email ' + req.query.email + ' has been linked with account.');
+						pmManager.serverSend(req.session.USERNAME, 'New email ' + req.query.email + ' has been linked with account.');
 
 						res.send({
 							status: 'DX-OK',
@@ -432,7 +488,7 @@ router.get('/remove_email', function(req, res, next) {
 					username: req.session.USERNAME
 				}, { $pull: { other_emails: req.query.email.toLowerCase() } });
 				// Send PM
-				pmSystem.serverSend(req.session.USERNAME, 'Email ' + req.query.email + ' has been removed from account.');
+				pmManager.serverSend(req.session.USERNAME, 'Email ' + req.query.email + ' has been removed from account.');
 				res.send({status: 'DX-OK', message: 'Email removed'});
 				return;
 			} else {
@@ -520,14 +576,14 @@ router.get('/sendmail', function(req, res, next) {
 	var s = ''; // subject
 	var m = ''; // message text
 
-	if(('s' in req.query) && pmSystem.validateSubject(req.query.s)) {
+	if(('s' in req.query) && pmManager.validateSubject(req.query.s)) {
 		s = req.query.s;
 		if(s.length == 0) {
 			s = 'No subject';
 		}
 	}
 
-	if(('m' in req.query) && pmSystem.validateMessage(req.query.m)) {
+	if(('m' in req.query) && pmManager.validateMessage(req.query.m)) {
 		m = req.query.m;
 	} else {
 		// Bad message

@@ -52,13 +52,15 @@ Messenger.send = function(callback) {
 	// Send if good
 	if(status) {
 		$.ajax({
-			url: '/api/sendmail',
+			type: 'POST',
+			url: '/api/mail/send',
 			data: {
-				s: this.messageSubject,
-				r: this.messageRecipients,
-				m: this.messageText
+				SUBJECT: this.messageSubject,
+				RCPT: JSON.stringify(this.messageRecipients),
+				DATA: this.messageText
 			}
 		}).done(function(res) {
+			console.log(res);
 			callback(res);
 		});
 	}

@@ -79,8 +79,9 @@ Main.get = function() {
 
 Main.load = function(callback) {
 	$.ajax({
-		url: '/api/getmail'
+		url: '/api/mail/inbox'
 	}).done(function(res) {
+		console.log(res);
 		callback(res);
 	});
 };
