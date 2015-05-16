@@ -22,19 +22,6 @@ var initial_description = '';
 
 $(function() {
 
-	$.ajax({
-		type: 'POST',
-		url: '/api/mail/send',
-		data: {
-			RCPT: JSON.stringify(['lukeymoo', 'lukeymoo2', '++as', 'john_doe', 'nigkai', 'morrison']),
-			DATA: 'Test message'
-		}
-	}).done(function(res) {
-		console.log(res);
-	});
-
-	return;
-
 	/**
 		To search if there is search parameter in URL, query the database with that
 

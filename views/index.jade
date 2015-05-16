@@ -121,8 +121,72 @@ block registerForm
 		a(href='/signin')
 				div(id='signinNow') Already have an account ?
 
+
+
+
+
+
+
+
+
+
+
+
+
 block mailBlock
-	
+	div(id='mailWrapper')
+		div(id='actionContainer')
+			ul(id='newMessage', class='action', data-selected='true')
+				img(src='/img/mail_ui.png')
+				label Inbox
+				li(class='open', data-for='[INBOX]') Open
+				li(class='compose') New
+		div(id='previewContainer')
+			div(class='messageGroup unread')
+				div(class='groupAuthor')
+					img(src='/img/default.png')
+					span(class='Username') Phil
+				div(class='groupTo') 
+					span(class='SentTo') Sent to &rarr; 
+					span(class='Username') Lukeymoo
+					span(class='Username') Lukeymoo2
+				span(class='groupLastTimestamp') 11:02 AM
+				br
+				span(class='groupLastMessage') 
+					span(class='By') Phil
+					| You going to the party ?
+				img(src='/img/gearbox.png', class='groupOptions')
+
+
+			div(id='composeForm')
+				span(id='hideForm') &#10095;
+				div(id='messageToContainer')
+					div(id='messageTo', contenteditable='true')
+
+
+		div(id='messageViewer')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 block mailBlock_backup
 	div(id='mailWrapper')
