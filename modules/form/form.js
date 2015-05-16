@@ -43,6 +43,10 @@ var validateTOS = function(string) {
 	return status;
 };
 
+var validateZipcode = function(string) {
+	return (/[0-9]/.test(string) && string.length == 5) ? true : false;
+}
+
 var isRegisterProper = function(form) {
 	var status = true;
 
@@ -53,12 +57,6 @@ var isRegisterProper = function(form) {
 	if(!('l' in form) || form.l.length == 0) {
 		status = false;
 	}
-	if(!('e' in form) || form.e.length == 0) {
-		status = false;
-	}
-	if(!('ea' in form) || form.ea.length == 0) {
-		status = false;
-	}
 	if(!('u' in form) || form.u.length == 0) {
 		status = false;
 	}
@@ -66,6 +64,18 @@ var isRegisterProper = function(form) {
 		status = false;
 	}
 	if(!('pa' in form) || form.pa.length == 0) {
+		status = false;
+	}
+	if(!('e' in form) || form.e.length == 0) {
+		status = false;
+	}
+	if(!('ea' in form) || form.ea.length == 0) {
+		status = false;
+	}
+	if(!('g' in form) || form.g.length == 0) {
+		status = false;
+	}
+	if(!('z' in form) || form.z.length == 0) {
 		status = false;
 	}
 	if(!('tos' in form) || form.tos.length == 0 || form.tos != 'I_AGREE') {
@@ -98,5 +108,6 @@ module.exports = {
 	validatePassword: validatePassword,
 	validateTOS: validateTOS,
 	isRegisterProper: isRegisterProper,
-	isLoginProper: isLoginProper
+	isLoginProper: isLoginProper,
+	validateZipcode: validateZipcode
 };

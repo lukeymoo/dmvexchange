@@ -120,7 +120,7 @@ function createAlert(message, type) {
 			});
 		}
 	}, 7000);
-	$('#notification_container').prepend(DOM);
+	$('#notification-container').prepend(DOM);
 	return;
 }
 
@@ -132,11 +132,11 @@ function removeAlert(obj) {
 }
 
 function goodStyle(obj) {
-	$(obj).css('border', '2px solid rgb(200, 200, 200)');
+	$(obj).css('border', '1px solid rgba(0, 0, 0, 0.2)');
 }
 
 function badStyle(obj) {
-	$(obj).css('border', '2px solid rgb(175, 0, 0)');
+	$(obj).css('border', '1px solid rgb(175, 0, 0)');
 	return;
 }
 

@@ -6,6 +6,13 @@ $(function() {
 	$(document).on('click', '#actionContainer .compose', function() {
 	});
 
+	/** Give focus to messageTo on container click **/
+	$(document).on('click', '#messageToContainer', function(e) {
+		if(!$(e.target).is('.token')) {
+			$('#messageTo').focus();
+		}
+	});
+
 	/** Add/Remove recipient token **/
 	$(document).on('keydown', '#messageTo', function(e) {
 		// On Backspace

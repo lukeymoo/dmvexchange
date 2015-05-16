@@ -1,0 +1,280 @@
+body {
+	background-color: white;
+}
+
+a span {
+	color: inherit;
+}
+
+#header-bar {
+	display: block;
+	height: 60px;
+	line-height: 60px;
+	text-align: center;
+	background-color: rgba(0, 0, 0, 0.0575);
+}
+
+#header-bar #logo {
+	font-size: 1.75em;
+	font-family: fancy;
+	color: rgb(100, 100, 100);
+	cursor: default;
+	pointer: default;
+}
+
+#header-bar #signin {
+	position: absolute;
+	margin-top: 16px;
+	height: 28px;
+	line-height: 28px;
+	font-family: 'Arial';
+	font-weight: bold;
+	font-size: .8em;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-left: 95px;
+	color: white;
+	-webkit-border: 1px solid rgb(77, 104, 204);
+	-moz-border: 1px solid rgb(77, 104, 204);
+	border: 1px solid rgb(77, 104, 204);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: -webkit-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: -moz-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+}
+
+#header-bar #signin:hover {
+	background: -webkit-linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+	background: -moz-linear-gradient(top, rgb(50,  100, 224), rgb(61, 125, 227));
+	background: linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+}
+
+#header-bar #home {
+	position: absolute;
+	margin-top: 16px;
+	height: 28px;
+	line-height: 28px;
+	font-family: 'Arial';
+	font-weight: bold;
+	font-size: .8em;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-left: 175px;
+	color: white;
+	-webkit-border: 1px solid rgb(77, 104, 204);
+	-moz-border: 1px solid rgb(77, 104, 204);
+	border: 1px solid rgb(77, 104, 204);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: -webkit-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: -moz-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+}
+
+#header-bar #home:hover {
+	background: -webkit-linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+	background: -moz-linear-gradient(top, rgb(50,  100, 224), rgb(61, 125, 227));
+	background: linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+}
+
+#header-bar #logo:before, #header-bar #logo:after {
+	content: '';
+	vertical-align: .35em;
+	display: inline-block;
+	width: 6em;
+	height: 1px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+#banner {
+	display: block;
+	font-size: 1.85em;
+	font-family: GOOGLE;
+	text-align: center;
+	margin-top: 25px;
+	color: rgb(100, 100, 100);
+}
+
+#signup-why {
+	position: absolute;
+	margin-top: 20px;
+	margin-left: 125px;
+}
+
+#signup-why #main {
+	display: block;
+	font-family: DX-LIGHT;
+	font-size: 1.75em;
+	color: rgb(90, 90, 90);
+}
+
+#signup-why #main-support {
+	display: inline-block;
+	width: 550px;
+	margin-left: -75px;
+	color: rgb(110, 110, 110);
+	text-align: center;
+	font-size: 1.1em;
+}
+
+#signup-why #secondary {
+	display: block;
+	font-family: DX-LIGHT;
+	font-size: 1.75em;
+	margin-top: 25px;
+	margin-left: -35px;
+	color: rgb(90, 90, 90);
+}
+
+#signup-why #secondary-support {
+	display: inline-block;
+	width: 575px;
+	margin-left: -82px;
+	color: rgb(110, 110, 110);
+	text-align: center;
+	font-size: 1.1em;
+}
+
+#signup-why #last {
+	display: block;
+	font-family: DX-LIGHT;
+	font-size: 1.75em;
+	margin-top: 25px;
+	margin-left: 135px;
+	color: rgb(90, 90, 90);
+}
+
+#signup-why #last-support {
+	display: inline-block;
+	width: 575px;
+	margin-left: -82px;
+	color: rgb(110, 110, 110);
+	text-align: center;
+	font-size: 1.1em;
+}
+
+#signup-card {
+	width: 330px;
+	float: right;
+	padding-bottom: 25px;
+	margin-top: 25px;
+	margin-right: 35px;
+	margin-bottom: 50px;
+	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.5);
+	background-color: rgba(0, 0, 0, 0.04);
+}
+
+#signup-form {
+	display: block;
+	margin-top: 25px;
+	padding-left: 25px;
+}
+
+#signup-form .form-error {
+	display: block;
+	color: rgb(190, 0, 0);
+	font-family: GOOGLE;
+	margin-bottom: 5px;
+}
+
+#signup-form label {
+	display: block;
+	font-size: .9em;
+	font-family: 'Arial';
+	font-weight: bold;
+}
+
+#signup-form input {
+	display: block;
+	height: 30px;
+	font-size: 16px;
+	font-family: 'Arial';
+	padding-left: 5px;
+	margin-bottom: 5px;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	font-size: .95em;
+}
+
+#signup-form .single-line-input {
+	width: 280px;
+}
+#signup-form .same-line-input {
+	display: inline-block;
+	width: 135px;
+	margin-right: 10px;
+}
+
+#signup-form input:hover {
+	border: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+#signup-form input:focus {
+	outline: none;
+	box-shadow: inset 0px 0px 1px rgb(100, 100, 100);
+}
+
+#signup-button {
+	display: block;
+	width: 280px;
+	height: 36px;
+	margin-top: 10px;
+	-webkit-border: 1px solid rgb(77, 104, 204);
+	-moz-border: 1px solid rgb(77, 104, 204);
+	border: 1px solid rgb(77, 104, 204);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	color: white;
+	font-family: Arial;
+	font-weight: bold;
+	font-size: .85em;
+	background: -webkit-linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+	background: -moz-linear-gradient(top, rgb(50,  100, 224), rgb(61, 125, 227));
+	background: linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+}
+
+#gender-select {
+	width: 280px;
+	height: 28px;
+	margin-bottom: 5px;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+#tos-container {
+	width: 280px;
+	padding: 5px;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	background-color: rgba(0, 0, 0, 0.05);
+}
+
+#tos-checkbox {
+	display: block;
+	float: left;
+	width: 16px;
+}
+
+#tos-checkbox,
+#tos-checkbox:active,
+#tos-checkbox:focus {
+	outline: none;
+	border: none;
+}
+
+#tos-disclosure {
+	display: block;
+	width: 225px;
+	margin-top: 9px;
+	margin-left: 25px;
+	padding-left: 5px;
+	font-family: GOOGLE;
+	font-size: .9em;
+}
+
+#signup-button:hover {
+	background: -webkit-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: -moz-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+}

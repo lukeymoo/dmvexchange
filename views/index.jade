@@ -60,68 +60,79 @@ block accountBlock
 			button Change password
 
 block loginForm
-	div(id='loginFormErrorContainer') 
-	div(id='loginFormContainer')
-		div(id='loginFormHeader') Sign in
-		form(id='loginForm', action='/auth', method='post')
-			label Username or email
-			input(id='username', name='u', type='text', tabindex=1)
-			input(id='password', name='p', type='password', tabindex=2)
-			a(href='/forgot')
-				span(tabindex=4) forgot password?
-		button(tabindex=3) Sign in
+	div(id='notification-container')
+	div(id='header-bar')
+		span(id='logo')  DMV EXCHANGE 
 		a(href='/signup')
-			div(id='signupNow') Don't have an account?
+			span(id='signup') Sign up
+		a(href='/')
+			span(id='home') Home
+	span(id='banner') Sign in to get started
+	div(id='signin-card')
+		div(id='login-container')
+			img(id='avatar', src='/img/avatar.png')
+			form(id='signin-form', action='/auth', method='post')
+				input(id='username-or-email', type='text', placeholder='Username or email', name='u', class='field')
+				input(id='password', type='password', placeholder='Password', name='p', class='field')
+				button(id='signin-button') Sign in
+			a(href='/forgot')
+				span(id='forgot-password') Forgot password?
+	div(id='create-account-container')
+		a(href='/signup')
+			span(id='create-account') Don't have an account?
 
 block registerForm
-	div(id='registerFormContainer')
-		div(id='registerFormHeader') Sign up
-		form(id='registerForm', action='/process', method='post')
-			label(id='firstnameLabel') First name
-			label(id='lastnameLabel') Last name
-			br
-			input(id='firstname', name='f', type='text', tabindex=1)
-			input(id='lastname', name='l', type='text', tabindex=2)
-			br
-			div(id='nameError') 
-			br
-			label Email address
-			br
-			input(id='email', name='e', type='text', tabindex=3)
-			br
-			div(id='emailError') 
-			br
-			label Confirm email
-			br
-			input(id='emailAgain', name='ea', type='text', tabindex=4)
-			br
-			div(id='emailAgainError') 
-			br
-			label Desired username
-			br
-			input(id='username', name='u', type='text', tabindex=5)
-			br
-			div(id='usernameError') 
-			br
-			label(id='passwordLabel') Desired password
-			label(id='passwordAgainLabel') Confirm password
-			br
-			input(id='password', name='p', type='password', tabindex=6)
-			input(id='passwordAgain', name='pa', type='password', tabindex=7)
-			br
-			div(id='passwordError') 
-			br
-			div(id='tosContainer')
-				input(type='checkbox', name='tos', value='I_AGREE', tabindex=8)
-				span(id='tosLetter')
-					| By clicking here you agree to our 
-					a(target='_blank', href='/policy.html', style='color: rgb(0, 100, 225);') terms of service
-			div(id='tosError') 
-		button(tabindex=9) Sign up
+	div(id='notification-container')
+	div(id='header-bar')
+		span(id='logo')  DMV EXCHANGE 
 		a(href='/signin')
-				div(id='signinNow') Already have an account ?
-
-
+			span(id='signin') Sign in
+		a(href='/')
+			span(id='home') Home
+	span(id='banner') Create an account to get started
+	div(id='signup-why')
+		span(id='main') Build trust with your buyers and sellers
+		span(id='main-support') With built-in review and reporting system
+			| we filter and remove scammers and people who have a history of backing-out/wasting time.
+		span(id='secondary') Find buyers and sellers quickly and efficiently
+		span(id='secondary-support') Efficient search algorithms ensure you can find
+			| relevant products closests to you and at a price you want.
+		span(id='last') Build a brand
+		span(id='last-support') Sell your products through DMV Exchange and avoid the cost and
+			| associated overhead of a business.
+	div(id='signup-card')
+		div(id='signup-container')
+			form(id='signup-form', action='/process', method='post')
+				label Name
+				input(id='firstname', name='f', type='text', placeholder='First', class='same-line-input field')
+				input(id='lastname', name='l', type='text', placeholder='Last', class='same-line-input field')
+				label Username
+				input(id='username', name='u', type='text', placeholder='Username', class='single-line-input field')
+				label Password
+				input(id='password', name='p', type='password', placeholder='Create a password', class='single-line-input field')
+				label Confirm password
+				input(id='password-again', name='pa', type='password', placeholder='Confirm password', class='single-line-input field')
+				label Email
+				input(id='email', name='e', type='text', placeholder='Email', class='single-line-input field')
+				label Confirm email
+				input(id='email-again', name='ea', type='text', placeholder='Confirm email address', class='single-line-input field')
+				label(class='optional') Zipcode
+				input(id='zipcode', name='z', maxlength='5', type='text', placeholder='Zipcode', class='same-line-input field')
+				label Gender
+				select(id='gender-select', name='g', class='field')
+					option(selected='true') I am...
+					option(value='m') Male
+					option(value='f') Female
+				label Policy Agreement
+				div(id='tos-container' class='field')
+					input(id='tos-checkbox', type='checkbox', value='I_AGREE', name='tos', style='outline:0;border:0;')
+					span(id='tos-disclosure') I agree to 
+						a(href='/policy.html') 
+							span policies
+						|  and the 
+						a(href='/policy.html') 
+							span terms of service
+				button(id='signup-button') Sign up
 
 
 

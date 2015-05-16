@@ -1,0 +1,199 @@
+body {
+	background-color: white;
+}
+
+#header-bar {
+	display: block;
+	height: 60px;
+	line-height: 60px;
+	text-align: center;
+	background-color: rgba(0, 0, 0, 0.0575);
+}
+
+#signin-form .form-error {
+	display: block;
+	color: rgb(190, 0, 0);
+	font-family: GOOGLE;
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+#header-bar #logo {
+	font-size: 1.75em;
+	font-family: fancy;
+	color: rgb(100, 100, 100);
+	cursor: default;
+	pointer: default;
+}
+
+#header-bar #signup {
+	position: absolute;
+	margin-top: 16px;
+	height: 28px;
+	line-height: 28px;
+	font-family: 'Arial';
+	font-weight: bold;
+	font-size: .8em;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-left: 95px;
+	color: white;
+	-webkit-border: 1px solid rgb(77, 104, 204);
+	-moz-border: 1px solid rgb(77, 104, 204);
+	border: 1px solid rgb(77, 104, 204);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: -webkit-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: -moz-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+}
+
+#header-bar #signup:hover {
+	background: -webkit-linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+	background: -moz-linear-gradient(top, rgb(50,  100, 224), rgb(61, 125, 227));
+	background: linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+}
+
+#header-bar #home {
+	position: absolute;
+	margin-top: 16px;
+	height: 28px;
+	line-height: 28px;
+	font-family: 'Arial';
+	font-weight: bold;
+	font-size: .8em;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-left: 175px;
+	color: white;
+	-webkit-border: 1px solid rgb(77, 104, 204);
+	-moz-border: 1px solid rgb(77, 104, 204);
+	border: 1px solid rgb(77, 104, 204);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: -webkit-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: -moz-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+}
+
+#header-bar #home:hover {
+	background: -webkit-linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+	background: -moz-linear-gradient(top, rgb(50,  100, 224), rgb(61, 125, 227));
+	background: linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+}
+
+#header-bar #logo:before, #header-bar #logo:after {
+	content: '';
+	vertical-align: .35em;
+	display: inline-block;
+	width: 6em;
+	height: 1px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+#banner {
+	display: block;
+	font-size: 1.25em;
+	font-family: GOOGLE;
+	text-align: center;
+	margin-top: 25px;
+	color: rgb(125, 125, 125);
+}
+
+#signin-card {
+	display: block;
+	width: 375px;
+	height: 400px;
+	margin-top: 30px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 50px;
+	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.5);
+	background-color: rgba(0, 0, 0, 0.04);
+}
+
+#signin-card #avatar {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 100px;
+	height: 100px;
+	border: 1px solid rgba(0, 0, 0, 0,);
+	border-radius: 100px;
+}
+
+#signin-form {
+	display: block;
+	margin-top: 25px;
+}
+
+#signin-form input {
+	display: block;
+	width: 250px;
+	height: 40px;
+	font-size: 16px;
+	font-family: 'Arial';
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 5px;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#signin-form input:hover {
+	border: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+#signin-form input:focus {
+	outline: none;
+	box-shadow: inset 0px 0px 1px rgb(200, 200, 200);
+}
+
+#signin-button {
+	display: block;
+	width: 250px;
+	height: 36px;
+	margin-top: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	-webkit-border: 1px solid rgb(77, 104, 204);
+	-moz-border: 1px solid rgb(77, 104, 204);
+	border: 1px solid rgb(77, 104, 204);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	color: white;
+	font-family: Arial;
+	font-weight: bold;
+	font-size: .85em;
+	background: -webkit-linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+	background: -moz-linear-gradient(top, rgb(50,  100, 224), rgb(61, 125, 227));
+	background: linear-gradient(top, rgb(50, 100, 224), rgb(61, 125, 227));
+}
+
+#signin-button:hover {
+	background: -webkit-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: -moz-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	background: linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+}
+
+#signin-card #forgot-password {
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 63px;
+	color: rgb(80, 135, 235);
+	font-family: DX-REG;
+}
+
+#create-account-container {
+	display: block;
+	text-align: center;
+	padding-top: 10px;
+}
+
+#create-account {
+	color: rgb(80, 135, 235);
+	font-family: DX-REG;
+	font-size: 1.1em;
+}

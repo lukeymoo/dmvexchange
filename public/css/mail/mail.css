@@ -18,14 +18,26 @@
 }
 
 #composeForm #hideForm {
+	display: inline-block;
 	padding: 10px;
+	cursor: pointer;
+	pointer: hand;
 	background-color: rgba(0, 0, 0, 0.2);
+}
+
+#composeForm #hideForm:hover {
+	background-color: rgba(0, 0, 0, 0.1);
 }
 
 #messageToContainer {
 	margin-top: 15px;
 	max-width: 85%;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#messageToContainer:hover {
+	cursor: text;
+	pointer: text;
 }
 
 #messageToContainer .token {
@@ -55,7 +67,11 @@
 	line-height: 28px;
 
 	font-family: .8em;
-	background-color: orange;
+	background-color: transparent;
+}
+
+#composeForm #messageTo:not(:focus) {
+	content: 'Recipients...';
 }
 
 #composeForm #messageTo:focus {

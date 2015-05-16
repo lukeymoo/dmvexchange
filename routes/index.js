@@ -54,6 +54,13 @@ router.get('/auth', function(req, res, next) {
 });
 
 /** POST Process login form **/
+/**
+	Code
+	-----
+	u_invalid		->		invalid username
+	p_invalid		->		invalid password
+	invalid_login	->		Incorrect username/email + password combo
+*/
 router.post('/auth', function(req, res, next) {
 	// Redirect already authenticated users
 	if(sessionManager.isLoggedIn(req.session)) {
@@ -115,6 +122,21 @@ router.post('/auth', function(req, res, next) {
 });
 
 /** POST Handle registration **/
+/**
+	Errors
+	-------
+	invalid_form
+	UIN
+	F
+	L
+	U
+	E
+	EM
+	P
+	PM
+	G
+	Z
+*/
 router.post('/process', function(req, res, next) {
 	// Redirect already authenticated users
 	if(sessionManager.isLoggedIn(req.session)) {
@@ -133,9 +155,9 @@ router.post('/process', function(req, res, next) {
 	// Lowercase form ( Excluding passwords )
 	req.body.f = req.body.f.toLowerCase();
 	req.body.l = req.body.l.toLowerCase();
+	req.body.u = req.body.u.toLowerCase();
 	req.body.e = req.body.e.toLowerCase();
 	req.body.ea = req.body.ea.toLowerCase();
-	req.body.u = req.body.u.toLowerCase();
 
 	// Validate names
 	var formElem = {};
@@ -144,6 +166,8 @@ router.post('/process', function(req, res, next) {
 	formElem.L = formManager.validateName(req.body.l);
 	formElem.E = formManager.validateEmail(req.body.e);
 	formElem.EA = formManager.validateEmail(req.body.ea);
+	formElem.G = (req.body.g == 'm' || req.body.g == 'f') ? true : false;
+	formElem.Z = formManager.validateZipcode(req.body.z);
 	// Did emails match ?
 	if(req.body.e.toLowerCase() != req.body.ea.toLowerCase()) {
 		formElem.EM = false;

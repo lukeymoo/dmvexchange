@@ -4,8 +4,13 @@ html
 		title DX &#8212; #{title}
 		link(rel='stylesheet', href='/css/normalize.css?v=1')
 		link(rel='stylesheet', href='/css/main.css?v=1')
-		link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
+		//
+			link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
 		link(rel='stylesheet', href='/css/common/common.css?v=1')
+		if title == 'Sign in'
+			link(rel='stylesheet', href='/css/signin.css?v=1')
+		if title == 'Sign up'
+			link(rel='stylesheet', href='/css/signup.css?v=1')
 		if title == 'Account'
 			link(rel='stylesheet', href='/css/account/account.css?v=1')
 		if title == 'Umm'
@@ -22,31 +27,19 @@ html
 			link(rel='stylesheet', href='/css/tips/tips.css?v=1')
 	body
 		div(id='wrapper')
-			div(id='pageHeader')
-				div(id='menuButtonContainer')
-					span(id='menuButton') &#9776;
-				a(href='/')
-					div(id='headerLogo')  DMV EXCHANGE 
-					div(id='beta') beta
-				div(id='headerControls')
-					if USER.LOGGED_IN
-						a(href='/account/mail')
-							div(id='left') Mail					
-						a(href='/market')
-							div(id='right') Market
-						//
-							a(href='/user/#{USER.USERNAME}')
-								div(id='right') #{USER.USERNAME}
-					else
-						a(href='/signin')
-							div(data-selected='false', id='left') Log in
-						a(href='/signup')
-							div(id='signup') Sign up
-
-			block headerMenu
+			if title != 'Sign in' && title != 'Sign up'
+				div(id='header-bar')
+					a(href='/')
+						span(id='header-logo') DMV EXCHANGE 
+					span(id='header-menu-button') &#9776;
+					div(id='header-search-container')
+						input(id='header-search-input', type='text')
+						button(id='header-search-button') Search
+				div(id='header-controls')
+					a(href='/upload', id='create-post') Post
+					span(id='notification') Notice
 
 			if title == 'Home'
-				block frontPageBlock
 
 			if title == 'Sign in'
 				block loginForm
@@ -78,9 +71,9 @@ html
 		if title == 'Account'
 			script(src='/js/account.js?v=1')
 		if title == 'Sign in'
-			script(src='/js/login.js?v=1')
+			script(src='/js/signin.js?v=1')
 		if title == 'Sign up'
-			script(src='/js/register.js?v=1')
+			script(src='/js/signup.js?v=1')
 		if title == 'Mail'
 			//
 				script(src='/js/mail/messenger.js?v=1')
