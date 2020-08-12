@@ -12,12 +12,7 @@ The design is an attempt at improving the liquidity of sellers goods and provide
 <ul>
 	<li>Become dominant C2C marketplace for niche products</li>
 	<li>Become large player in urban and luxury clothing industry</li>
-	<li>Become leader in futuristic supply chain logistics technology</li>
+	<li>Become leader in urban supply chain logistics technology</li>
 </ul>
 
-<h3>Long-term Vision</h3>
-<ul>
-	<li>Become the most technologically advanced food production company</li>
-	<li>Become leader in Artifical Intelligence community</li>
-</ul>
 
